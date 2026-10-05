@@ -44,5 +44,31 @@ public static class DatabaseMigrations
         [
             "CREATE TABLE sync_states (key TEXT NOT NULL PRIMARY KEY, value TEXT NOT NULL, updated_at INTEGER NOT NULL)",
         ]),
+        new(4, "create_clients_and_devices",
+        [
+            """
+            CREATE TABLE clients (
+                id TEXT NOT NULL PRIMARY KEY,
+                name TEXT NOT NULL,
+                street TEXT NOT NULL,
+                building_number TEXT NOT NULL,
+                postal_code TEXT NOT NULL,
+                city TEXT NOT NULL,
+                contact_person TEXT NOT NULL,
+                phone TEXT NOT NULL,
+                email TEXT,
+                archived_at INTEGER)
+            """,
+            """
+            CREATE TABLE devices (
+                id TEXT NOT NULL PRIMARY KEY,
+                client_id TEXT NOT NULL,
+                serial_number TEXT NOT NULL,
+                model TEXT NOT NULL,
+                manufacturer TEXT NOT NULL,
+                installation_date TEXT NOT NULL,
+                archived_at INTEGER)
+            """,
+        ]),
     ];
 }
