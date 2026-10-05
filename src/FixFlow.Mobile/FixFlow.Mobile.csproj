@@ -29,6 +29,10 @@
     <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#171717" />
     <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#171717" BaseSize="128,128" />
   </ItemGroup>
+  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+    <AndroidResource Include="Platforms\Android\NetworkSecurity\$(Configuration)\network_security_config.xml"
+                     Link="Platforms\Android\Resources\xml\network_security_config.xml" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Maui.Controls" />
   </ItemGroup>
@@ -38,10 +42,12 @@
   <Target Name="GenerateBuildConfiguration" BeforeTargets="BeforeBuild">
     <PropertyGroup>
       <BuildConfigurationFile>$(IntermediateOutputPath)BuildConfiguration.g.cs</BuildConfigurationFile>
+      <DemoTechnicianEmailLiteral>$([MSBuild]::Escape($(DemoTechnicianEmail.Replace('"', '""'))))</DemoTechnicianEmailLiteral>
+      <DemoTechnicianPasswordLiteral>$([MSBuild]::Escape($(DemoTechnicianPassword.Replace('"', '""'))))</DemoTechnicianPasswordLiteral>
     </PropertyGroup>
     <WriteLinesToFile
       File="$(BuildConfigurationFile)"
-      Lines="namespace FixFlow.Mobile%3B;internal static class BuildConfiguration;{;    public const string ApiBaseUrl = &quot;$(FixFlowApiBaseUrl)&quot;%3B;}"
+      Lines="namespace FixFlow.Mobile%3B;internal static class BuildConfiguration;{;    public const string ApiBaseUrl = &quot;$(FixFlowApiBaseUrl)&quot;%3B;    public const string DemoTechnicianEmail = @&quot;$(DemoTechnicianEmailLiteral)&quot;%3B;    public const string DemoTechnicianPassword = @&quot;$(DemoTechnicianPasswordLiteral)&quot;%3B;}"
       Overwrite="true"
       WriteOnlyWhenDifferent="true" />
     <ItemGroup>

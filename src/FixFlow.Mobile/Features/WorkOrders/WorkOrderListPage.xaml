@@ -7,6 +7,10 @@
              x:Class="FixFlow.Mobile.Features.WorkOrders.WorkOrderListPage"
              x:DataType="viewModels:WorkOrderListViewModel"
              Title="{x:Static resources:AppResources.WorkOrderListTitle}">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="{x:Static resources:AppResources.LogoutButton}"
+                     Command="{Binding LogoutCommand}" />
+    </ContentPage.ToolbarItems>
     <Grid RowDefinitions="Auto,*">
         <controls:OfflineBanner IsVisible="{Binding Screen.IsOffline}"
                                 Message="{Binding Screen.OfflineMessage}" />

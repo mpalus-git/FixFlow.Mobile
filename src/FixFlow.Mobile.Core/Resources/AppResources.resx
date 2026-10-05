@@ -33,4 +33,67 @@
   <data name="WorkOrderListEmpty" xml:space="preserve">
     <value>Nie masz przypisanych zleceń.</value>
   </data>
+  <data name="LoginTitle" xml:space="preserve">
+    <value>Logowanie</value>
+  </data>
+  <data name="LoginSubtitle" xml:space="preserve">
+    <value>Aplikacja technika serwisu</value>
+  </data>
+  <data name="LoginEmailLabel" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+  <data name="LoginPasswordLabel" xml:space="preserve">
+    <value>Hasło</value>
+  </data>
+  <data name="LoginButton" xml:space="preserve">
+    <value>Zaloguj się</value>
+  </data>
+  <data name="LoginInvalidCredentials" xml:space="preserve">
+    <value>Nieprawidłowy e-mail lub hasło.</value>
+  </data>
+  <data name="LoginRateLimited" xml:space="preserve">
+    <value>Zbyt wiele prób logowania. Spróbuj ponownie za {0} s.</value>
+  </data>
+  <data name="LoginConnectionFailed" xml:space="preserve">
+    <value>Nie udało się połączyć z serwerem. Spróbuj ponownie.</value>
+  </data>
+  <data name="LoginOffline" xml:space="preserve">
+    <value>Brak połączenia z internetem. Logowanie wymaga sieci.</value>
+  </data>
+  <data name="LoginServerStarting" xml:space="preserve">
+    <value>Serwer się uruchamia, to może potrwać do minuty.</value>
+  </data>
+  <data name="LoginServerUnavailable" xml:space="preserve">
+    <value>Serwer nie odpowiada. Spróbuj ponownie za chwilę.</value>
+  </data>
+  <data name="LoginFailed" xml:space="preserve">
+    <value>Logowanie nie powiodło się.</value>
+  </data>
+  <data name="NotTechnicianTitle" xml:space="preserve">
+    <value>Brak dostępu do aplikacji</value>
+  </data>
+  <data name="NotTechnicianMessage" xml:space="preserve">
+    <value>Aplikacja mobilna jest przeznaczona dla techników. Dyspozytorzy i administratorzy korzystają z panelu webowego.</value>
+  </data>
+  <data name="OpenWebPanelButton" xml:space="preserve">
+    <value>Otwórz panel</value>
+  </data>
+  <data name="CloseButton" xml:space="preserve">
+    <value>Zamknij</value>
+  </data>
+  <data name="AppName" xml:space="preserve">
+    <value>FixFlow</value>
+  </data>
+  <data name="LogoutButton" xml:space="preserve">
+    <value>Wyloguj</value>
+  </data>
+  <data name="SessionExpiredTitle" xml:space="preserve">
+    <value>Sesja wygasła</value>
+  </data>
+  <data name="SessionExpiredMessage" xml:space="preserve">
+    <value>Zaloguj się ponownie. Dane zapisane na urządzeniu zostały zachowane.</value>
+  </data>
+  <data name="DemoLoginButton" xml:space="preserve">
+    <value>Zaloguj się kontem demo</value>
+  </data>
 </root>
