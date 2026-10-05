@@ -28,11 +28,13 @@ public static class ApiServiceCollectionExtensions
             RestService.ForGenerated<IFixFlowApi>(provider.GetRequiredService<IHttpClientFactory>().CreateClient(AnonymousClientKey)));
 
         services.AddSingleton<TokenRefresher>();
+        services.AddTransient<AuthenticationHandler>();
 
         var builder = services
             .AddRefitGeneratedClient<IFixFlowApi>()
             .ConfigureHttpClient(client => client.BaseAddress = baseAddress);
         builder.AddStandardResilienceHandler(ConfigureResilience);
+        builder.AddHttpMessageHandler<AuthenticationHandler>();
 
         return builder;
     }

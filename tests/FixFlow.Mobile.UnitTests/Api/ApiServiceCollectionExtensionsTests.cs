@@ -1,5 +1,7 @@
 using System.Net;
 using FixFlow.Mobile.Core.Api;
+using FixFlow.Mobile.Core.Features.Auth;
+using FixFlow.Mobile.UnitTests.Features.Auth;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
 
@@ -49,7 +51,10 @@ public sealed class ApiServiceCollectionExtensionsTests
 
     private ServiceProvider BuildProvider(StubHttpMessageHandler handler)
     {
-        var services = new ServiceCollection().AddSingleton<TimeProvider>(_timeProvider);
+        var services = new ServiceCollection()
+            .AddSingleton<TimeProvider>(_timeProvider)
+            .AddSingleton<ISecureStore, InMemorySecureStore>()
+            .AddSingleton<SessionStore>();
         services.AddFixFlowApi(new Uri("https://api.test")).ConfigurePrimaryHttpMessageHandler(() => handler);
         return services.BuildServiceProvider();
     }
