@@ -77,8 +77,8 @@ jobs:
           key: nuget-android-${{ hashFiles('global.json', 'Directory.Packages.props', '**/*.csproj') }}
           restore-keys: nuget-android-
 
-      - name: Install workload
-        run: dotnet workload install maui-android
+      - name: Install workloads
+        run: dotnet workload restore src/FixFlow.Mobile/FixFlow.Mobile.csproj
 
       - name: Build
         run: dotnet build src/FixFlow.Mobile --configuration Release --framework net10.0-android
@@ -101,8 +101,8 @@ jobs:
           key: nuget-windows-${{ hashFiles('global.json', 'Directory.Packages.props', '**/*.csproj') }}
           restore-keys: nuget-windows-
 
-      - name: Install workload
-        run: dotnet workload install maui-windows
+      - name: Install workloads
+        run: dotnet workload restore src/FixFlow.Mobile/FixFlow.Mobile.csproj
 
       - name: Build
         run: dotnet build src/FixFlow.Mobile --configuration Release --framework net10.0-windows10.0.19041.0
