@@ -150,4 +150,19 @@
   <data name="WorkOrderListLoadFailed" xml:space="preserve">
     <value>Nie udało się pobrać zleceń. Sprawdź połączenie i spróbuj ponownie.</value>
   </data>
+  <data name="DetailsContactPerson" xml:space="preserve">
+    <value>Osoba kontaktowa: {0}</value>
+  </data>
+  <data name="DetailsSerialNumber" xml:space="preserve">
+    <value>Nr seryjny: {0}</value>
+  </data>
+  <data name="DetailsInstalledOn" xml:space="preserve">
+    <value>Zainstalowane: {0}</value>
+  </data>
+  <data name="DetailsEntryCount" xml:space="preserve">
+    <value>Wpisy: {0}</value>
+  </data>
+  <data name="DetailsCreatedAt" xml:space="preserve">
+    <value>Utworzono: {0}</value>
+  </data>
 </root>
