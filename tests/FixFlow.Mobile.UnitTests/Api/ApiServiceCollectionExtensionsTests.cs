@@ -19,7 +19,7 @@ public sealed class ApiServiceCollectionExtensionsTests
         await using var provider = BuildProvider(handler);
         var api = provider.GetRequiredService<IFixFlowApi>();
 
-        using var response = await AdvanceUntilCompleted(api.StartWorkAsync(Guid.NewGuid(), TestContext.Current.CancellationToken));
+        using var response = await AdvanceUntilCompleted(api.StartWorkAsync(Guid.NewGuid(), null, TestContext.Current.CancellationToken));
 
         response.StatusCode.ShouldBe(HttpStatusCode.ServiceUnavailable);
         handler.Requests.Count.ShouldBe(1);

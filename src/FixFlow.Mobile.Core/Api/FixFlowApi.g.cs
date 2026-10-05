@@ -64,9 +64,9 @@ namespace FixFlow.Mobile.Core.Api
         [Put("/api/v1/work-orders/{workOrderId}")]
         Task<IApiResponse<WorkOrderResponse>> UpdateWorkOrderAsync(System.Guid workOrderId, [Body] UpdateWorkOrderRequest body, [Header("If-Match")] string if_Match, CancellationToken cancellationToken = default);
 
-        [Headers("Accept: application/json, application/problem+json")]
+        [Headers("Accept: application/json, application/problem+json", "Content-Type: application/json")]
         [Post("/api/v1/work-orders/{workOrderId}/start")]
-        Task<IApiResponse<WorkOrderResponse>> StartWorkAsync(System.Guid workOrderId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<WorkOrderResponse>> StartWorkAsync(System.Guid workOrderId, [Body] StartWorkRequest? body, CancellationToken cancellationToken = default);
 
         [Headers("Accept: application/json, application/problem+json")]
         [Post("/api/v1/work-orders/{workOrderId}/complete")]
@@ -977,6 +977,29 @@ public WorkOrderPriority Priority { get; init; }
         [JsonPropertyName("createdAt")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public System.DateTimeOffset CreatedAt { get; init; }
+
+        private IDictionary<string, object>? _additionalProperties;
+
+        [JsonExtensionData]
+        public IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial record StartWorkRequest
+    {
+        [JsonConstructor]
+        public StartWorkRequest(System.DateTimeOffset? @startedAt)
+        {
+            this.StartedAt = @startedAt;
+        }
+
+        [JsonPropertyName("startedAt")]
+        public System.DateTimeOffset? StartedAt { get; init; }
 
         private IDictionary<string, object>? _additionalProperties;
 

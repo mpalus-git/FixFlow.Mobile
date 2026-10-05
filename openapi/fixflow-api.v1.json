@@ -2505,7 +2505,7 @@
           "WorkOrders"
         ],
         "summary": "Start work on a work order",
-        "description": "Moves a work order assigned to the calling technician from Assigned to InProgress. A technician can have only one work order in progress at a time. Work orders of other technicians are reported as not found. Available to technicians only.",
+        "description": "Moves a work order assigned to the calling technician from Assigned to InProgress. A technician can have only one work order in progress at a time. The body is optional: without it the work starts at the server time, with startedAt the work starts at the time given by the client, for example recorded offline. Work orders of other technicians are reported as not found. Available to technicians only.",
         "operationId": "StartWork",
         "parameters": [
           {
@@ -2518,6 +2518,22 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/StartWorkRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -2533,6 +2549,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/WorkOrderResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
                 }
               }
             }
@@ -3723,7 +3749,7 @@
               "null",
               "string"
             ],
-            "description": "Time when the work finished; required for a work entry and not allowed for a correction. Must be after the start and not in the future.",
+            "description": "Time when the work finished; required for a work entry and not allowed for a correction. Must be after the start and not later than the server time plus the allowed clock skew.",
             "format": "date-time"
           },
           "latitude": {
@@ -4903,6 +4929,20 @@
           }
         },
         "description": "Service entry of a work order: performed work with used parts, or a correction returning parts to stock."
+      },
+      "StartWorkRequest": {
+        "type": "object",
+        "properties": {
+          "startedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Time when the technician started the work, for example recorded offline by the mobile client. Cannot be earlier than the assignment of the work order to the technician and cannot be later than the server time plus the allowed clock skew; a time within the skew is stored as the server time. When omitted, the server time is used.",
+            "format": "date-time"
+          }
+        },
+        "description": "Optional details of starting work on a work order."
       },
       "Stream": {
         "type": "string",
