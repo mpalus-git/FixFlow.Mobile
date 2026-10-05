@@ -24,6 +24,8 @@ public sealed class AuthServiceTests : IDisposable
     private readonly List<string> _revokedTokens = [];
     private Func<HttpResponseMessage> _loginResponse;
     private string _role = SessionUser.TechnicianRole;
+    private Func<CancellationToken, Task<HttpResponseMessage>> _logoutResponse =
+        _ => Task.FromResult(new HttpResponseMessage(HttpStatusCode.NoContent));
 
     public AuthServiceTests()
     {
@@ -93,6 +95,53 @@ public sealed class AuthServiceTests : IDisposable
         _secureStore.Values.ShouldBeEmpty();
     }
 
+    [Fact]
+    public async Task Should_Revoke_Token_And_End_Session_When_User_Logs_Out()
+    {
+        await _service.LoginAsync("jan@fixflow.test", "secret", TestContext.Current.CancellationToken);
+        SessionEndReason? endReason = null;
+        _session.SessionEnded += (_, args) => endReason = args.Reason;
+
+        await _service.LogoutAsync();
+
+        _revokedTokens.ShouldBe(["refresh-1"]);
+        endReason.ShouldBe(SessionEndReason.SignedOut);
+        _secureStore.Values.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Should_End_Session_After_Timeout_When_Revoke_Does_Not_Respond()
+    {
+        await _service.LoginAsync("jan@fixflow.test", "secret", TestContext.Current.CancellationToken);
+        _logoutResponse = async cancellationToken =>
+        {
+            await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+            return new HttpResponseMessage(HttpStatusCode.NoContent);
+        };
+
+        var logout = _service.LogoutAsync();
+        while (!logout.IsCompleted)
+        {
+            _timeProvider.Advance(TimeSpan.FromSeconds(1));
+            await Task.Delay(10, TestContext.Current.CancellationToken);
+        }
+
+        await logout;
+        _session.CurrentUser.ShouldBeNull();
+        _secureStore.Values.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Should_End_Session_When_Revoke_Fails_Without_Network()
+    {
+        await _service.LoginAsync("jan@fixflow.test", "secret", TestContext.Current.CancellationToken);
+        _logoutResponse = _ => throw new HttpRequestException("Network is unreachable");
+
+        await _service.LogoutAsync();
+
+        _secureStore.Values.ShouldBeEmpty();
+    }
+
     public void Dispose()
     {
         _authenticationHandler.Dispose();
@@ -114,7 +163,7 @@ public sealed class AuthServiceTests : IDisposable
                     _revokedTokens.Add(body.RootElement.GetProperty("refreshToken").GetString()!);
                 }
 
-                return new HttpResponseMessage(HttpStatusCode.NoContent);
+                return await _logoutResponse(cancellationToken);
             default:
                 return new HttpResponseMessage(HttpStatusCode.NotFound);
         }

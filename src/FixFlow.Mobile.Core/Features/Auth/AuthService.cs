@@ -43,6 +43,16 @@ public sealed class AuthService(
         return LoginResult.Succeeded(user);
     }
 
+    public async Task LogoutAsync()
+    {
+        if (await session.GetRefreshTokenAsync() is { } refreshToken)
+        {
+            await RevokeAsync(refreshToken);
+        }
+
+        session.End(SessionEndReason.SignedOut);
+    }
+
     private async Task RevokeAsync(string refreshToken)
     {
         using var timeout = new CancellationTokenSource(RevokeTimeout, timeProvider);
