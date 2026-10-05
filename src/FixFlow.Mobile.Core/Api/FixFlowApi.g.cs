@@ -74,7 +74,7 @@ namespace FixFlow.Mobile.Core.Api
 
         [Headers("Accept: application/pdf, application/problem+json")]
         [Get("/api/v1/work-orders/{workOrderId}/protocol")]
-        Task<IApiResponse<FileResponse>> GetServiceProtocolAsync(System.Guid workOrderId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<System.IO.Stream>> GetServiceProtocolAsync(System.Guid workOrderId, CancellationToken cancellationToken = default);
 
         [Headers("Accept: application/problem+json, application/json", "Content-Type: application/json")]
         [Post("/api/v1/parts")]

@@ -26,6 +26,9 @@
   ],
   "useCancellationTokens": true,
   "returnIApiResponse": true,
+  "responseTypeOverride": {
+    "GetServiceProtocol": "IApiResponse<System.IO.Stream>"
+  },
   "operationNameTemplate": "{operationName}Async",
   "generateXmlDocCodeComments": false,
   "generateStatusCodeComments": false,
