@@ -33,4 +33,19 @@
   <data name="WorkOrderListEmpty" xml:space="preserve">
     <value>Nie masz przypisanych zleceń.</value>
   </data>
+  <data name="LoginInvalidCredentials" xml:space="preserve">
+    <value>Nieprawidłowy e-mail lub hasło.</value>
+  </data>
+  <data name="LoginConnectionFailed" xml:space="preserve">
+    <value>Nie udało się połączyć z serwerem. Spróbuj ponownie.</value>
+  </data>
+  <data name="LoginOffline" xml:space="preserve">
+    <value>Brak połączenia z internetem. Logowanie wymaga sieci.</value>
+  </data>
+  <data name="LoginFailed" xml:space="preserve">
+    <value>Logowanie nie powiodło się.</value>
+  </data>
+  <data name="NotTechnicianMessage" xml:space="preserve">
+    <value>Aplikacja mobilna jest przeznaczona dla techników. Dyspozytorzy i administratorzy korzystają z panelu webowego.</value>
+  </data>
 </root>

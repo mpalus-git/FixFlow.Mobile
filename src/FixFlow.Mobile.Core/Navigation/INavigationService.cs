@@ -8,5 +8,8 @@ public interface INavigationService
     Task NavigateToAsync<TViewModel, TParameter>(TParameter parameter)
         where TViewModel : class, INavigatedTo<TParameter>;
 
+    Task NavigateToRootAsync<TViewModel>()
+        where TViewModel : class;
+
     Task GoBackAsync();
 }

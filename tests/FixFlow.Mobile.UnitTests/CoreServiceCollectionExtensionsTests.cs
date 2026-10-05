@@ -1,4 +1,7 @@
 using FixFlow.Mobile.Core;
+using FixFlow.Mobile.Core.Api;
+using FixFlow.Mobile.Core.Connectivity;
+using FixFlow.Mobile.Core.Navigation;
 using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.Settings;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,11 +14,14 @@ public sealed class CoreServiceCollectionExtensionsTests
     [Fact]
     public void Should_Resolve_All_ViewModels_When_Core_Services_Are_Registered()
     {
-        using var provider = new ServiceCollection()
+        var services = new ServiceCollection()
             .AddSingleton(Substitute.For<ISettingsStore>())
             .AddSingleton(Substitute.For<ISecureStore>())
-            .AddCore()
-            .BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
+            .AddSingleton(Substitute.For<IConnectivityService>())
+            .AddSingleton(Substitute.For<INavigationService>())
+            .AddCore();
+        services.AddFixFlowApi(new Uri("https://api.test"));
+        using var provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
 
         var viewModelTypes = typeof(CoreServiceCollectionExtensions).Assembly
             .GetTypes()

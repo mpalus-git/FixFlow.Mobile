@@ -18,6 +18,7 @@ public static class CoreServiceCollectionExtensions
         services.AddSingleton<DisplayFormatter>();
         services.AddTransient<ScreenState>();
 
+        services.AddTransient<LoginViewModel>();
         services.AddTransient<WorkOrderListViewModel>();
 
         return services;
