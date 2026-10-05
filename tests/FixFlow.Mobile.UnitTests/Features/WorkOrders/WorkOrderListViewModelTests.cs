@@ -97,6 +97,35 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Should_Show_Offline_Banner_With_Last_Sync_Without_Request_When_Device_Is_Offline()
+    {
+        await _viewModel.LoadCommand.ExecuteAsync(null);
+        _connectivity.IsOnline.Returns(false);
+        var requestsBefore = _handler.Requests.Count;
+
+        await _viewModel.RefreshCommand.ExecuteAsync(null);
+
+        _viewModel.Screen.IsOffline.ShouldBeTrue();
+        _viewModel.Screen.OfflineMessage.ShouldNotBeNull().ShouldContain("05.10.2026 10:00");
+        _viewModel.Screen.Status.ShouldBe(ScreenStatus.Content);
+        _handler.Requests.Count.ShouldBe(requestsBefore);
+    }
+
+    [Fact]
+    public async Task Should_Keep_Local_Data_And_Show_Notice_When_Refresh_Fails()
+    {
+        await _workOrders.ReplaceAllAsync([TestWorkOrders.Create("ZL-LOCAL", Now.AddDays(1))]);
+        _respond = (request, _) => Task.FromResult(IsListRequest(request) ? new HttpResponseMessage(HttpStatusCode.ServiceUnavailable) : Route(request));
+        _viewModel.IsRefreshing = true;
+
+        await _viewModel.LoadCommand.ExecuteAsync(null);
+
+        _viewModel.Screen.Status.ShouldBe(ScreenStatus.Content);
+        _viewModel.Notice.ShouldBe(AppResources.RefreshFailedNotice);
+        _viewModel.IsRefreshing.ShouldBeFalse();
+    }
+
+    [Fact]
     public async Task Should_Show_Error_With_Retry_When_Refresh_Fails_Without_Local_Data()
     {
         _respond = (request, _) => IsListRequest(request) ? throw new HttpRequestException("Network is unreachable") : Task.FromResult(Route(request));
@@ -105,6 +134,29 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
 
         _viewModel.Screen.Status.ShouldBe(ScreenStatus.Error);
         _viewModel.Screen.ErrorMessage.ShouldBe(AppResources.WorkOrderListLoadFailed);
+    }
+
+    [Fact]
+    public async Task Should_Show_Server_Starting_Notice_While_Server_Wakes_Up()
+    {
+        var ready = new TaskCompletionSource<HttpResponseMessage>();
+        _respond = (request, cancellationToken) => request.RequestUri!.AbsolutePath == "/api/v1/system/ready"
+            ? ready.Task.WaitAsync(cancellationToken)
+            : Task.FromResult(Route(request));
+
+        var load = _viewModel.LoadCommand.ExecuteAsync(null);
+        for (var second = 0; second < 3; second++)
+        {
+            await Task.Delay(10, TestContext.Current.CancellationToken);
+            _timeProvider.Advance(TimeSpan.FromSeconds(1));
+        }
+
+        await Task.Delay(10, TestContext.Current.CancellationToken);
+        _viewModel.Notice.ShouldBe(AppResources.ServerStartingNotice);
+        ready.SetResult(new HttpResponseMessage(HttpStatusCode.OK));
+        await load;
+        _viewModel.Notice.ShouldBeNull();
+        _viewModel.Screen.Status.ShouldBe(ScreenStatus.Content);
     }
 
     [Fact]
