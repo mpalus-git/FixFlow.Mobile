@@ -22,7 +22,10 @@
                      Command="{Binding RefreshCommand}"
                      IsRefreshing="{Binding IsRefreshing}">
             <CollectionView ItemsSource="{Binding Groups}"
-                            IsGrouped="True">
+                            IsGrouped="True"
+                            SelectionMode="Single"
+                            SelectedItem="{Binding SelectedWorkOrder}"
+                            SelectionChangedCommand="{Binding OpenSelectedWorkOrderCommand}">
                 <CollectionView.EmptyView>
                     <controls:EmptyView Message="{x:Static resources:AppResources.WorkOrderListEmpty}" />
                 </CollectionView.EmptyView>
@@ -38,10 +41,6 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:WorkOrderListItem">
                         <Grid Padding="16,4">
-                            <Grid.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding OpenWorkOrderCommand, Source={RelativeSource AncestorType={x:Type viewModels:WorkOrderListViewModel}}, x:DataType=viewModels:WorkOrderListViewModel}"
-                                                      CommandParameter="{Binding .}" />
-                            </Grid.GestureRecognizers>
                             <Border Style="{StaticResource CardBorder}">
                                 <Grid ColumnDefinitions="*,Auto"
                                       RowDefinitions="Auto,Auto,Auto,Auto,Auto"

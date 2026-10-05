@@ -53,6 +53,9 @@ public sealed partial class WorkOrderListViewModel : ObservableObject, IRecipien
     [NotifyPropertyChangedFor(nameof(HasNotice))]
     public partial string? Notice { get; private set; }
 
+    [ObservableProperty]
+    public partial WorkOrderListItem? SelectedWorkOrder { get; set; }
+
     public bool HasNotice => Notice is not null;
 
     [RelayCommand]
@@ -103,6 +106,18 @@ public sealed partial class WorkOrderListViewModel : ObservableObject, IRecipien
         }
     }
 
+    [RelayCommand]
+    private Task OpenSelectedWorkOrderAsync()
+    {
+        if (SelectedWorkOrder is not { } item)
+        {
+            return Task.CompletedTask;
+        }
+
+        SelectedWorkOrder = null;
+        return _navigation.NavigateToAsync<WorkOrderDetailsViewModel, Guid>(item.Id);
+    }
+
     public async void Receive(ConnectivityChangedMessage message)
     {
         ArgumentNullException.ThrowIfNull(message);
@@ -115,10 +130,6 @@ public sealed partial class WorkOrderListViewModel : ObservableObject, IRecipien
             Screen.SetOffline(await _sync.GetLastPulledAtAsync());
         }
     }
-
-    [RelayCommand]
-    private Task OpenWorkOrderAsync(WorkOrderListItem item) =>
-        _navigation.NavigateToAsync<WorkOrderDetailsViewModel, Guid>(item.Id);
 
     [RelayCommand]
     private Task LogoutAsync() => _authService.LogoutAsync();

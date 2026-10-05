@@ -184,10 +184,12 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
     {
         await _viewModel.LoadCommand.ExecuteAsync(null);
         var item = _viewModel.Groups[0][0];
+        _viewModel.SelectedWorkOrder = item;
 
-        await _viewModel.OpenWorkOrderCommand.ExecuteAsync(item);
+        await _viewModel.OpenSelectedWorkOrderCommand.ExecuteAsync(null);
 
         await _navigation.Received(1).NavigateToAsync<WorkOrderDetailsViewModel, Guid>(item.Id);
+        _viewModel.SelectedWorkOrder.ShouldBeNull();
     }
 
     [Fact]
