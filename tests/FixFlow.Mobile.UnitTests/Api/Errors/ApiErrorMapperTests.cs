@@ -104,12 +104,43 @@ public sealed class ApiErrorMapperTests
         error.ErrorCode.ShouldBeNull();
     }
 
+    [Fact]
+    public async Task Should_Retry_When_Request_Fails_With_Network_Error()
+    {
+        using var handler = new StubHttpMessageHandler(_ => throw new HttpRequestException("No route to host"));
+
+        var error = await StartWorkAsync(handler);
+
+        error.Kind.ShouldBe(ApiErrorKind.Transient);
+        error.StatusCode.ShouldBeNull();
+        error.Detail.ShouldBe("No route to host");
+    }
+
+    [Fact]
+    public void Should_Retry_When_Http_Client_Times_Out()
+    {
+        var error = ApiErrorMapper.FromException(new TaskCanceledException("Timeout", new TimeoutException()));
+
+        error.ShouldNotBeNull().ShouldRetry.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Should_Not_Map_Exception_When_Caller_Cancelled_Request()
+    {
+        ApiErrorMapper.FromException(new OperationCanceledException()).ShouldBeNull();
+    }
+
     private static HttpResponseMessage Respond(HttpStatusCode statusCode, string content, string mediaType) =>
         new(statusCode) { Content = new StringContent(content, Encoding.UTF8, mediaType) };
 
     private static async Task<ApiError> StartWorkAsync(HttpResponseMessage response)
     {
         using var handler = new StubHttpMessageHandler(_ => response);
+        return await StartWorkAsync(handler);
+    }
+
+    private static async Task<ApiError> StartWorkAsync(StubHttpMessageHandler handler)
+    {
         using var httpClient = new HttpClient(handler) { BaseAddress = new Uri("https://api.test") };
         var api = RestService.For<IFixFlowApi>(httpClient);
 

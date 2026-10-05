@@ -14,6 +14,6 @@ public sealed record ApiError(
 
     public bool IsConflict => Kind is ApiErrorKind.Business or ApiErrorKind.Validation;
 
-    public static ApiError Transient() =>
-        new(ApiErrorKind.Transient, null, null, null, new Dictionary<string, IReadOnlyList<string>>(), null);
+    public static ApiError Transient(string? detail = null) =>
+        new(ApiErrorKind.Transient, null, null, detail, new Dictionary<string, IReadOnlyList<string>>(), null);
 }

@@ -19,10 +19,20 @@ public static class ApiErrorMapper
         return response switch
         {
             { Error: ApiException error } => FromApiException(error),
+            { Error: ApiRequestException error } => ApiError.Transient(error.InnerException?.Message ?? error.Message),
             { StatusCode: { } statusCode } => Map(statusCode, response.Headers, response.ContentHeaders, null),
             _ => ApiError.Transient(),
         };
     }
+
+    public static ApiError? FromException(Exception exception) => exception switch
+    {
+        ApiException apiException => FromApiException(apiException),
+        ApiRequestException => ApiError.Transient(exception.InnerException?.Message ?? exception.Message),
+        HttpRequestException => ApiError.Transient(exception.Message),
+        TaskCanceledException { InnerException: TimeoutException } => ApiError.Transient(exception.Message),
+        _ => null,
+    };
 
     private static ApiError FromApiException(ApiException exception) =>
         Map(exception.StatusCode, exception.Headers, exception.ContentHeaders, exception.Content);
