@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/FixFlow.Mobile.Core/FixFlow.Mobile.Core.csproj" />
+    <Project Path="src/FixFlow.Mobile/FixFlow.Mobile.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/FixFlow.Mobile.UnitTests/FixFlow.Mobile.UnitTests.csproj" />
