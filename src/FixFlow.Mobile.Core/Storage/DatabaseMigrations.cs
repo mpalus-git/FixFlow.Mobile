@@ -27,5 +27,18 @@ public static class DatabaseMigrations
             """,
             "CREATE INDEX ix_work_orders_due_date ON work_orders (due_date)",
         ]),
+        new(2, "create_parts",
+        [
+            """
+            CREATE TABLE parts (
+                id TEXT NOT NULL PRIMARY KEY,
+                name TEXT NOT NULL,
+                catalog_number TEXT NOT NULL,
+                stock_quantity INTEGER NOT NULL,
+                unit_price TEXT NOT NULL,
+                archived_at INTEGER,
+                search_text TEXT NOT NULL)
+            """,
+        ]),
     ];
 }

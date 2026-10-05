@@ -1,4 +1,5 @@
 using FixFlow.Mobile.Core.Features.Auth;
+using FixFlow.Mobile.Core.Features.Parts;
 using FixFlow.Mobile.Core.Features.Settings;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Formatting;
@@ -23,6 +24,7 @@ public static class CoreServiceCollectionExtensions
 
         services.AddTransient<StartupViewModel>();
         services.AddTransient<LoginViewModel>();
+        services.AddTransient<PartRepository>();
         services.AddTransient<WorkOrderRepository>();
         services.AddTransient<WorkOrderListViewModel>();
 
