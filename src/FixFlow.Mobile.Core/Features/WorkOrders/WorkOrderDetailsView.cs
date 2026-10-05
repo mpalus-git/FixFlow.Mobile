@@ -1,3 +1,5 @@
+using FixFlow.Mobile.Core.Features.ServiceEntries;
+
 namespace FixFlow.Mobile.Core.Features.WorkOrders;
 
 public sealed record WorkOrderDetailsView(
@@ -9,5 +11,7 @@ public sealed record WorkOrderDetailsView(
     string Description,
     ClientView? Client,
     DeviceView? Device,
+    IReadOnlyList<ServiceEntryView> Entries,
+    string? PartsTotalText,
     IReadOnlyList<DeviceHistoryView> History,
     bool CanDownloadProtocol);

@@ -159,6 +159,18 @@
   <data name="DetailsInstalledOn" xml:space="preserve">
     <value>Zainstalowane: {0}</value>
   </data>
+  <data name="DetailsWorkTime" xml:space="preserve">
+    <value>Czas pracy: {0} – {1} ({2})</value>
+  </data>
+  <data name="DetailsDuration" xml:space="preserve">
+    <value>{0} h {1} min</value>
+  </data>
+  <data name="DetailsQuantity" xml:space="preserve">
+    <value>{0} szt.</value>
+  </data>
+  <data name="DetailsPartsTotal" xml:space="preserve">
+    <value>Części netto razem: {0}</value>
+  </data>
   <data name="DetailsEntryCount" xml:space="preserve">
     <value>Wpisy: {0}</value>
   </data>
