@@ -34,6 +34,8 @@ public static class CoreServiceCollectionExtensions
         services.AddTransient<SyncStateRepository>();
         services.AddTransient<OutboxRepository>();
         services.AddTransient<OutboxWriter>();
+        services.AddSingleton(OutboxRetryPolicy.CreateDefault());
+        services.AddTransient<OutboxDispatcher>();
         services.AddTransient<WorkOrderSyncService>();
         services.AddTransient<WorkOrderDetailsSyncService>();
         services.AddTransient<WorkOrderRepository>();
