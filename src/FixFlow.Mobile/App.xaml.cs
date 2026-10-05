@@ -1,14 +1,27 @@
+using FixFlow.Mobile.Core.Features.Settings;
+
 namespace FixFlow.Mobile;
 
 public partial class App : Application
 {
-    private readonly AppShell _shell;
+    private readonly IServiceProvider _services;
 
-    public App(AppShell shell)
+    public App(IServiceProvider services, ILanguageService languageService)
     {
         InitializeComponent();
-        _shell = shell;
+        _services = services;
+        languageService.LanguageChanged += OnLanguageChanged;
     }
 
-    protected override Window CreateWindow(IActivationState? activationState) => new(_shell);
+    protected override Window CreateWindow(IActivationState? activationState) => new(CreateShell());
+
+    private AppShell CreateShell() => _services.GetRequiredService<AppShell>();
+
+    private void OnLanguageChanged(object? sender, EventArgs e)
+    {
+        foreach (var window in Windows)
+        {
+            window.Page = CreateShell();
+        }
+    }
 }

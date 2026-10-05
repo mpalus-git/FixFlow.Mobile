@@ -1,4 +1,6 @@
 using FixFlow.Mobile.Core;
+using FixFlow.Mobile.Core.Features.Settings;
+using FixFlow.Mobile.Features.Settings;
 using FixFlow.Mobile.Features.WorkOrders;
 
 namespace FixFlow.Mobile;
@@ -11,9 +13,14 @@ public static class MauiProgram
         builder.UseMauiApp<App>();
 
         builder.Services.AddCore();
-        builder.Services.AddSingleton<AppShell>();
+        builder.Services.AddSingleton(Preferences.Default);
+        builder.Services.AddSingleton<ISettingsStore, PreferencesSettingsStore>();
+        builder.Services.AddTransient<AppShell>();
         builder.Services.AddTransient<WorkOrderListPage>();
 
-        return builder.Build();
+        var app = builder.Build();
+        app.Services.GetRequiredService<ILanguageService>().ApplySavedLanguage();
+
+        return app;
     }
 }
