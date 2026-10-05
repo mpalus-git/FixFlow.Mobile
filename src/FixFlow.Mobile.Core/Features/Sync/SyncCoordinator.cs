@@ -64,13 +64,13 @@ public sealed class SyncCoordinator : IRecipient<ConnectivityChangedMessage>, IR
 
     public async void Receive(LocalChangeQueuedMessage message) => await SynchronizeInBackgroundAsync();
 
-    private async Task SynchronizeInBackgroundAsync()
+    public async Task SynchronizeInBackgroundAsync()
     {
         try
         {
             await SynchronizeAsync();
         }
-        catch (InvalidOperationException)
+        catch (Exception)
         {
         }
     }

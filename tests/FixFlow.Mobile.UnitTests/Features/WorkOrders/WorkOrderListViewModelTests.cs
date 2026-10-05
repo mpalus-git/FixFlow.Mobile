@@ -50,22 +50,29 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
         var clock = BusinessClock.CreateForWarsaw(_timeProvider);
         var formatter = new DisplayFormatter(new LanguageService(Substitute.For<ISettingsStore>()), clock);
         _workOrders = new WorkOrderRepository(_userDatabase.Database);
-        var sync = new WorkOrderSyncService(
-            api,
-            new ServerReadinessProbe(httpClient, _timeProvider),
-            new ServerWarmup(),
-            _workOrders,
-            new SyncStateRepository(_userDatabase.Database, _timeProvider));
+        var warmup = new ServerWarmup();
+        var syncStates = new SyncStateRepository(_userDatabase.Database, _timeProvider);
+        var sync = new WorkOrderSyncService(api, new ServerReadinessProbe(httpClient, _timeProvider), warmup, _workOrders, syncStates);
         _outbox = new OutboxRepository(_userDatabase.Database);
+        var coordinator = new SyncCoordinator(
+            _userDatabase.Database,
+            _connectivity,
+            warmup,
+            () => new ServerReadinessProbe(httpClient, _timeProvider),
+            () => new OutboxDispatcher(api, _outbox, new OutboxRetryPolicy(() => 0.5), _timeProvider),
+            () => sync,
+            _messenger);
         _viewModel = new WorkOrderListViewModel(
             new ScreenState(formatter),
             new AuthService(api, api, _session, _userDatabase.Database, _timeProvider),
             _workOrders,
             _outbox,
             sync,
+            coordinator,
             new WorkOrderListPresenter(new WorkOrderSectionClassifier(clock), formatter),
             _connectivity,
             _navigation,
+            new ImmediateUiDispatcher(),
             _messenger);
     }
 
@@ -108,6 +115,7 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
         var item = _viewModel.Groups.SelectMany(group => group).ShouldHaveSingleItem();
         item.IsInProgress.ShouldBeTrue();
         item.IsPending.ShouldBeTrue();
+        _viewModel.SyncStatus.ShouldBe("Do wysłania: 1");
     }
 
     [Fact]

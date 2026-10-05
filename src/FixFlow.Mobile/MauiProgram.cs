@@ -3,12 +3,15 @@ using FixFlow.Mobile.Core;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Connectivity;
 using FixFlow.Mobile.Core.Dialogs;
+using FixFlow.Mobile.Core.Dispatching;
 using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.Settings;
+using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Launching;
 using FixFlow.Mobile.Core.Navigation;
 using FixFlow.Mobile.Core.Storage;
 using FixFlow.Mobile.Dialogs;
+using FixFlow.Mobile.Dispatching;
 using FixFlow.Mobile.Features.Auth;
 using FixFlow.Mobile.Features.Settings;
 using FixFlow.Mobile.Features.WorkOrders;
@@ -41,6 +44,7 @@ public static partial class MauiProgram
         builder.Services.AddSingleton<IMapLauncher, EssentialsMapLauncher>();
         builder.Services.AddSingleton(FileSystem.Current);
         builder.Services.AddSingleton<IDocumentLauncher, EssentialsDocumentLauncher>();
+        builder.Services.AddSingleton<IUiDispatcher, MainThreadUiDispatcher>();
         builder.Services.AddSingleton(new DemoAccount(BuildConfiguration.DemoTechnicianEmail, BuildConfiguration.DemoTechnicianPassword));
         builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
         builder.Services.AddSingleton<IDialogService, PageDialogService>();
@@ -53,6 +57,7 @@ public static partial class MauiProgram
         var app = builder.Build();
         app.Services.GetRequiredService<ILanguageService>().ApplySavedLanguage();
         app.Services.GetRequiredService<SessionEndNavigator>().Start();
+        app.Services.GetRequiredService<SyncCoordinator>().Start();
 
         return app;
     }

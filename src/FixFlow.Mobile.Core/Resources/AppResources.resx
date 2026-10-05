@@ -234,4 +234,10 @@
   <data name="PendingSyncLabel" xml:space="preserve">
     <value>Oczekuje na wysłanie</value>
   </data>
+  <data name="SyncPendingCount" xml:space="preserve">
+    <value>Do wysłania: {0}</value>
+  </data>
+  <data name="SyncConflictCount" xml:space="preserve">
+    <value>Do wyjaśnienia: {0}</value>
+  </data>
 </root>

@@ -107,20 +107,24 @@ public sealed class SyncCoordinatorTests : IAsyncLifetime
     public async Task Should_Synchronize_When_Connection_Returns()
     {
         _coordinator.Start();
+        var completed = WaitForCompletionAsync();
 
         _messenger.Send(new ConnectivityChangedMessage(IsOnline: true));
 
-        await WaitUntilAsync(() => _api.Calls.Contains(ListCall));
+        await completed;
+        _api.Calls.ShouldContain(ListCall);
     }
 
     [Fact]
     public async Task Should_Synchronize_When_Local_Change_Is_Queued()
     {
         _coordinator.Start();
+        var completed = WaitForCompletionAsync();
 
         await new OutboxWriter(_outbox, _timeProvider, _messenger).StartWorkAsync(WorkOrderId);
 
-        await WaitUntilAsync(() => _api.Calls.Contains($"POST /api/v1/work-orders/{WorkOrderId}/start"));
+        await completed;
+        _api.Calls.ShouldContain($"POST /api/v1/work-orders/{WorkOrderId}/start");
     }
 
     [Fact]
@@ -141,13 +145,10 @@ public sealed class SyncCoordinatorTests : IAsyncLifetime
         await _userDatabase.DisposeAsync();
     }
 
-    private static async Task WaitUntilAsync(Func<bool> condition)
+    private Task WaitForCompletionAsync()
     {
-        for (var attempt = 0; attempt < 200 && !condition(); attempt++)
-        {
-            await Task.Delay(10, TestContext.Current.CancellationToken);
-        }
-
-        condition().ShouldBeTrue();
+        var completed = new TaskCompletionSource();
+        _messenger.Register<SyncCompletedMessage>(completed, (recipient, _) => ((TaskCompletionSource)recipient).TrySetResult());
+        return completed.Task.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
     }
 }
