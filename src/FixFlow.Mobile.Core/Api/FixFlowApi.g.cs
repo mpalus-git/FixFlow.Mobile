@@ -44,6 +44,10 @@ namespace FixFlow.Mobile.Core.Api
         [Put("/api/v1/devices/{deviceId}")]
         Task<IApiResponse<DeviceResponse>> UpdateDeviceAsync(System.Guid deviceId, [Body] UpdateDeviceRequest body, [Header("If-Match")] string if_Match, CancellationToken cancellationToken = default);
 
+        [Headers("Accept: application/problem+json, application/json")]
+        [Get("/api/v1/devices/{deviceId}/work-orders")]
+        Task<IApiResponse<PagedResponseOfDeviceWorkOrderHistoryItemResponse>> ListDeviceWorkOrdersAsync(System.Guid deviceId, [Query] int? page, [Query] int? pageSize, CancellationToken cancellationToken = default);
+
         [Headers("Accept: application/problem+json, application/json", "Content-Type: application/json")]
         [Post("/api/v1/work-orders")]
         Task<IApiResponse<WorkOrderResponse>> CreateWorkOrderAsync([Body] CreateWorkOrderRequest body, CancellationToken cancellationToken = default);
@@ -446,6 +450,71 @@ public WorkOrderPriority? Priority { get; init; }
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial record DeviceWorkOrderHistoryItemResponse
+    {
+        [JsonConstructor]
+        public DeviceWorkOrderHistoryItemResponse(System.DateTimeOffset? @completedAt, System.DateTimeOffset @createdAt, string @description, System.Guid @id, string @number, WorkOrderPriority @priority, int @serviceEntryCount, System.DateTimeOffset? @startedAt, WorkOrderStatus @status, string? @technicianName)
+        {
+            this.Id = @id;
+            this.Number = @number;
+            this.Status = @status;
+            this.Priority = @priority;
+            this.Description = @description;
+            this.TechnicianName = @technicianName;
+            this.CreatedAt = @createdAt;
+            this.StartedAt = @startedAt;
+            this.CompletedAt = @completedAt;
+            this.ServiceEntryCount = @serviceEntryCount;
+        }
+
+        [JsonPropertyName("id")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public System.Guid Id { get; init; }
+
+        [JsonPropertyName("number")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Number { get; init; }
+
+        [JsonPropertyName("status")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+public WorkOrderStatus Status { get; init; }
+
+        [JsonPropertyName("priority")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+public WorkOrderPriority Priority { get; init; }
+
+        [JsonPropertyName("description")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Description { get; init; }
+
+        [JsonPropertyName("technicianName")]
+        public string? TechnicianName { get; init; }
+
+        [JsonPropertyName("createdAt")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public System.DateTimeOffset CreatedAt { get; init; }
+
+        [JsonPropertyName("startedAt")]
+        public System.DateTimeOffset? StartedAt { get; init; }
+
+        [JsonPropertyName("completedAt")]
+        public System.DateTimeOffset? CompletedAt { get; init; }
+
+        [JsonPropertyName("serviceEntryCount")]
+        public int ServiceEntryCount { get; init; }
+
+        private IDictionary<string, object>? _additionalProperties;
+
+        [JsonExtensionData]
+        public IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial record HttpValidationProblemDetails
     {
         [JsonConstructor]
@@ -529,6 +598,42 @@ public WorkOrderPriority? Priority { get; init; }
         [JsonPropertyName("refreshToken")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string RefreshToken { get; init; }
+
+        private IDictionary<string, object>? _additionalProperties;
+
+        [JsonExtensionData]
+        public IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial record PagedResponseOfDeviceWorkOrderHistoryItemResponse
+    {
+        [JsonConstructor]
+        public PagedResponseOfDeviceWorkOrderHistoryItemResponse(ICollection<DeviceWorkOrderHistoryItemResponse> @items, int @page, int @pageSize, int @totalCount)
+        {
+            this.Items = @items;
+            this.Page = @page;
+            this.PageSize = @pageSize;
+            this.TotalCount = @totalCount;
+        }
+
+        [JsonPropertyName("items")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public ICollection<DeviceWorkOrderHistoryItemResponse> Items { get; init; }
+
+        [JsonPropertyName("page")]
+        public int Page { get; init; }
+
+        [JsonPropertyName("pageSize")]
+        public int PageSize { get; init; }
+
+        [JsonPropertyName("totalCount")]
+        public int TotalCount { get; init; }
 
         private IDictionary<string, object>? _additionalProperties;
 

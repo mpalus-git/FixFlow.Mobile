@@ -1654,6 +1654,94 @@
         ]
       }
     },
+    "/api/v1/devices/{deviceId}/work-orders": {
+      "get": {
+        "tags": [
+          "Devices"
+        ],
+        "summary": "List the service history of a device",
+        "description": "Returns one page of work orders of a device, newest first, with ties ordered by identifier. Each work order comes with the name of the assigned technician and the number of its service entries. Dispatchers and administrators see all work orders of the device, including archived devices. Technicians see only work orders assigned to them; a device without such work orders is reported as not found.",
+        "operationId": "ListDeviceWorkOrders",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number, starting from 1.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Number of work orders per page, from 1 to 100.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResponseOfDeviceWorkOrderHistoryItemResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
     "/api/v1/work-orders": {
       "post": {
         "tags": [
@@ -4067,6 +4155,78 @@
         },
         "description": "Device installed at a client and serviced by the company."
       },
+      "DeviceWorkOrderHistoryItemResponse": {
+        "required": [
+          "id",
+          "number",
+          "status",
+          "priority",
+          "description",
+          "technicianName",
+          "createdAt",
+          "startedAt",
+          "completedAt",
+          "serviceEntryCount"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier of the work order.",
+            "format": "uuid"
+          },
+          "number": {
+            "type": "string",
+            "description": "Readable number of the work order, for example ZL/2026/0042."
+          },
+          "status": {
+            "description": "Current status of the work order.",
+            "$ref": "#/components/schemas/WorkOrderStatus"
+          },
+          "priority": {
+            "description": "Priority of the work order.",
+            "$ref": "#/components/schemas/WorkOrderPriority"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the fault."
+          },
+          "technicianName": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "First and last name of the assigned technician; null when no technician is assigned."
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "UTC time when the work order was created.",
+            "format": "date-time"
+          },
+          "startedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "UTC time when the technician started the work; null before the work is started.",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "UTC time when the work order was completed; null before completion.",
+            "format": "date-time"
+          },
+          "serviceEntryCount": {
+            "type": "integer",
+            "description": "Number of service entries of the work order, including correction entries.",
+            "format": "int32"
+          }
+        },
+        "description": "Work order in the service history of a device."
+      },
       "HttpValidationProblemDetails": {
         "type": "object",
         "properties": {
@@ -4190,6 +4350,40 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/DeviceListItemResponse"
+            },
+            "description": "Items on the requested page."
+          },
+          "page": {
+            "type": "integer",
+            "description": "Requested page number, starting from 1.",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "Requested page size.",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Number of items on all pages.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a list."
+      },
+      "PagedResponseOfDeviceWorkOrderHistoryItemResponse": {
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeviceWorkOrderHistoryItemResponse"
             },
             "description": "Items on the requested page."
           },
