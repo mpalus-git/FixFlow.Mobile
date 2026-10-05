@@ -70,5 +70,34 @@ public static class DatabaseMigrations
                 archived_at INTEGER)
             """,
         ]),
+        new(5, "create_service_entries",
+        [
+            """
+            CREATE TABLE service_entries (
+                id TEXT NOT NULL PRIMARY KEY,
+                work_order_id TEXT NOT NULL,
+                technician_id TEXT NOT NULL,
+                technician_name TEXT NOT NULL,
+                note TEXT NOT NULL,
+                is_correction INTEGER NOT NULL,
+                work_started_at INTEGER,
+                work_finished_at INTEGER,
+                latitude REAL,
+                longitude REAL,
+                created_at INTEGER NOT NULL)
+            """,
+            "CREATE INDEX ix_service_entries_work_order_id ON service_entries (work_order_id)",
+            """
+            CREATE TABLE service_entry_parts (
+                service_entry_id TEXT NOT NULL,
+                position INTEGER NOT NULL,
+                part_id TEXT NOT NULL,
+                part_name TEXT NOT NULL,
+                catalog_number TEXT NOT NULL,
+                quantity INTEGER NOT NULL,
+                unit_price TEXT NOT NULL,
+                PRIMARY KEY (service_entry_id, position))
+            """,
+        ]),
     ];
 }
