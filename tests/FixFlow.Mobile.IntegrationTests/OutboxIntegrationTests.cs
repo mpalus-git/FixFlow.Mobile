@@ -66,6 +66,27 @@ public sealed class OutboxIntegrationTests(ApiEnvironment environment)
         conflict.Kind.ShouldBe(OutboxOperationKind.StartWork);
     }
 
+    [Fact]
+    public async Task Should_Keep_Operation_In_Queue_When_Api_Container_Is_Stopped()
+    {
+        using var admin = await AdminApi.LogInAsync(environment);
+        var scenario = await TechnicianScenario.CreateAsync(admin);
+        await using var api = environment.CreateApiContainer();
+        await api.StartAsync(TestContext.Current.CancellationToken);
+        await using var device = await TechnicianDevice.LogInAsync(ApiEnvironment.AddressOf(api), scenario.Email, scenario.Password);
+        await device.Get<OutboxWriter>().StartWorkAsync(scenario.WorkOrderId);
+        await api.StopAsync(TestContext.Current.CancellationToken);
+
+        var summary = await device.Get<OutboxDispatcher>().DispatchAsync(CancellationToken.None);
+
+        summary.ShouldBe(new DispatchSummary(Sent: 0, Rejected: 0, Remaining: 1, SessionRejected: false));
+        var waiting = (await device.Get<OutboxRepository>().GetAllAsync()).ShouldHaveSingleItem();
+        waiting.AttemptCount.ShouldBe(1);
+        waiting.NextAttemptAt.ShouldNotBeNull();
+        (await device.Get<OutboxRepository>().GetConflictsAsync()).ShouldBeEmpty();
+        (await admin.GetAsync($"api/v1/work-orders/{scenario.WorkOrderId}")).GetProperty("status").GetString().ShouldBe("Assigned");
+    }
+
     private static PendingServiceEntry CreateEntry(Guid partId, int quantity)
     {
         var workStartedAt = DateTimeOffset.UtcNow;
