@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/FixFlow.Mobile.Core/FixFlow.Mobile.Core.csproj" />
+    <Project Path="src/FixFlow.Mobile/FixFlow.Mobile.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/FixFlow.Mobile.UnitTests/FixFlow.Mobile.UnitTests.csproj" />
+    <Project Path="tests/FixFlow.Tools.Tests/FixFlow.Tools.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/FixFlow.Tools/FixFlow.Tools.csproj" />
+  </Folder>
+</Solution>
