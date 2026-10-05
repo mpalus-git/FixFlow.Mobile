@@ -1,3 +1,4 @@
+using System.Net;
 using CommunityToolkit.Mvvm.Messaging;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Connectivity;
@@ -58,9 +59,95 @@ public sealed class SyncCoordinatorTests : IAsyncLifetime
         _api.Calls.ShouldBe(["GET /api/v1/system/ready", $"POST /api/v1/work-orders/{WorkOrderId}/start", ListCall]);
     }
 
+    [Fact]
+    public async Task Should_Run_Once_More_Instead_Of_Each_Time_When_Requested_During_Sync()
+    {
+        var release = new TaskCompletionSource();
+        var firstList = true;
+        _api.AsyncOverrides[ListCall] = async () =>
+        {
+            if (firstList)
+            {
+                firstList = false;
+                await release.Task;
+            }
+
+            return OutboxApiStub.Json(HttpStatusCode.OK, """{"items":[],"page":1,"pageSize":100,"totalCount":0}""");
+        };
+
+        var first = _coordinator.SynchronizeAsync();
+        while (!_api.Calls.Contains(ListCall))
+        {
+            await Task.Delay(10, TestContext.Current.CancellationToken);
+        }
+
+        var second = _coordinator.SynchronizeAsync();
+        var third = _coordinator.SynchronizeAsync();
+        release.SetResult();
+        await Task.WhenAll(first, second, third);
+
+        _api.Calls.Count(call => call == ListCall).ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task Should_Report_Offline_Without_Requests_When_Device_Is_Offline()
+    {
+        _connectivity.IsOnline.Returns(false);
+        SyncCompletedMessage? completed = null;
+        _messenger.Register<SyncCompletedMessage>(this, (_, message) => completed = message);
+
+        var result = await _coordinator.SynchronizeAsync();
+
+        result.ShouldBe(SyncResult.Offline);
+        completed.ShouldNotBeNull().Result.ShouldBe(SyncResult.Offline);
+        _api.Calls.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Should_Synchronize_When_Connection_Returns()
+    {
+        _coordinator.Start();
+
+        _messenger.Send(new ConnectivityChangedMessage(IsOnline: true));
+
+        await WaitUntilAsync(() => _api.Calls.Contains(ListCall));
+    }
+
+    [Fact]
+    public async Task Should_Synchronize_When_Local_Change_Is_Queued()
+    {
+        _coordinator.Start();
+
+        await new OutboxWriter(_outbox, _timeProvider, _messenger).StartWorkAsync(WorkOrderId);
+
+        await WaitUntilAsync(() => _api.Calls.Contains($"POST /api/v1/work-orders/{WorkOrderId}/start"));
+    }
+
+    [Fact]
+    public async Task Should_Skip_Pull_When_Session_Is_Rejected_While_Sending()
+    {
+        await new OutboxWriter(_outbox, _timeProvider, new WeakReferenceMessenger()).StartWorkAsync(WorkOrderId);
+        _api.Overrides[$"POST /api/v1/work-orders/{WorkOrderId}/start"] = () => new HttpResponseMessage(HttpStatusCode.Unauthorized);
+
+        var result = await _coordinator.SynchronizeAsync();
+
+        result.Pull.ShouldBeNull();
+        _api.Calls.ShouldNotContain(ListCall);
+    }
+
     public async ValueTask DisposeAsync()
     {
         _handler.Dispose();
         await _userDatabase.DisposeAsync();
+    }
+
+    private static async Task WaitUntilAsync(Func<bool> condition)
+    {
+        for (var attempt = 0; attempt < 200 && !condition(); attempt++)
+        {
+            await Task.Delay(10, TestContext.Current.CancellationToken);
+        }
+
+        condition().ShouldBeTrue();
     }
 }
