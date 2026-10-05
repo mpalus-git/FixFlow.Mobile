@@ -140,12 +140,6 @@ jobs:
         with:
           global-json-file: global.json
 
-      - uses: actions/cache@v6
-        with:
-          path: ~/.nuget/packages
-          key: nuget-windows-app-${{ hashFiles('global.json', 'Directory.Packages.props') }}
-          restore-keys: nuget-windows-app-
-
       - name: Install workloads
         run: dotnet workload install maui-windows
 
