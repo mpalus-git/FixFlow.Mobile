@@ -157,17 +157,20 @@ public sealed partial class WorkOrderDetailsViewModel(
 
     private async Task ShowLocalAsync()
     {
-        if (await sources.WorkOrders.GetAsync(_workOrderId) is not { } workOrder)
+        if (await sources.WorkOrders.GetAsync(_workOrderId) is not { } storedWorkOrder)
         {
             return;
         }
 
+        var pendingOperations = await sources.Outbox.GetForWorkOrderAsync(_workOrderId);
+        var workOrder = PendingOperationsOverlay.Apply(storedWorkOrder, pendingOperations);
         Details = presenter.Present(
             workOrder,
             await sources.Clients.GetAsync(workOrder.ClientId),
             await sources.Devices.GetAsync(workOrder.DeviceId),
             await sources.ServiceEntries.GetForWorkOrderAsync(workOrder.Id),
-            await sources.DeviceHistory.GetForDeviceAsync(workOrder.DeviceId));
+            await sources.DeviceHistory.GetForDeviceAsync(workOrder.DeviceId),
+            pendingOperations);
         Screen.ShowContent(hasItems: true);
     }
 

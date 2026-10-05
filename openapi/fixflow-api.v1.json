@@ -2505,7 +2505,7 @@
           "WorkOrders"
         ],
         "summary": "Start work on a work order",
-        "description": "Moves a work order assigned to the calling technician from Assigned to InProgress. A technician can have only one work order in progress at a time. Work orders of other technicians are reported as not found. Available to technicians only.",
+        "description": "Moves a work order assigned to the calling technician from Assigned to InProgress. A technician can have only one work order in progress at a time. The body is optional: without it the work starts at the server time, with startedAt the work starts at the time given by the client, for example recorded offline. Work orders of other technicians are reported as not found. Available to technicians only.",
         "operationId": "StartWork",
         "parameters": [
           {
@@ -2518,6 +2518,22 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/StartWorkRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -2533,6 +2549,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/WorkOrderResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
                 }
               }
             }
@@ -3357,7 +3383,7 @@
           "ServiceEntries"
         ],
         "summary": "Add a service entry",
-        "description": "Adds a work entry or a correction entry to a work order in progress assigned to the calling technician. Parts used in a work entry are taken from stock at their current price and the entry is rejected if the stock would drop below zero. A correction returns parts to stock, at most the net quantity used on the work order, at the price of their last use. Entries cannot be changed or deleted. Work orders of other technicians are reported as not found. Available to technicians only.",
+        "description": "Adds a work entry or a correction entry to a work order in progress assigned to the calling technician. Parts used in a work entry are taken from stock at their current price and the entry is rejected if the stock would drop below zero. A correction returns parts to stock, at most the net quantity used on the work order, at the price of their last use. Entries cannot be changed or deleted. Work orders of other technicians are reported as not found. Available to technicians only. When the request carries an identifier of an entry already added by the same technician to the same work order, the stored entry is returned with status 200 without taking parts from stock again and without checking the work order status, so a queued entry can be safely sent again even after the work order was completed; the request content is not compared. An identifier used on another work order or by another technician is rejected with a conflict.",
         "operationId": "AddServiceEntry",
         "parameters": [
           {
@@ -3387,6 +3413,16 @@
               "application/problem+json": {
                 "schema": {
                   "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceEntryResponse"
                 }
               }
             }
@@ -3476,6 +3512,73 @@
                   "items": {
                     "$ref": "#/components/schemas/ServiceEntryResponse"
                   }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/work-orders/{workOrderId}/service-entries/{serviceEntryId}": {
+      "get": {
+        "tags": [
+          "ServiceEntries"
+        ],
+        "summary": "Get a service entry",
+        "description": "Returns one work or correction entry of a work order. Technicians see only entries of work orders assigned to them; other work orders are reported as not found. An entry of a different work order is reported as not found.",
+        "operationId": "GetServiceEntry",
+        "parameters": [
+          {
+            "name": "workOrderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "serviceEntryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceEntryResponse"
                 }
               }
             }
@@ -3646,7 +3749,7 @@
               "null",
               "string"
             ],
-            "description": "Time when the work finished; required for a work entry and not allowed for a correction. Must be after the start and not in the future.",
+            "description": "Time when the work finished; required for a work entry and not allowed for a correction. Must be after the start and not later than the server time plus the allowed clock skew.",
             "format": "date-time"
           },
           "latitude": {
@@ -3674,6 +3777,14 @@
               "$ref": "#/components/schemas/ServiceEntryPartRequest"
             },
             "description": "Parts used in a work entry or returned in a correction, at most 20, each part at most once. Required for a correction."
+          },
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Optional identifier of the entry chosen by the client, for example by an offline queue. Sending an entry again with the same identifier returns the stored entry instead of adding a new one; when omitted, the server assigns the identifier.",
+            "format": "uuid"
           }
         },
         "description": "New service entry of a work order in progress. A work entry records performed work and used parts; a correction entry returns wrongly recorded parts to stock and has no work time or location."
@@ -4818,6 +4929,20 @@
           }
         },
         "description": "Service entry of a work order: performed work with used parts, or a correction returning parts to stock."
+      },
+      "StartWorkRequest": {
+        "type": "object",
+        "properties": {
+          "startedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Time when the technician started the work, for example recorded offline by the mobile client. Cannot be earlier than the assignment of the work order to the technician and cannot be later than the server time plus the allowed clock skew; a time within the skew is stored as the server time. When omitted, the server time is used.",
+            "format": "date-time"
+          }
+        },
+        "description": "Optional details of starting work on a work order."
       },
       "Stream": {
         "type": "string",

@@ -32,7 +32,7 @@ public sealed class WorkOrderListPresenterTests : IDisposable
             Priority = WorkOrderPriority.Critical,
         };
 
-        var group = _presenter.Present([workOrder]).ShouldHaveSingleItem();
+        var group = _presenter.Present([workOrder], new HashSet<Guid>()).ShouldHaveSingleItem();
 
         group.Title.ShouldBe("Dziś");
         var item = group.ShouldHaveSingleItem();
@@ -51,10 +51,20 @@ public sealed class WorkOrderListPresenterTests : IDisposable
             Priority = WorkOrderPriority.High,
         };
 
-        var item = _presenter.Present([workOrder]).ShouldHaveSingleItem().ShouldHaveSingleItem();
+        var item = _presenter.Present([workOrder], new HashSet<Guid>()).ShouldHaveSingleItem().ShouldHaveSingleItem();
 
         item.DateText.ShouldBe("Zakończono: 04.10.2026 08:00");
         item.IsUrgent.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Should_Mark_Work_Order_When_Its_Changes_Wait_In_Queue()
+    {
+        var workOrder = TestWorkOrders.Create("ZL-2026-0042", Now.AddHours(2));
+
+        var item = _presenter.Present([workOrder], new HashSet<Guid> { workOrder.Id }).ShouldHaveSingleItem().ShouldHaveSingleItem();
+
+        item.IsPending.ShouldBeTrue();
     }
 
     [Theory]

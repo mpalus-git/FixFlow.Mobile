@@ -153,7 +153,7 @@ public sealed class ApiErrorMapperTests
         using var httpClient = new HttpClient(handler) { BaseAddress = new Uri("https://api.test") };
         var api = RestService.For<IFixFlowApi>(httpClient);
 
-        using var apiResponse = await api.StartWorkAsync(Guid.NewGuid(), TestContext.Current.CancellationToken);
+        using var apiResponse = await api.StartWorkAsync(Guid.NewGuid(), null, TestContext.Current.CancellationToken);
 
         apiResponse.IsSuccessful.ShouldBeFalse();
         return ApiErrorMapper.FromResponse(apiResponse);

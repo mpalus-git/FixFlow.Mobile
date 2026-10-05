@@ -11,14 +11,17 @@
         <ToolbarItem Text="{x:Static resources:AppResources.LogoutButton}"
                      Command="{Binding LogoutCommand}" />
     </ContentPage.ToolbarItems>
-    <Grid RowDefinitions="Auto,Auto,*">
+    <Grid RowDefinitions="Auto,Auto,Auto,*">
         <controls:OfflineBanner IsVisible="{Binding Screen.IsOffline}"
                                 Message="{Binding Screen.OfflineMessage}" />
         <controls:OfflineBanner Grid.Row="1"
                                 IsVisible="{Binding HasNotice}"
                                 Message="{Binding Notice}" />
+        <controls:OfflineBanner Grid.Row="2"
+                                IsVisible="{Binding HasSyncStatus}"
+                                Message="{Binding SyncStatus}" />
 
-        <RefreshView Grid.Row="2"
+        <RefreshView Grid.Row="3"
                      Command="{Binding RefreshCommand}"
                      IsRefreshing="{Binding IsRefreshing}">
             <CollectionView ItemsSource="{Binding Groups}"
@@ -43,7 +46,7 @@
                         <Grid Padding="16,4">
                             <Border Style="{StaticResource CardBorder}">
                                 <Grid ColumnDefinitions="*,Auto"
-                                      RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+                                      RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
                                       RowSpacing="2">
                                     <Label Text="{Binding Number}"
                                            FontAttributes="Bold" />
@@ -74,6 +77,12 @@
                                            Grid.ColumnSpan="2"
                                            Text="{Binding DateText}"
                                            Style="{StaticResource SecondaryLabel}" />
+                                    <Label Grid.Row="5"
+                                           Grid.ColumnSpan="2"
+                                           Text="{x:Static resources:AppResources.PendingSyncLabel}"
+                                           IsVisible="{Binding IsPending}"
+                                           Style="{StaticResource SecondaryLabel}"
+                                           FontAttributes="Italic" />
                                     <Label Grid.Row="4"
                                            Grid.ColumnSpan="2"
                                            Text="{Binding PriorityText}"
@@ -91,10 +100,10 @@
             </CollectionView>
         </RefreshView>
 
-        <controls:LoadingView Grid.Row="2"
+        <controls:LoadingView Grid.Row="3"
                               Style="{StaticResource ScreenOverlay}"
                               IsVisible="{Binding Screen.IsLoading}" />
-        <controls:ErrorView Grid.Row="2"
+        <controls:ErrorView Grid.Row="3"
                             Style="{StaticResource ScreenOverlay}"
                             IsVisible="{Binding Screen.IsError}"
                             Message="{Binding Screen.ErrorMessage}"

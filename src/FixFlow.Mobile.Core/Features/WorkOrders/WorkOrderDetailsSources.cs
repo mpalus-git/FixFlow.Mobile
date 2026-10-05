@@ -1,4 +1,5 @@
 using FixFlow.Mobile.Core.Features.ServiceEntries;
+using FixFlow.Mobile.Core.Features.Sync;
 
 namespace FixFlow.Mobile.Core.Features.WorkOrders;
 
@@ -7,4 +8,5 @@ public sealed record WorkOrderDetailsSources(
     ClientRepository Clients,
     DeviceRepository Devices,
     ServiceEntryRepository ServiceEntries,
-    DeviceHistoryRepository DeviceHistory);
+    DeviceHistoryRepository DeviceHistory,
+    OutboxRepository Outbox);

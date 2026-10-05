@@ -107,6 +107,10 @@
                                         </Grid>
                                         <Label Text="{Binding CreatedText}"
                                                Style="{StaticResource SecondaryLabel}" />
+                                        <Label Text="{x:Static resources:AppResources.PendingSyncLabel}"
+                                               IsVisible="{Binding IsPending}"
+                                               Style="{StaticResource SecondaryLabel}"
+                                               FontAttributes="Italic" />
                                         <Label Text="{Binding Note}" />
                                         <Label Text="{Binding WorkTimeText}"
                                                Style="{StaticResource SecondaryLabel}"

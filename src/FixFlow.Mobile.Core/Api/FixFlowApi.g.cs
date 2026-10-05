@@ -64,9 +64,9 @@ namespace FixFlow.Mobile.Core.Api
         [Put("/api/v1/work-orders/{workOrderId}")]
         Task<IApiResponse<WorkOrderResponse>> UpdateWorkOrderAsync(System.Guid workOrderId, [Body] UpdateWorkOrderRequest body, [Header("If-Match")] string if_Match, CancellationToken cancellationToken = default);
 
-        [Headers("Accept: application/json, application/problem+json")]
+        [Headers("Accept: application/json, application/problem+json", "Content-Type: application/json")]
         [Post("/api/v1/work-orders/{workOrderId}/start")]
-        Task<IApiResponse<WorkOrderResponse>> StartWorkAsync(System.Guid workOrderId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<WorkOrderResponse>> StartWorkAsync(System.Guid workOrderId, [Body] StartWorkRequest? body, CancellationToken cancellationToken = default);
 
         [Headers("Accept: application/json, application/problem+json")]
         [Post("/api/v1/work-orders/{workOrderId}/complete")]
@@ -133,7 +133,7 @@ namespace FixFlow.Mobile.Core.Api
     public partial record AddServiceEntryRequest
     {
         [JsonConstructor]
-        public AddServiceEntryRequest(bool? @isCorrection, double? @latitude, double? @longitude, string @note, ICollection<ServiceEntryPartRequest>? @parts, ICollection<string>? @photoUrls, System.DateTimeOffset? @workFinishedAt, System.DateTimeOffset? @workStartedAt)
+        public AddServiceEntryRequest(System.Guid? @id, bool? @isCorrection, double? @latitude, double? @longitude, string @note, ICollection<ServiceEntryPartRequest>? @parts, ICollection<string>? @photoUrls, System.DateTimeOffset? @workFinishedAt, System.DateTimeOffset? @workStartedAt)
         {
             this.Note = @note;
             this.IsCorrection = @isCorrection;
@@ -143,6 +143,7 @@ namespace FixFlow.Mobile.Core.Api
             this.Latitude = @latitude;
             this.Longitude = @longitude;
             this.Parts = @parts;
+            this.Id = @id;
         }
 
         [JsonPropertyName("note")]
@@ -169,6 +170,9 @@ namespace FixFlow.Mobile.Core.Api
 
         [JsonPropertyName("parts")]
         public ICollection<ServiceEntryPartRequest>? Parts { get; init; }
+
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; init; }
 
         private IDictionary<string, object>? _additionalProperties;
 
@@ -973,6 +977,29 @@ public WorkOrderPriority Priority { get; init; }
         [JsonPropertyName("createdAt")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public System.DateTimeOffset CreatedAt { get; init; }
+
+        private IDictionary<string, object>? _additionalProperties;
+
+        [JsonExtensionData]
+        public IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial record StartWorkRequest
+    {
+        [JsonConstructor]
+        public StartWorkRequest(System.DateTimeOffset? @startedAt)
+        {
+            this.StartedAt = @startedAt;
+        }
+
+        [JsonPropertyName("startedAt")]
+        public System.DateTimeOffset? StartedAt { get; init; }
 
         private IDictionary<string, object>? _additionalProperties;
 

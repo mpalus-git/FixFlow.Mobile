@@ -1,4 +1,5 @@
 using FixFlow.Mobile.Core.Features.Settings;
+using FixFlow.Mobile.Core.Features.Sync;
 
 namespace FixFlow.Mobile;
 
@@ -22,6 +23,12 @@ public partial class App : Application
     }
 
     private AppShell CreateShell() => _services.GetRequiredService<AppShell>();
+
+    protected override async void OnResume()
+    {
+        base.OnResume();
+        await _services.GetRequiredService<SyncCoordinator>().SynchronizeInBackgroundAsync();
+    }
 
     private void OnLanguageChanged(object? sender, EventArgs e)
     {

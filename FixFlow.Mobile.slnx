@@ -4,6 +4,7 @@
     <Project Path="src/FixFlow.Mobile/FixFlow.Mobile.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/FixFlow.Mobile.IntegrationTests/FixFlow.Mobile.IntegrationTests.csproj" />
     <Project Path="tests/FixFlow.Mobile.UnitTests/FixFlow.Mobile.UnitTests.csproj" />
     <Project Path="tests/FixFlow.Tools.Tests/FixFlow.Tools.Tests.csproj" />
   </Folder>

@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using FixFlow.Mobile.Core.Api.Errors;
 using FixFlow.Mobile.Core.Connectivity;
+using FixFlow.Mobile.Core.Dispatching;
 using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Navigation;
@@ -11,11 +12,15 @@ using FixFlow.Mobile.Core.Screens;
 
 namespace FixFlow.Mobile.Core.Features.WorkOrders;
 
-public sealed partial class WorkOrderListViewModel : ObservableObject, IRecipient<ConnectivityChangedMessage>
+public sealed partial class WorkOrderListViewModel
+    : ObservableObject, IRecipient<ConnectivityChangedMessage>, IRecipient<SyncCompletedMessage>, IRecipient<ServerStartingMessage>
 {
     private readonly AuthService _authService;
     private readonly WorkOrderRepository _workOrders;
+    private readonly OutboxRepository _outbox;
     private readonly WorkOrderSyncService _sync;
+    private readonly SyncCoordinator _coordinator;
+    private readonly IUiDispatcher _ui;
     private readonly WorkOrderListPresenter _presenter;
     private readonly IConnectivityService _connectivity;
     private readonly INavigationService _navigation;
@@ -24,21 +29,27 @@ public sealed partial class WorkOrderListViewModel : ObservableObject, IRecipien
         ScreenState screen,
         AuthService authService,
         WorkOrderRepository workOrders,
+        OutboxRepository outbox,
         WorkOrderSyncService sync,
+        SyncCoordinator coordinator,
         WorkOrderListPresenter presenter,
         IConnectivityService connectivity,
         INavigationService navigation,
+        IUiDispatcher ui,
         IMessenger messenger)
     {
         ArgumentNullException.ThrowIfNull(messenger);
         Screen = screen;
         _authService = authService;
         _workOrders = workOrders;
+        _outbox = outbox;
         _sync = sync;
+        _coordinator = coordinator;
+        _ui = ui;
         _presenter = presenter;
         _connectivity = connectivity;
         _navigation = navigation;
-        messenger.Register(this);
+        messenger.RegisterAll(this);
     }
 
     public ScreenState Screen { get; }
@@ -56,7 +67,13 @@ public sealed partial class WorkOrderListViewModel : ObservableObject, IRecipien
     [ObservableProperty]
     public partial WorkOrderListItem? SelectedWorkOrder { get; set; }
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSyncStatus))]
+    public partial string? SyncStatus { get; private set; }
+
     public bool HasNotice => Notice is not null;
+
+    public bool HasSyncStatus => SyncStatus is not null;
 
     [RelayCommand]
     private async Task LoadAsync(CancellationToken cancellationToken)
@@ -89,14 +106,15 @@ public sealed partial class WorkOrderListViewModel : ObservableObject, IRecipien
             }
 
             Screen.SetOnline();
-            var result = await _sync.PullAsync(() => Notice = AppResources.ServerStartingNotice, cancellationToken);
+            var result = await _coordinator.SynchronizeAsync();
             Notice = null;
-            if (result.Outcome == PullOutcome.Succeeded)
+            if (result.Pull?.Outcome == PullOutcome.Succeeded)
             {
                 await ShowLocalAsync(updateScreen: true);
             }
-            else if (result.Error?.Kind != ApiErrorKind.Unauthorized)
+            else if (result.IsServerUnavailable || (result.Pull is { } pull && pull.Error?.Kind != ApiErrorKind.Unauthorized))
             {
+                await ShowLocalAsync(updateScreen: false);
                 ShowRefreshFailure();
             }
         }
@@ -118,6 +136,16 @@ public sealed partial class WorkOrderListViewModel : ObservableObject, IRecipien
         return _navigation.NavigateToAsync<WorkOrderDetailsViewModel, Guid>(item.Id);
     }
 
+    public void Receive(SyncCompletedMessage message) =>
+        _ui.Post(() => ShowLocalAsync(updateScreen: Groups.Count > 0));
+
+    public void Receive(ServerStartingMessage message) =>
+        _ui.Post(() =>
+        {
+            Notice = AppResources.ServerStartingNotice;
+            return Task.CompletedTask;
+        });
+
     public async void Receive(ConnectivityChangedMessage message)
     {
         ArgumentNullException.ThrowIfNull(message);
@@ -136,11 +164,25 @@ public sealed partial class WorkOrderListViewModel : ObservableObject, IRecipien
 
     private async Task ShowLocalAsync(bool updateScreen)
     {
-        Groups = _presenter.Present(await _workOrders.GetAllAsync());
+        var operations = await _outbox.GetAllAsync();
+        SyncStatus = DescribeQueue(operations.Count, await _outbox.CountConflictsAsync());
+        Groups = _presenter.Present(
+            PendingOperationsOverlay.Apply(await _workOrders.GetAllAsync(), operations),
+            operations.Select(operation => operation.WorkOrderId).ToHashSet());
         if (updateScreen)
         {
             Screen.ShowContent(hasItems: Groups.Count > 0);
         }
+    }
+
+    private static string? DescribeQueue(int pending, int conflicts)
+    {
+        string[] parts =
+        [
+            .. pending > 0 ? [WorkOrderTexts.Format(AppResources.SyncPendingCount, pending)] : Array.Empty<string>(),
+            .. conflicts > 0 ? [WorkOrderTexts.Format(AppResources.SyncConflictCount, conflicts)] : Array.Empty<string>(),
+        ];
+        return parts.Length == 0 ? null : string.Join("  ·  ", parts);
     }
 
     private void ShowRefreshFailure()

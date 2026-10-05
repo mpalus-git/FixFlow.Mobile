@@ -39,6 +39,24 @@ jobs:
           dotnet test --project tests/FixFlow.Mobile.UnitTests --no-build --configuration Release
           dotnet test --project tests/FixFlow.Tools.Tests --no-build --configuration Release
 
+  integration-tests:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Install workload set
+        run: dotnet workload update
+
+      - name: Build
+        run: dotnet build tests/FixFlow.Mobile.IntegrationTests --configuration Release
+
+      - name: Test
+        run: dotnet test --project tests/FixFlow.Mobile.IntegrationTests --no-build --configuration Release
+
   check-comments:
     runs-on: ubuntu-26.04
     steps:

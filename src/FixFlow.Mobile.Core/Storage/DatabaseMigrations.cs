@@ -117,5 +117,32 @@ public static class DatabaseMigrations
                 PRIMARY KEY (device_id, work_order_id))
             """,
         ]),
+        new(7, "create_outbox",
+        [
+            """
+            CREATE TABLE outbox_operations (
+                id TEXT NOT NULL PRIMARY KEY,
+                work_order_id TEXT NOT NULL,
+                kind TEXT NOT NULL,
+                payload TEXT NOT NULL,
+                created_at INTEGER NOT NULL,
+                attempt_count INTEGER NOT NULL,
+                next_attempt_at INTEGER,
+                last_error TEXT)
+            """,
+            "CREATE INDEX ix_outbox_operations_work_order_id ON outbox_operations (work_order_id, created_at)",
+            """
+            CREATE TABLE sync_conflicts (
+                operation_id TEXT NOT NULL PRIMARY KEY,
+                work_order_id TEXT NOT NULL,
+                kind TEXT NOT NULL,
+                payload TEXT NOT NULL,
+                created_at INTEGER NOT NULL,
+                status_code INTEGER,
+                error_code TEXT,
+                detail TEXT,
+                rejected_at INTEGER NOT NULL)
+            """,
+        ]),
     ];
 }

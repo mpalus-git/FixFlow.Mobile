@@ -231,4 +231,13 @@
   <data name="DetailsDownloadProtocolButton" xml:space="preserve">
     <value>Download PDF protocol</value>
   </data>
+  <data name="PendingSyncLabel" xml:space="preserve">
+    <value>Waiting to be sent</value>
+  </data>
+  <data name="SyncPendingCount" xml:space="preserve">
+    <value>To send: {0}</value>
+  </data>
+  <data name="SyncConflictCount" xml:space="preserve">
+    <value>To resolve: {0}</value>
+  </data>
 </root>

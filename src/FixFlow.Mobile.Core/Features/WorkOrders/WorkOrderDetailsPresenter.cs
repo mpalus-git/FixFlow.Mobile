@@ -1,5 +1,6 @@
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
+using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Formatting;
 using FixFlow.Mobile.Core.Resources;
 
@@ -12,13 +13,20 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter)
         Client? client,
         Device? device,
         IReadOnlyList<ServiceEntry> entries,
-        IReadOnlyList<DeviceHistoryItem> history)
+        IReadOnlyList<DeviceHistoryItem> history,
+        IReadOnlyList<OutboxOperation> pendingOperations)
     {
         ArgumentNullException.ThrowIfNull(workOrder);
         ArgumentNullException.ThrowIfNull(entries);
         ArgumentNullException.ThrowIfNull(history);
+        ArgumentNullException.ThrowIfNull(pendingOperations);
 
-        var usedParts = entries.SelectMany(entry => entry.Parts.Select(part => entry.IsCorrection ? -part.Amount : part.Amount)).ToList();
+        var pendingEntries = pendingOperations
+            .Where(operation => operation.Kind == OutboxOperationKind.AddServiceEntry)
+            .Select(operation => ToServiceEntry(workOrder.Id, operation))
+            .ToList();
+        var allEntries = entries.Concat(pendingEntries).ToList();
+        var usedParts = allEntries.SelectMany(entry => entry.Parts.Select(part => entry.IsCorrection ? -part.Amount : part.Amount)).ToList();
         return new WorkOrderDetailsView(
             workOrder.Number,
             WorkOrderTexts.Status(workOrder.Status),
@@ -28,7 +36,7 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter)
             workOrder.Description,
             client is null ? null : ToClientView(client),
             device is null ? null : ToDeviceView(device),
-            [.. entries.Select(ToEntryView)],
+            [.. entries.Select(entry => ToEntryView(entry, isPending: false)), .. pendingEntries.Select(entry => ToEntryView(entry, isPending: true))],
             usedParts.Count == 0 ? null : WorkOrderTexts.Format(AppResources.DetailsPartsTotal, formatter.FormatMoney(usedParts.Sum())),
             [.. history.Where(item => item.WorkOrderId != workOrder.Id).Select(ToHistoryView)],
             workOrder.Status is WorkOrderStatus.Completed or WorkOrderStatus.Invoiced);
@@ -48,7 +56,25 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter)
         WorkOrderTexts.Format(AppResources.DetailsSerialNumber, device.SerialNumber),
         WorkOrderTexts.Format(AppResources.DetailsInstalledOn, formatter.FormatDate(device.InstallationDate)));
 
-    private ServiceEntryView ToEntryView(ServiceEntry entry) => new(
+    private static ServiceEntry ToServiceEntry(Guid workOrderId, OutboxOperation operation)
+    {
+        var pending = OutboxPayload.ToServiceEntry(operation);
+        return new ServiceEntry(
+            pending.Id,
+            workOrderId,
+            Guid.Empty,
+            string.Empty,
+            pending.Note,
+            pending.IsCorrection,
+            pending.WorkStartedAt,
+            pending.WorkFinishedAt,
+            pending.Latitude,
+            pending.Longitude,
+            operation.CreatedAt,
+            [.. pending.Parts.Select(part => new ServiceEntryPart(part.PartId, part.PartName, part.CatalogNumber, part.Quantity, part.UnitPrice))]);
+    }
+
+    private ServiceEntryView ToEntryView(ServiceEntry entry, bool isPending) => new(
         entry.Id,
         entry.TechnicianName,
         formatter.FormatDateTime(entry.CreatedAt),
@@ -57,7 +83,8 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter)
         entry is { WorkStartedAt: { } started, WorkFinishedAt: { } finished } ? FormatWorkTime(started, finished) : null,
         [.. entry.Parts.Select(part => ToPartView(part, entry.IsCorrection))],
         entry.Latitude,
-        entry.Longitude);
+        entry.Longitude,
+        isPending);
 
     private ServiceEntryPartView ToPartView(ServiceEntryPart part, bool isCorrection)
     {

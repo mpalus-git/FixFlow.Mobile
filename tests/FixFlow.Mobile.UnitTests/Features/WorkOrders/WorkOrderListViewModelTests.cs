@@ -34,6 +34,7 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
     private readonly StubHttpMessageHandler _handler;
     private readonly SessionStore _session;
     private readonly WorkOrderRepository _workOrders;
+    private readonly OutboxRepository _outbox;
     private readonly WorkOrderListViewModel _viewModel;
     private Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> _respond;
     private int _remoteCount = 2;
@@ -49,20 +50,29 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
         var clock = BusinessClock.CreateForWarsaw(_timeProvider);
         var formatter = new DisplayFormatter(new LanguageService(Substitute.For<ISettingsStore>()), clock);
         _workOrders = new WorkOrderRepository(_userDatabase.Database);
-        var sync = new WorkOrderSyncService(
-            api,
-            new ServerReadinessProbe(httpClient, _timeProvider),
-            new ServerWarmup(),
-            _workOrders,
-            new SyncStateRepository(_userDatabase.Database, _timeProvider));
+        var warmup = new ServerWarmup();
+        var syncStates = new SyncStateRepository(_userDatabase.Database, _timeProvider);
+        var sync = new WorkOrderSyncService(api, new ServerReadinessProbe(httpClient, _timeProvider), warmup, _workOrders, syncStates);
+        _outbox = new OutboxRepository(_userDatabase.Database);
+        var coordinator = new SyncCoordinator(
+            _userDatabase.Database,
+            _connectivity,
+            warmup,
+            () => new ServerReadinessProbe(httpClient, _timeProvider),
+            () => new OutboxDispatcher(api, _outbox, new OutboxRetryPolicy(() => 0.5), _timeProvider),
+            () => sync,
+            _messenger);
         _viewModel = new WorkOrderListViewModel(
             new ScreenState(formatter),
             new AuthService(api, api, _session, _userDatabase.Database, _timeProvider),
             _workOrders,
+            _outbox,
             sync,
+            coordinator,
             new WorkOrderListPresenter(new WorkOrderSectionClassifier(clock), formatter),
             _connectivity,
             _navigation,
+            new ImmediateUiDispatcher(),
             _messenger);
     }
 
@@ -90,6 +100,22 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
         release.SetResult();
         await load;
         _viewModel.Groups.SelectMany(group => group).Count().ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task Should_Show_Queued_Start_As_In_Progress_And_Pending_When_Device_Is_Offline()
+    {
+        var workOrder = TestWorkOrders.Create("ZL-LOCAL", Now.AddDays(1));
+        await _workOrders.ReplaceAllAsync([workOrder]);
+        await new OutboxWriter(_outbox, _timeProvider, _messenger).StartWorkAsync(workOrder.Id);
+        _connectivity.IsOnline.Returns(false);
+
+        await _viewModel.LoadCommand.ExecuteAsync(null);
+
+        var item = _viewModel.Groups.SelectMany(group => group).ShouldHaveSingleItem();
+        item.IsInProgress.ShouldBeTrue();
+        item.IsPending.ShouldBeTrue();
+        _viewModel.SyncStatus.ShouldBe("Do wysłania: 1");
     }
 
     [Fact]
