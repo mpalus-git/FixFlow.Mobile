@@ -32,6 +32,7 @@ public static class CoreServiceCollectionExtensions
         services.AddTransient<LoginViewModel>();
         services.AddTransient<PartRepository>();
         services.AddTransient<SyncStateRepository>();
+        services.AddTransient<OutboxRepository>();
         services.AddTransient<WorkOrderSyncService>();
         services.AddTransient<WorkOrderDetailsSyncService>();
         services.AddTransient<WorkOrderRepository>();
