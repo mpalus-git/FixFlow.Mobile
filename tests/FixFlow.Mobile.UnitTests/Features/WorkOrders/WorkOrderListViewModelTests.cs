@@ -9,6 +9,7 @@ using FixFlow.Mobile.Core.Features.Settings;
 using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Formatting;
+using FixFlow.Mobile.Core.Navigation;
 using FixFlow.Mobile.Core.Resources;
 using FixFlow.Mobile.Core.Screens;
 using FixFlow.Mobile.UnitTests.Api;
@@ -29,6 +30,7 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
     private readonly TestUserDatabase _userDatabase = new();
     private readonly IConnectivityService _connectivity = Substitute.For<IConnectivityService>();
     private readonly WeakReferenceMessenger _messenger = new();
+    private readonly INavigationService _navigation = Substitute.For<INavigationService>();
     private readonly StubHttpMessageHandler _handler;
     private readonly SessionStore _session;
     private readonly WorkOrderRepository _workOrders;
@@ -60,6 +62,7 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
             sync,
             new WorkOrderListPresenter(new WorkOrderSectionClassifier(clock), formatter),
             _connectivity,
+            _navigation,
             _messenger);
     }
 
@@ -174,6 +177,17 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
 
         _messenger.Send(new ConnectivityChangedMessage(IsOnline: true));
         _viewModel.Screen.IsOffline.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Should_Open_Details_When_Work_Order_Is_Selected()
+    {
+        await _viewModel.LoadCommand.ExecuteAsync(null);
+        var item = _viewModel.Groups[0][0];
+
+        await _viewModel.OpenWorkOrderCommand.ExecuteAsync(item);
+
+        await _navigation.Received(1).NavigateToAsync<WorkOrderDetailsViewModel, Guid>(item.Id);
     }
 
     [Fact]

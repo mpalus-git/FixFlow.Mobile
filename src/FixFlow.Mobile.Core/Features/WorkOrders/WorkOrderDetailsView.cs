@@ -14,4 +14,13 @@ public sealed record WorkOrderDetailsView(
     IReadOnlyList<ServiceEntryView> Entries,
     string? PartsTotalText,
     IReadOnlyList<DeviceHistoryView> History,
-    bool CanDownloadProtocol);
+    bool CanDownloadProtocol)
+{
+    public bool HasClient => Client is not null;
+
+    public bool HasDevice => Device is not null;
+
+    public bool HasEntries => Entries.Count > 0;
+
+    public bool HasHistory => History.Count > 0;
+}

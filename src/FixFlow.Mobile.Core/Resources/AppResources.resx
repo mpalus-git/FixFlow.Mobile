@@ -198,4 +198,16 @@
   <data name="ProtocolFailed" xml:space="preserve">
     <value>Nie udało się pobrać protokołu.</value>
   </data>
+  <data name="DetailsClientSection" xml:space="preserve">
+    <value>Klient</value>
+  </data>
+  <data name="DetailsDeviceSection" xml:space="preserve">
+    <value>Urządzenie</value>
+  </data>
+  <data name="DetailsCallButton" xml:space="preserve">
+    <value>Zadzwoń</value>
+  </data>
+  <data name="DetailsOpenMapButton" xml:space="preserve">
+    <value>Pokaż na mapie</value>
+  </data>
 </root>

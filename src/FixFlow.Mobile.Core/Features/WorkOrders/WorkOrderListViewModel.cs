@@ -5,6 +5,7 @@ using FixFlow.Mobile.Core.Api.Errors;
 using FixFlow.Mobile.Core.Connectivity;
 using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.Sync;
+using FixFlow.Mobile.Core.Navigation;
 using FixFlow.Mobile.Core.Resources;
 using FixFlow.Mobile.Core.Screens;
 
@@ -17,6 +18,7 @@ public sealed partial class WorkOrderListViewModel : ObservableObject, IRecipien
     private readonly WorkOrderSyncService _sync;
     private readonly WorkOrderListPresenter _presenter;
     private readonly IConnectivityService _connectivity;
+    private readonly INavigationService _navigation;
 
     public WorkOrderListViewModel(
         ScreenState screen,
@@ -25,6 +27,7 @@ public sealed partial class WorkOrderListViewModel : ObservableObject, IRecipien
         WorkOrderSyncService sync,
         WorkOrderListPresenter presenter,
         IConnectivityService connectivity,
+        INavigationService navigation,
         IMessenger messenger)
     {
         ArgumentNullException.ThrowIfNull(messenger);
@@ -34,6 +37,7 @@ public sealed partial class WorkOrderListViewModel : ObservableObject, IRecipien
         _sync = sync;
         _presenter = presenter;
         _connectivity = connectivity;
+        _navigation = navigation;
         messenger.Register(this);
     }
 
@@ -111,6 +115,10 @@ public sealed partial class WorkOrderListViewModel : ObservableObject, IRecipien
             Screen.SetOffline(await _sync.GetLastPulledAtAsync());
         }
     }
+
+    [RelayCommand]
+    private Task OpenWorkOrderAsync(WorkOrderListItem item) =>
+        _navigation.NavigateToAsync<WorkOrderDetailsViewModel, Guid>(item.Id);
 
     [RelayCommand]
     private Task LogoutAsync() => _authService.LogoutAsync();

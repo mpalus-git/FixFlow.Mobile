@@ -38,6 +38,10 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:WorkOrderListItem">
                         <Grid Padding="16,4">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenWorkOrderCommand, Source={RelativeSource AncestorType={x:Type viewModels:WorkOrderListViewModel}}, x:DataType=viewModels:WorkOrderListViewModel}"
+                                                      CommandParameter="{Binding .}" />
+                            </Grid.GestureRecognizers>
                             <Border Style="{StaticResource CardBorder}">
                                 <Grid ColumnDefinitions="*,Auto"
                                       RowDefinitions="Auto,Auto,Auto,Auto,Auto"

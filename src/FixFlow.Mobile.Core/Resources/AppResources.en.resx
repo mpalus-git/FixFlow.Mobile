@@ -198,4 +198,16 @@
   <data name="ProtocolFailed" xml:space="preserve">
     <value>Could not download the protocol.</value>
   </data>
+  <data name="DetailsClientSection" xml:space="preserve">
+    <value>Client</value>
+  </data>
+  <data name="DetailsDeviceSection" xml:space="preserve">
+    <value>Device</value>
+  </data>
+  <data name="DetailsCallButton" xml:space="preserve">
+    <value>Call</value>
+  </data>
+  <data name="DetailsOpenMapButton" xml:space="preserve">
+    <value>Show on map</value>
+  </data>
 </root>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:FixFlow.Mobile.Controls"
+             xmlns:resources="clr-namespace:FixFlow.Mobile.Core.Resources;assembly=FixFlow.Mobile.Core"
+             xmlns:viewModels="clr-namespace:FixFlow.Mobile.Core.Features.WorkOrders;assembly=FixFlow.Mobile.Core"
+             x:Class="FixFlow.Mobile.Features.WorkOrders.WorkOrderDetailsPage"
+             x:DataType="viewModels:WorkOrderDetailsViewModel"
+             Title="{Binding Details.Number}">
+    <Grid RowDefinitions="Auto,Auto,*">
+        <controls:OfflineBanner IsVisible="{Binding Screen.IsOffline}"
+                                Message="{Binding Screen.OfflineMessage}" />
+        <controls:OfflineBanner Grid.Row="1"
+                                IsVisible="{Binding HasNotice}"
+                                Message="{Binding Notice}" />
+
+        <RefreshView Grid.Row="2"
+                     Command="{Binding RefreshCommand}"
+                     IsRefreshing="{Binding IsRefreshing}">
+            <ScrollView>
+                <VerticalStackLayout
+                                     Padding="16"
+                                     Spacing="12">
+                    <Border Style="{StaticResource CardBorder}">
+                        <VerticalStackLayout Spacing="4">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="{Binding Details.Number}"
+                                       Style="{StaticResource HeadlineLabel}"
+                                       HorizontalTextAlignment="Start"
+                                       SemanticProperties.HeadingLevel="Level1" />
+                                <Border Grid.Column="1"
+                                        Style="{StaticResource StatusBadge}">
+                                    <Label Text="{Binding Details.StatusText}"
+                                           FontSize="12" />
+                                </Border>
+                            </Grid>
+                            <Label Text="{Binding Details.DueText}"
+                                   Style="{StaticResource SecondaryLabel}" />
+                            <Label Text="{Binding Details.PriorityText}"
+                                   IsVisible="{Binding Details.IsUrgent}"
+                                   Style="{StaticResource ErrorLabel}" />
+                            <Label Text="{Binding Details.Description}"
+                                   Margin="0,8,0,0" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Label Text="{x:Static resources:AppResources.DetailsClientSection}"
+                           Style="{StaticResource SectionLabel}"
+                           IsVisible="{Binding Details.HasClient}" />
+                    <Border Style="{StaticResource CardBorder}"
+                            IsVisible="{Binding Details.HasClient}">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="{Binding Details.Client.Name}"
+                                   FontAttributes="Bold" />
+                            <Label Text="{Binding Details.Client.ContactText}"
+                                   Style="{StaticResource SecondaryLabel}" />
+                            <Label Text="{Binding Details.Client.AddressText}" />
+                            <Label Text="{Binding Details.Client.Phone}" />
+                            <Grid ColumnDefinitions="*,*"
+                                  ColumnSpacing="8"
+                                  Margin="0,8,0,0">
+                                <Button Text="{x:Static resources:AppResources.DetailsCallButton}"
+                                        Command="{Binding CallClientCommand}"
+                                        Style="{StaticResource OutlineButton}" />
+                                <Button Grid.Column="1"
+                                        Text="{x:Static resources:AppResources.DetailsOpenMapButton}"
+                                        Command="{Binding OpenAddressCommand}"
+                                        Style="{StaticResource OutlineButton}" />
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Label Text="{x:Static resources:AppResources.DetailsDeviceSection}"
+                           Style="{StaticResource SectionLabel}"
+                           IsVisible="{Binding Details.HasDevice}" />
+                    <Border Style="{StaticResource CardBorder}"
+                            IsVisible="{Binding Details.HasDevice}">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="{Binding Details.Device.Name}"
+                                   FontAttributes="Bold" />
+                            <Label Text="{Binding Details.Device.SerialNumberText}"
+                                   Style="{StaticResource SecondaryLabel}" />
+                            <Label Text="{Binding Details.Device.InstalledText}"
+                                   Style="{StaticResource SecondaryLabel}" />
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+            </ScrollView>
+        </RefreshView>
+
+        <controls:LoadingView Grid.Row="2"
+                              Style="{StaticResource ScreenOverlay}"
+                              IsVisible="{Binding Screen.IsLoading}" />
+        <controls:ErrorView Grid.Row="2"
+                            Style="{StaticResource ScreenOverlay}"
+                            IsVisible="{Binding Screen.IsError}"
+                            Message="{Binding Screen.ErrorMessage}"
+                            RetryCommand="{Binding RefreshCommand}" />
+    </Grid>
+</ContentPage>

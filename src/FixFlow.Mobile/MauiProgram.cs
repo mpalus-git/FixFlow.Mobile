@@ -48,6 +48,7 @@ public static partial class MauiProgram
         builder.Services.AddTransient<StartupPage>();
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<WorkOrderListPage>();
+        builder.Services.AddTransient<WorkOrderDetailsPage>();
 
         var app = builder.Build();
         app.Services.GetRequiredService<ILanguageService>().ApplySavedLanguage();
