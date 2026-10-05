@@ -33,6 +33,7 @@ public static class CoreServiceCollectionExtensions
         services.AddTransient<PartRepository>();
         services.AddTransient<SyncStateRepository>();
         services.AddTransient<WorkOrderSyncService>();
+        services.AddTransient<WorkOrderDetailsSyncService>();
         services.AddTransient<WorkOrderRepository>();
         services.AddTransient<ClientRepository>();
         services.AddTransient<DeviceRepository>();
