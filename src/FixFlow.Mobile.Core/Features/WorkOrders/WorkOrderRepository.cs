@@ -19,6 +19,14 @@ public sealed class WorkOrderRepository(UserDatabase userDatabase)
         });
     }
 
+    public async Task UpsertAsync(WorkOrder workOrder)
+    {
+        ArgumentNullException.ThrowIfNull(workOrder);
+        await Connection.InsertOrReplaceAsync(WorkOrderRow.From(workOrder));
+    }
+
+    public async Task DeleteAsync(Guid id) => await Connection.ExecuteAsync("DELETE FROM work_orders WHERE id = ?", id);
+
     public async Task<IReadOnlyList<WorkOrder>> GetAllAsync()
     {
         var rows = await Connection.QueryAsync<WorkOrderRow>("SELECT * FROM work_orders ORDER BY due_date, number");
