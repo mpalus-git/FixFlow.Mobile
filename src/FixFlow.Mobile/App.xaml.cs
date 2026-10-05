@@ -11,9 +11,15 @@ public partial class App : Application
         InitializeComponent();
         _services = services;
         languageService.LanguageChanged += OnLanguageChanged;
+        RequestedThemeChanged += OnRequestedThemeChanged;
     }
 
-    protected override Window CreateWindow(IActivationState? activationState) => new(CreateShell());
+    protected override Window CreateWindow(IActivationState? activationState)
+    {
+        var window = new Window(CreateShell());
+        window.Created += (_, _) => SystemBars.ApplyTheme(window, RequestedTheme);
+        return window;
+    }
 
     private AppShell CreateShell() => _services.GetRequiredService<AppShell>();
 
@@ -22,6 +28,14 @@ public partial class App : Application
         foreach (var window in Windows)
         {
             window.Page = CreateShell();
+        }
+    }
+
+    private void OnRequestedThemeChanged(object? sender, AppThemeChangedEventArgs e)
+    {
+        foreach (var window in Windows)
+        {
+            SystemBars.ApplyTheme(window, e.RequestedTheme);
         }
     }
 }

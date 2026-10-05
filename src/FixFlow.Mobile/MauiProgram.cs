@@ -9,12 +9,14 @@ using FixFlow.Mobile.Navigation;
 
 namespace FixFlow.Mobile;
 
-public static class MauiProgram
+public static partial class MauiProgram
 {
     public static MauiApp CreateMauiApp()
     {
         var builder = MauiApp.CreateBuilder();
-        builder.UseMauiApp<App>();
+        builder
+            .UseMauiApp<App>()
+            .ConfigureMauiHandlers(ConfigurePlatformHandlers);
 
         builder.Services.AddCore();
         builder.Services.AddSingleton(Preferences.Default);
@@ -29,4 +31,6 @@ public static class MauiProgram
 
         return app;
     }
+
+    private static partial void ConfigurePlatformHandlers(IMauiHandlersCollection handlers);
 }
