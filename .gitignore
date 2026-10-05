@@ -1,0 +1,17 @@
+bin/
+obj/
+artifacts/
+TestResults/
+*.user
+*.suo
+*.rsuser
+*.DotSettings.user
+.vs/
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+.env
+*.keystore
+*.jks
