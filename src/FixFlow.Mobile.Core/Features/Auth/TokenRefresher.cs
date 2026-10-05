@@ -6,9 +6,11 @@ namespace FixFlow.Mobile.Core.Features.Auth;
 
 public sealed class TokenRefresher(
     [FromKeyedServices(ApiServiceCollectionExtensions.AnonymousClientKey)] IFixFlowApi api,
-    SessionStore session) : IDisposable
+    SessionStore session,
+    TimeProvider timeProvider) : IDisposable
 {
     private readonly SemaphoreSlim _gate = new(1, 1);
+    private DateTimeOffset _retryNotBefore = DateTimeOffset.MinValue;
 
     public async Task<TokenRefreshResult> RefreshAsync(string? rejectedAccessToken, CancellationToken cancellationToken)
     {
@@ -18,6 +20,11 @@ public sealed class TokenRefresher(
             if (session.HasValidAccessToken && session.AccessToken != rejectedAccessToken)
             {
                 return TokenRefreshResult.Refreshed;
+            }
+
+            if (timeProvider.GetUtcNow() < _retryNotBefore)
+            {
+                return TokenRefreshResult.Unavailable;
             }
 
             var refreshToken = await session.GetRefreshTokenAsync();
@@ -37,6 +44,11 @@ public sealed class TokenRefresher(
             if (error.Kind is ApiErrorKind.Unauthorized or ApiErrorKind.Validation)
             {
                 return EndSession();
+            }
+
+            if (error.RetryAfter is { } retryAfter)
+            {
+                _retryNotBefore = timeProvider.GetUtcNow() + retryAfter;
             }
 
             return TokenRefreshResult.Unavailable;

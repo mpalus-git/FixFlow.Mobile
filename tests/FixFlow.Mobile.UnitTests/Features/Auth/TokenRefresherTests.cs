@@ -94,6 +94,33 @@ public sealed class TokenRefresherTests : IDisposable
     }
 
     [Fact]
+    public async Task Should_Not_Refresh_Again_Before_Retry_After_When_Refresh_Is_Rate_Limited()
+    {
+        await StartSessionAsync();
+        _respond = attempt =>
+        {
+            if (attempt > 0)
+            {
+                return Task.FromResult(TokensResponse(2));
+            }
+
+            var response = new HttpResponseMessage(HttpStatusCode.TooManyRequests);
+            response.Headers.Add("Retry-After", "30");
+            return Task.FromResult(response);
+        };
+        var refresher = CreateRefresher();
+
+        (await refresher.RefreshAsync("access-1", TestContext.Current.CancellationToken)).ShouldBe(TokenRefreshResult.Unavailable);
+        (await refresher.RefreshAsync("access-1", TestContext.Current.CancellationToken)).ShouldBe(TokenRefreshResult.Unavailable);
+        _sentRefreshTokens.Count.ShouldBe(1);
+
+        _timeProvider.Advance(TimeSpan.FromSeconds(30));
+
+        (await refresher.RefreshAsync("access-1", TestContext.Current.CancellationToken)).ShouldBe(TokenRefreshResult.Refreshed);
+        _sentRefreshTokens.Count.ShouldBe(2);
+    }
+
+    [Fact]
     public async Task Should_Return_Expired_Without_Request_When_No_Session_Is_Stored()
     {
         var result = await CreateRefresher().RefreshAsync(null, TestContext.Current.CancellationToken);
@@ -128,7 +155,7 @@ public sealed class TokenRefresherTests : IDisposable
             return await _respond(attempt);
         });
         var api = RestService.ForGenerated<IFixFlowApi>(new HttpClient(_handler, disposeHandler: false) { BaseAddress = new Uri("https://api.test") });
-        _refresher = new TokenRefresher(api, _session);
+        _refresher = new TokenRefresher(api, _session, _timeProvider);
         return _refresher;
     }
 
