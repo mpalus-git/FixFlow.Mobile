@@ -16,6 +16,5 @@ public sealed record WorkOrderListItem(
     public bool IsInProgress => Status == WorkOrderStatus.InProgress;
 
     public bool IsUrgent =>
-        Priority is WorkOrderPriority.High or WorkOrderPriority.Critical
-        && Status is WorkOrderStatus.Assigned or WorkOrderStatus.InProgress;
+        Priority is WorkOrderPriority.High or WorkOrderPriority.Critical && WorkOrderTexts.IsActive(Status);
 }
