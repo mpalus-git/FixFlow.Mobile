@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using Polly;
 using Refit;
 
 namespace FixFlow.Mobile.Core.Api.Errors;
@@ -30,6 +31,7 @@ public static class ApiErrorMapper
         ApiException apiException => FromApiException(apiException),
         ApiRequestException => ApiError.Transient(exception.InnerException?.Message ?? exception.Message),
         HttpRequestException => ApiError.Transient(exception.Message),
+        ExecutionRejectedException => ApiError.Transient(exception.Message),
         TaskCanceledException { InnerException: TimeoutException } => ApiError.Transient(exception.Message),
         _ => null,
     };

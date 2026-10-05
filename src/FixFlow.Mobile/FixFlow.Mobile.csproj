@@ -20,6 +20,11 @@
     <SelfContained>true</SelfContained>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
   </PropertyGroup>
+  <PropertyGroup>
+    <FixFlowApiBaseUrl Condition="'$(FixFlowApiBaseUrl)' == '' and '$(Configuration)' == 'Release'">https://fixflow-api-us2p.onrender.com</FixFlowApiBaseUrl>
+    <FixFlowApiBaseUrl Condition="'$(FixFlowApiBaseUrl)' == '' and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">http://10.0.2.2:8080</FixFlowApiBaseUrl>
+    <FixFlowApiBaseUrl Condition="'$(FixFlowApiBaseUrl)' == ''">http://localhost:8080</FixFlowApiBaseUrl>
+  </PropertyGroup>
   <ItemGroup>
     <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#171717" />
     <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#171717" BaseSize="128,128" />
@@ -30,4 +35,18 @@
   <ItemGroup>
     <ProjectReference Include="..\FixFlow.Mobile.Core\FixFlow.Mobile.Core.csproj" />
   </ItemGroup>
+  <Target Name="GenerateBuildConfiguration" BeforeTargets="BeforeBuild">
+    <PropertyGroup>
+      <BuildConfigurationFile>$(IntermediateOutputPath)BuildConfiguration.g.cs</BuildConfigurationFile>
+    </PropertyGroup>
+    <WriteLinesToFile
+      File="$(BuildConfigurationFile)"
+      Lines="namespace FixFlow.Mobile%3B;internal static class BuildConfiguration;{;    public const string ApiBaseUrl = &quot;$(FixFlowApiBaseUrl)&quot;%3B;}"
+      Overwrite="true"
+      WriteOnlyWhenDifferent="true" />
+    <ItemGroup>
+      <Compile Include="$(BuildConfigurationFile)" />
+      <FileWrites Include="$(BuildConfigurationFile)" />
+    </ItemGroup>
+  </Target>
 </Project>

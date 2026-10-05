@@ -3,6 +3,7 @@ using System.Text;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Api.Errors;
 using FixFlow.Mobile.UnitTests.Api;
+using Polly.Timeout;
 using Refit;
 
 namespace FixFlow.Mobile.UnitTests.Api.Errors;
@@ -120,6 +121,14 @@ public sealed class ApiErrorMapperTests
     public void Should_Retry_When_Http_Client_Times_Out()
     {
         var error = ApiErrorMapper.FromException(new TaskCanceledException("Timeout", new TimeoutException()));
+
+        error.ShouldNotBeNull().ShouldRetry.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Should_Retry_When_Resilience_Attempt_Times_Out()
+    {
+        var error = ApiErrorMapper.FromException(new TimeoutRejectedException());
 
         error.ShouldNotBeNull().ShouldRetry.ShouldBeTrue();
     }

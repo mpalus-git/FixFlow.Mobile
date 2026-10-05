@@ -1,4 +1,5 @@
 using FixFlow.Mobile.Core;
+using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Dialogs;
 using FixFlow.Mobile.Core.Features.Settings;
 using FixFlow.Mobile.Core.Navigation;
@@ -19,6 +20,7 @@ public static partial class MauiProgram
             .ConfigureMauiHandlers(ConfigurePlatformHandlers);
 
         builder.Services.AddCore();
+        builder.Services.AddFixFlowApi(new Uri(BuildConfiguration.ApiBaseUrl));
         builder.Services.AddSingleton(Preferences.Default);
         builder.Services.AddSingleton<ISettingsStore, PreferencesSettingsStore>();
         builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
