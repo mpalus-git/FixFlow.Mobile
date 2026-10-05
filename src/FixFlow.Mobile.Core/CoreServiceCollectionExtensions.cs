@@ -3,6 +3,7 @@ using FixFlow.Mobile.Core.Features.Settings;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Formatting;
 using FixFlow.Mobile.Core.Screens;
+using FixFlow.Mobile.Core.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FixFlow.Mobile.Core;
@@ -15,6 +16,7 @@ public static class CoreServiceCollectionExtensions
         services.AddSingleton(provider => BusinessClock.CreateForWarsaw(provider.GetRequiredService<TimeProvider>()));
         services.AddSingleton<ILanguageService, LanguageService>();
         services.AddSingleton<SessionStore>();
+        services.AddSingleton<UserDatabase>();
         services.AddSingleton<SessionEndNavigator>();
         services.AddSingleton<DisplayFormatter>();
         services.AddTransient<ScreenState>();

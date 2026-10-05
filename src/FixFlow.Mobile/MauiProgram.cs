@@ -7,6 +7,7 @@ using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.Settings;
 using FixFlow.Mobile.Core.Launching;
 using FixFlow.Mobile.Core.Navigation;
+using FixFlow.Mobile.Core.Storage;
 using FixFlow.Mobile.Dialogs;
 using FixFlow.Mobile.Features.Auth;
 using FixFlow.Mobile.Features.Settings;
@@ -31,6 +32,7 @@ public static partial class MauiProgram
         builder.Services.AddSingleton<ISettingsStore, PreferencesSettingsStore>();
         builder.Services.AddSingleton(SecureStorage.Default);
         builder.Services.AddSingleton<ISecureStore, SecureStorageStore>();
+        builder.Services.AddSingleton(new LocalDatabaseOptions(FileSystem.AppDataDirectory));
         builder.Services.AddSingleton(Microsoft.Maui.Networking.Connectivity.Current);
         builder.Services.AddSingleton<IConnectivityService, EssentialsConnectivityService>();
         builder.Services.AddSingleton(Launcher.Default);
