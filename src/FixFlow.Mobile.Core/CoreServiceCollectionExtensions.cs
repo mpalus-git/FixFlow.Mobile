@@ -23,6 +23,7 @@ public static class CoreServiceCollectionExtensions
 
         services.AddTransient<StartupViewModel>();
         services.AddTransient<LoginViewModel>();
+        services.AddTransient<WorkOrderRepository>();
         services.AddTransient<WorkOrderListViewModel>();
 
         return services;
