@@ -28,6 +28,7 @@ public static class CoreServiceCollectionExtensions
         services.AddTransient<PartRepository>();
         services.AddTransient<SyncStateRepository>();
         services.AddTransient<WorkOrderRepository>();
+        services.AddSingleton<WorkOrderSectionClassifier>();
         services.AddTransient<WorkOrderListViewModel>();
 
         return services;
