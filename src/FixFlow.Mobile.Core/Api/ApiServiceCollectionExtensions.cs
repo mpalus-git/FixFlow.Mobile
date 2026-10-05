@@ -29,6 +29,7 @@ public static class ApiServiceCollectionExtensions
 
         services.AddSingleton<TokenRefresher>();
         services.AddTransient<AuthenticationHandler>();
+        services.AddTransient<AuthService>();
 
         var builder = services
             .AddRefitGeneratedClient<IFixFlowApi>()

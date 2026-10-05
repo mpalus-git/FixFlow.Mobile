@@ -41,12 +41,13 @@ public sealed class ApiServiceCollectionExtensionsTests
     }
 
     [Fact]
-    public void Should_Resolve_Readiness_Probe_When_Api_Is_Registered()
+    public void Should_Resolve_Readiness_Probe_And_Auth_Service_When_Api_Is_Registered()
     {
         using var handler = new StubHttpMessageHandler(_ => new HttpResponseMessage(HttpStatusCode.OK));
         using var provider = BuildProvider(handler);
 
         provider.GetService<ServerReadinessProbe>().ShouldNotBeNull();
+        provider.GetService<AuthService>().ShouldNotBeNull();
     }
 
     private ServiceProvider BuildProvider(StubHttpMessageHandler handler)
