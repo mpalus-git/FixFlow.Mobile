@@ -141,4 +141,13 @@
   <data name="WorkOrderCompletedAt" xml:space="preserve">
     <value>Completed: {0}</value>
   </data>
+  <data name="ServerStartingNotice" xml:space="preserve">
+    <value>The server is starting. You are working with data saved on the device.</value>
+  </data>
+  <data name="RefreshFailedNotice" xml:space="preserve">
+    <value>Could not refresh the list. You are seeing data saved on the device.</value>
+  </data>
+  <data name="WorkOrderListLoadFailed" xml:space="preserve">
+    <value>Could not load work orders. Check your connection and try again.</value>
+  </data>
 </root>

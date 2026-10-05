@@ -141,4 +141,13 @@
   <data name="WorkOrderCompletedAt" xml:space="preserve">
     <value>Zakończono: {0}</value>
   </data>
+  <data name="ServerStartingNotice" xml:space="preserve">
+    <value>Serwer się uruchamia. Pracujesz na danych zapisanych na urządzeniu.</value>
+  </data>
+  <data name="RefreshFailedNotice" xml:space="preserve">
+    <value>Nie udało się odświeżyć listy. Widzisz dane zapisane na urządzeniu.</value>
+  </data>
+  <data name="WorkOrderListLoadFailed" xml:space="preserve">
+    <value>Nie udało się pobrać zleceń. Sprawdź połączenie i spróbuj ponownie.</value>
+  </data>
 </root>
