@@ -46,11 +46,15 @@ public sealed class WorkOrderListPresenterTests : IDisposable
     [Fact]
     public void Should_Show_Completion_Time_When_Work_Order_Was_Completed_Recently()
     {
-        var workOrder = TestWorkOrders.Create("ZL-2026-0007", Now.AddDays(-3), WorkOrderStatus.Completed, Now.AddDays(-1));
+        var workOrder = TestWorkOrders.Create("ZL-2026-0007", Now.AddDays(-3), WorkOrderStatus.Completed, Now.AddDays(-1)) with
+        {
+            Priority = WorkOrderPriority.High,
+        };
 
         var item = _presenter.Present([workOrder]).ShouldHaveSingleItem().ShouldHaveSingleItem();
 
         item.DateText.ShouldBe("Zakończono: 04.10.2026 08:00");
+        item.IsUrgent.ShouldBeFalse();
     }
 
     [Theory]

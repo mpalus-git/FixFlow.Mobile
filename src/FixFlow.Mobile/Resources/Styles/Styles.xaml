@@ -87,6 +87,26 @@
         <Setter Property="FontSize" Value="14" />
     </Style>
 
+    <Style x:Key="CardBorder" TargetType="Border">
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource InputLight}, Dark={StaticResource InputDark}}" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 12" />
+        <Setter Property="Padding" Value="16,12" />
+    </Style>
+
+    <Style x:Key="StatusBadge" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource MutedLight}, Dark={StaticResource MutedDark}}" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 10" />
+        <Setter Property="Padding" Value="8,2" />
+        <Setter Property="VerticalOptions" Value="Center" />
+        <Setter Property="HorizontalOptions" Value="End" />
+    </Style>
+
+    <Style x:Key="ScreenOverlay" TargetType="ContentView">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource BackgroundLight}, Dark={StaticResource BackgroundDark}}" />
+    </Style>
+
     <Style TargetType="ActivityIndicator">
         <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource ForegroundLight}, Dark={StaticResource ForegroundDark}}" />
     </Style>
