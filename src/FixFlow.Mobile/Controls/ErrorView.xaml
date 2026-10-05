@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:FixFlow.Mobile.Controls"
+             xmlns:resources="clr-namespace:FixFlow.Mobile.Core.Resources;assembly=FixFlow.Mobile.Core"
+             x:Class="FixFlow.Mobile.Controls.ErrorView"
+             x:Name="Root">
+    <VerticalStackLayout x:DataType="controls:ErrorView"
+                         Padding="24"
+                         Spacing="12"
+                         VerticalOptions="Center">
+        <Label Text="{x:Static resources:AppResources.ErrorTitle}"
+               Style="{StaticResource HeadlineLabel}"
+               SemanticProperties.HeadingLevel="Level1" />
+        <Label Text="{Binding Message, Source={x:Reference Root}}"
+               TextColor="{AppThemeBinding Light={StaticResource DestructiveTextLight}, Dark={StaticResource DestructiveTextDark}}"
+               HorizontalTextAlignment="Center" />
+        <Button Text="{x:Static resources:AppResources.RetryButton}"
+                Command="{Binding RetryCommand, Source={x:Reference Root}}"
+                HorizontalOptions="Center" />
+    </VerticalStackLayout>
+</ContentView>

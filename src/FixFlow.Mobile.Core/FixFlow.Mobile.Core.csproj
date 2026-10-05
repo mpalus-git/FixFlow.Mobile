@@ -2,9 +2,19 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <IsPackable>false</IsPackable>
+    <NeutralLanguage>pl</NeutralLanguage>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\AppResources.resx">
+      <StronglyTypedFileName>$(IntermediateOutputPath)AppResources.Designer.cs</StronglyTypedFileName>
+      <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+      <StronglyTypedNamespace>FixFlow.Mobile.Core.Resources</StronglyTypedNamespace>
+      <StronglyTypedClassName>AppResources</StronglyTypedClassName>
+      <PublicClass>true</PublicClass>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

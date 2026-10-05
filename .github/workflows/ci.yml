@@ -71,8 +71,8 @@ jobs:
           distribution: microsoft
           java-version: '21'
 
-      - name: Install workload
-        run: dotnet workload install maui-android
+      - name: Install workloads
+        run: dotnet workload restore src/FixFlow.Mobile/FixFlow.Mobile.csproj
 
       - name: Build
         run: dotnet build src/FixFlow.Mobile --configuration Release --framework net10.0-android
@@ -82,12 +82,21 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Install .NET to a user directory
+        run: echo "DOTNET_INSTALL_DIR=$env:RUNNER_TEMP\dotnet" >> $env:GITHUB_ENV
+
       - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
 
-      - name: Install workload
-        run: dotnet workload install maui-windows
+      - uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: nuget-windows-${{ hashFiles('global.json', 'Directory.Packages.props') }}
+          restore-keys: nuget-windows-
+
+      - name: Install workloads
+        run: dotnet workload restore src/FixFlow.Mobile/FixFlow.Mobile.csproj
 
       - name: Build
         run: dotnet build src/FixFlow.Mobile --configuration Release --framework net10.0-windows10.0.19041.0
