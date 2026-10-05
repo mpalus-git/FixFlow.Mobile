@@ -1,8 +1,23 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:FixFlow.Mobile.Controls"
              xmlns:resources="clr-namespace:FixFlow.Mobile.Core.Resources;assembly=FixFlow.Mobile.Core"
              xmlns:viewModels="clr-namespace:FixFlow.Mobile.Core.Features.WorkOrders;assembly=FixFlow.Mobile.Core"
              x:Class="FixFlow.Mobile.Features.WorkOrders.WorkOrderListPage"
              x:DataType="viewModels:WorkOrderListViewModel"
-             Title="{x:Static resources:AppResources.WorkOrderListTitle}" />
+             Title="{x:Static resources:AppResources.WorkOrderListTitle}">
+    <Grid RowDefinitions="Auto,*">
+        <controls:OfflineBanner IsVisible="{Binding Screen.IsOffline}"
+                                Message="{Binding Screen.OfflineMessage}" />
+        <controls:LoadingView Grid.Row="1"
+                              IsVisible="{Binding Screen.IsLoading}" />
+        <controls:EmptyView Grid.Row="1"
+                            IsVisible="{Binding Screen.IsEmpty}"
+                            Message="{x:Static resources:AppResources.WorkOrderListEmpty}" />
+        <controls:ErrorView Grid.Row="1"
+                            IsVisible="{Binding Screen.IsError}"
+                            Message="{Binding Screen.ErrorMessage}"
+                            RetryCommand="{Binding RefreshCommand}" />
+    </Grid>
+</ContentPage>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:FixFlow.Mobile.Controls"
+             xmlns:resources="clr-namespace:FixFlow.Mobile.Core.Resources;assembly=FixFlow.Mobile.Core"
+             x:Class="FixFlow.Mobile.Controls.LoadingView"
+             x:Name="Root">
+    <VerticalStackLayout x:DataType="controls:LoadingView"
+                         Padding="24"
+                         Spacing="12"
+                         HorizontalOptions="Center"
+                         VerticalOptions="Center"
+                         SemanticProperties.Description="{x:Static resources:AppResources.LoadingMessage}">
+        <ActivityIndicator IsRunning="{Binding IsVisible, Source={x:Reference Root}}" />
+        <Label Text="{x:Static resources:AppResources.LoadingMessage}"
+               Style="{StaticResource SecondaryLabel}"
+               HorizontalTextAlignment="Center" />
+    </VerticalStackLayout>
+</ContentView>
