@@ -69,6 +69,101 @@ public sealed class OutboxDispatcherTests : IAsyncLifetime
         waiting.NextAttemptAt.ShouldBe(dispatchedAt.AddSeconds(5));
     }
 
+    [Fact]
+    public async Task Should_Send_Other_Work_Orders_When_One_Work_Order_Waits_For_Retry()
+    {
+        await QueueAsync(_writer.StartWorkAsync(WorkOrderId));
+        await QueueAsync(_writer.CompleteWorkOrderAsync(OtherWorkOrderId));
+        _api.Overrides[$"POST /api/v1/work-orders/{WorkOrderId}/start"] = () => new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
+
+        var summary = await DispatchAsync();
+
+        summary.Sent.ShouldBe(1);
+        _api.Calls.ShouldContain($"POST /api/v1/work-orders/{OtherWorkOrderId}/complete");
+    }
+
+    [Fact]
+    public async Task Should_Wait_For_Retry_After_When_Server_Limits_Requests()
+    {
+        await QueueAsync(_writer.StartWorkAsync(WorkOrderId));
+        _api.Overrides[$"POST /api/v1/work-orders/{WorkOrderId}/start"] = () =>
+        {
+            var response = new HttpResponseMessage(HttpStatusCode.TooManyRequests);
+            response.Headers.Add("Retry-After", "120");
+            return response;
+        };
+
+        var dispatchedAt = _timeProvider.GetUtcNow();
+        await DispatchAsync();
+        _timeProvider.Advance(TimeSpan.FromMinutes(1));
+        await DispatchAsync();
+
+        _api.Calls.Count.ShouldBe(1);
+        (await _outbox.GetAllAsync())[0].NextAttemptAt.ShouldBe(dispatchedAt.AddMinutes(2));
+    }
+
+    [Fact]
+    public async Task Should_Move_Operation_To_Conflicts_And_Block_Later_Ones_When_Api_Returns_404()
+    {
+        await AddEntryAsync(WorkOrderId);
+        await QueueAsync(_writer.CompleteWorkOrderAsync(WorkOrderId));
+        _api.Overrides[$"POST /api/v1/work-orders/{WorkOrderId}/service-entries"] = () => OutboxApiStub.Json(
+            HttpStatusCode.NotFound, """{"status":404,"detail":"Work order was not found.","errorCode":"WorkOrder.NotFound"}""");
+
+        var first = await DispatchAsync();
+        _api.Overrides.Clear();
+        var second = await DispatchAsync();
+
+        first.ShouldBe(new DispatchSummary(Sent: 0, Rejected: 1, Remaining: 1, SessionRejected: false));
+        second.Sent.ShouldBe(0);
+        var conflict = (await _outbox.GetConflictsAsync()).ShouldHaveSingleItem();
+        conflict.ErrorCode.ShouldBe("WorkOrder.NotFound");
+        conflict.Kind.ShouldBe(OutboxOperationKind.AddServiceEntry);
+        (await _outbox.GetAllAsync()).ShouldHaveSingleItem().Kind.ShouldBe(OutboxOperationKind.CompleteWorkOrder);
+        _api.Calls.ShouldNotContain($"POST /api/v1/work-orders/{WorkOrderId}/complete");
+    }
+
+    [Fact]
+    public async Task Should_Treat_Start_As_Sent_When_Api_Returns_409_And_Work_Order_Is_Already_In_Progress()
+    {
+        await QueueAsync(_writer.StartWorkAsync(WorkOrderId));
+        _api.Overrides[$"POST /api/v1/work-orders/{WorkOrderId}/start"] = () => OutboxApiStub.Json(
+            HttpStatusCode.Conflict, """{"status":409,"errorCode":"WorkOrder.InvalidStatusTransition"}""");
+        _api.RemoteStatus = "InProgress";
+
+        var summary = await DispatchAsync();
+
+        summary.Sent.ShouldBe(1);
+        (await _outbox.GetConflictsAsync()).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Should_Report_Conflict_When_Api_Returns_409_And_Work_Order_Is_Not_In_Target_Status()
+    {
+        await QueueAsync(_writer.StartWorkAsync(WorkOrderId));
+        _api.Overrides[$"POST /api/v1/work-orders/{WorkOrderId}/start"] = () => OutboxApiStub.Json(
+            HttpStatusCode.Conflict, """{"status":409,"errorCode":"WorkOrder.TechnicianHasWorkInProgress"}""");
+
+        await DispatchAsync();
+
+        (await _outbox.GetConflictsAsync()).ShouldHaveSingleItem().ErrorCode.ShouldBe("WorkOrder.TechnicianHasWorkInProgress");
+    }
+
+    [Fact]
+    public async Task Should_Stop_And_Keep_Queue_When_Session_Is_Rejected()
+    {
+        await QueueAsync(_writer.StartWorkAsync(WorkOrderId));
+        await QueueAsync(_writer.CompleteWorkOrderAsync(OtherWorkOrderId));
+        _api.Overrides[$"POST /api/v1/work-orders/{WorkOrderId}/start"] = () => new HttpResponseMessage(HttpStatusCode.Unauthorized);
+
+        var summary = await DispatchAsync();
+
+        summary.SessionRejected.ShouldBeTrue();
+        _api.Calls.ShouldHaveSingleItem();
+        (await _outbox.GetAllAsync()).Count.ShouldBe(2);
+        (await _outbox.GetAllAsync())[0].AttemptCount.ShouldBe(0);
+    }
+
     public async ValueTask DisposeAsync()
     {
         _handler.Dispose();
