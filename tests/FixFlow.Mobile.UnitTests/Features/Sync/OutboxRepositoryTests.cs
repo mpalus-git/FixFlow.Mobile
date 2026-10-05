@@ -1,3 +1,4 @@
+using System.Net;
 using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.UnitTests.Storage;
 
@@ -42,6 +43,21 @@ public sealed class OutboxRepositoryTests : IAsyncLifetime
         await _repository.RecordFailedAttemptAsync(operation.Id, Now.AddSeconds(20), "Timeout");
 
         (await _repository.GetAllAsync()).ShouldBe([operation with { AttemptCount = 2, NextAttemptAt = Now.AddSeconds(20), LastError = "Timeout" }]);
+    }
+
+    [Fact]
+    public async Task Should_Move_Operation_To_Conflicts_In_One_Step_When_Api_Rejects_It()
+    {
+        var operation = CreateOperation(OutboxOperationKind.AddServiceEntry, Now);
+        await _repository.EnqueueAsync(operation);
+        var conflict = new SyncConflict(
+            operation.Id, WorkOrderId, operation.Kind, operation.Payload, operation.CreatedAt, HttpStatusCode.NotFound, "WorkOrder.NotFound", "Work order was not found.", Now.AddMinutes(1));
+
+        await _repository.MoveToConflictsAsync(conflict);
+
+        (await _repository.GetAllAsync()).ShouldBeEmpty();
+        (await _repository.GetConflictsAsync()).ShouldBe([conflict]);
+        (await _repository.CountConflictsAsync()).ShouldBe(1);
     }
 
     public async ValueTask DisposeAsync() => await _userDatabase.DisposeAsync();

@@ -35,5 +35,25 @@ public sealed class OutboxRepository(UserDatabase userDatabase)
 
     public async Task RemoveAsync(Guid id) => await Connection.ExecuteAsync("DELETE FROM outbox_operations WHERE id = ?", id);
 
+    public async Task MoveToConflictsAsync(SyncConflict conflict)
+    {
+        ArgumentNullException.ThrowIfNull(conflict);
+
+        var row = SyncConflictRow.From(conflict);
+        await Connection.RunInTransactionAsync(connection =>
+        {
+            connection.Execute("DELETE FROM outbox_operations WHERE id = ?", conflict.OperationId);
+            connection.Insert(row);
+        });
+    }
+
+    public async Task<IReadOnlyList<SyncConflict>> GetConflictsAsync()
+    {
+        var rows = await Connection.QueryAsync<SyncConflictRow>("SELECT * FROM sync_conflicts ORDER BY rejected_at, operation_id");
+        return [.. rows.Select(row => row.ToConflict())];
+    }
+
     public async Task<int> CountPendingAsync() => await Connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM outbox_operations");
+
+    public async Task<int> CountConflictsAsync() => await Connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM sync_conflicts");
 }
