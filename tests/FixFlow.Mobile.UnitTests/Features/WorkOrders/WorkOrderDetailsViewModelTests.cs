@@ -90,6 +90,18 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
         _viewModel.Screen.ErrorMessage.ShouldBe(AppResources.WorkOrderNoLongerAssigned);
     }
 
+    [Fact]
+    public async Task Should_Keep_Local_Details_And_Show_Notice_When_Refresh_Fails()
+    {
+        await _viewModel.OnNavigatedToAsync(_api.WorkOrderId);
+        _api.Failures["/api/v1/work-orders/" + _api.WorkOrderId] = HttpStatusCode.ServiceUnavailable;
+
+        await _viewModel.RefreshCommand.ExecuteAsync(null);
+
+        _viewModel.Details.ShouldNotBeNull();
+        _viewModel.Notice.ShouldBe(AppResources.DetailsRefreshFailed);
+    }
+
     public async ValueTask DisposeAsync()
     {
         _handler.Dispose();
