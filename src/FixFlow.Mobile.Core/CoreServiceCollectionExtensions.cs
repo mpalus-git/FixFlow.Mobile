@@ -36,6 +36,7 @@ public static class CoreServiceCollectionExtensions
         services.AddTransient<WorkOrderRepository>();
         services.AddTransient<ClientRepository>();
         services.AddTransient<DeviceRepository>();
+        services.AddTransient<DeviceHistoryRepository>();
         services.AddTransient<ServiceEntryRepository>();
         services.AddSingleton<WorkOrderSectionClassifier>();
         services.AddSingleton<WorkOrderListPresenter>();

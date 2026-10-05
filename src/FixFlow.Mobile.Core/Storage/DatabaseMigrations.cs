@@ -99,5 +99,23 @@ public static class DatabaseMigrations
                 PRIMARY KEY (service_entry_id, position))
             """,
         ]),
+        new(6, "create_device_work_orders",
+        [
+            """
+            CREATE TABLE device_work_orders (
+                device_id TEXT NOT NULL,
+                work_order_id TEXT NOT NULL,
+                number TEXT NOT NULL,
+                status TEXT NOT NULL,
+                priority TEXT NOT NULL,
+                description TEXT NOT NULL,
+                technician_name TEXT,
+                created_at INTEGER NOT NULL,
+                started_at INTEGER,
+                completed_at INTEGER,
+                service_entry_count INTEGER NOT NULL,
+                PRIMARY KEY (device_id, work_order_id))
+            """,
+        ]),
     ];
 }
