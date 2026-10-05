@@ -1,4 +1,5 @@
 using FixFlow.Mobile.Core;
+using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
@@ -12,6 +13,7 @@ public sealed class CoreServiceCollectionExtensionsTests
     {
         using var provider = new ServiceCollection()
             .AddSingleton(Substitute.For<ISettingsStore>())
+            .AddSingleton(Substitute.For<ISecureStore>())
             .AddCore()
             .BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
 
