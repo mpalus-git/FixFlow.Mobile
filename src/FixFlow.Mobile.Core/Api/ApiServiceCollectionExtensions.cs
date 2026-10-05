@@ -12,6 +12,12 @@ public static class ApiServiceCollectionExtensions
 
     public static IHttpClientBuilder AddFixFlowApi(this IServiceCollection services, Uri baseAddress)
     {
+        services.AddHttpClient<ServerReadinessProbe>(client =>
+        {
+            client.BaseAddress = baseAddress;
+            client.Timeout = Timeout.InfiniteTimeSpan;
+        });
+
         var builder = services
             .AddRefitGeneratedClient<IFixFlowApi>()
             .ConfigureHttpClient(client => client.BaseAddress = baseAddress);

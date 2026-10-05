@@ -38,6 +38,15 @@ public sealed class ApiServiceCollectionExtensionsTests
         handler.Requests[0].RequestUri!.Authority.ShouldBe("api.test");
     }
 
+    [Fact]
+    public void Should_Resolve_Readiness_Probe_When_Api_Is_Registered()
+    {
+        using var handler = new StubHttpMessageHandler(_ => new HttpResponseMessage(HttpStatusCode.OK));
+        using var provider = BuildProvider(handler);
+
+        provider.GetService<ServerReadinessProbe>().ShouldNotBeNull();
+    }
+
     private ServiceProvider BuildProvider(StubHttpMessageHandler handler)
     {
         var services = new ServiceCollection().AddSingleton<TimeProvider>(_timeProvider);
