@@ -71,12 +71,6 @@ jobs:
           distribution: microsoft
           java-version: '21'
 
-      - uses: actions/cache@v6
-        with:
-          path: ~/.nuget/packages
-          key: nuget-android-${{ hashFiles('global.json', 'Directory.Packages.props') }}
-          restore-keys: nuget-android-
-
       - name: Install workloads
         run: dotnet workload restore src/FixFlow.Mobile/FixFlow.Mobile.csproj
 
