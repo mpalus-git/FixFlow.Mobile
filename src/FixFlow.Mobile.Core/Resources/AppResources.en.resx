@@ -93,4 +93,7 @@
   <data name="SessionExpiredMessage" xml:space="preserve">
     <value>Sign in again. Data saved on the device has been kept.</value>
   </data>
+  <data name="DemoLoginButton" xml:space="preserve">
+    <value>Sign in with demo account</value>
+  </data>
 </root>

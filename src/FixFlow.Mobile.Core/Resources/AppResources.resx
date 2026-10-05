@@ -93,4 +93,7 @@
   <data name="SessionExpiredMessage" xml:space="preserve">
     <value>Zaloguj się ponownie. Dane zapisane na urządzeniu zostały zachowane.</value>
   </data>
+  <data name="DemoLoginButton" xml:space="preserve">
+    <value>Zaloguj się kontem demo</value>
+  </data>
 </root>

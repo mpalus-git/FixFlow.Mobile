@@ -20,7 +20,8 @@ public sealed partial class LoginViewModel(
     IConnectivityService connectivity,
     INavigationService navigation,
     IDialogService dialogs,
-    IUriLauncher uriLauncher) : ObservableObject
+    IUriLauncher uriLauncher,
+    DemoAccount demoAccount) : ObservableObject
 {
     public static readonly Uri WebPanelUri = new("https://fix-flow-web.vercel.app");
 
@@ -45,6 +46,8 @@ public sealed partial class LoginViewModel(
     public bool HasErrorMessage => ErrorMessage is not null;
 
     public bool HasStatusMessage => StatusMessage is not null;
+
+    public bool IsDemoLoginAvailable => demoAccount.IsAvailable;
 
     private bool CanLogin => !string.IsNullOrWhiteSpace(Email) && !string.IsNullOrEmpty(Password);
 
@@ -83,6 +86,14 @@ public sealed partial class LoginViewModel(
                 ErrorMessage = Describe(result.Error!);
                 break;
         }
+    }
+
+    [RelayCommand]
+    private Task DemoLoginAsync(CancellationToken cancellationToken)
+    {
+        Email = demoAccount.Email;
+        Password = demoAccount.Password;
+        return LoginAsync(cancellationToken);
     }
 
     private static string Describe(ApiError error) => error switch

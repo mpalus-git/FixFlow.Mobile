@@ -66,6 +66,10 @@
             <Button Text="{x:Static resources:AppResources.LoginButton}"
                     Command="{Binding LoginCommand}"
                     Margin="0,8,0,0" />
+            <Button Text="{x:Static resources:AppResources.DemoLoginButton}"
+                    Command="{Binding DemoLoginCommand}"
+                    IsVisible="{Binding IsDemoLoginAvailable}"
+                    Style="{StaticResource OutlineButton}" />
             <ActivityIndicator IsRunning="{Binding LoginCommand.IsRunning}"
                                IsVisible="{Binding LoginCommand.IsRunning}" />
         </VerticalStackLayout>

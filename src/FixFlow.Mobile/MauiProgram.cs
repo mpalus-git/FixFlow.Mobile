@@ -35,6 +35,7 @@ public static partial class MauiProgram
         builder.Services.AddSingleton<IConnectivityService, EssentialsConnectivityService>();
         builder.Services.AddSingleton(Launcher.Default);
         builder.Services.AddSingleton<IUriLauncher, EssentialsUriLauncher>();
+        builder.Services.AddSingleton(new DemoAccount(BuildConfiguration.DemoTechnicianEmail, BuildConfiguration.DemoTechnicianPassword));
         builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
         builder.Services.AddSingleton<IDialogService, PageDialogService>();
         builder.Services.AddTransient<AppShell>();

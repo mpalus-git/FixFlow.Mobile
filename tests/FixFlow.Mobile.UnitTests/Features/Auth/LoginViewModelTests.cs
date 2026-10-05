@@ -41,7 +41,8 @@ public sealed class LoginViewModelTests : IDisposable
         _authenticationHandler = new AuthenticationHandler(session, _refresher) { InnerHandler = _handler };
         var authService = new AuthService(anonymousApi, RestService.ForGenerated<IFixFlowApi>(CreateClient(_authenticationHandler)), session, _timeProvider);
         var readinessProbe = new ServerReadinessProbe(CreateClient(_handler), _timeProvider);
-        _viewModel = new LoginViewModel(authService, readinessProbe, _connectivity, _navigation, _dialogs, _uriLauncher)
+        var demoAccount = new DemoAccount("demo@fixflow.test", "demo-secret");
+        _viewModel = new LoginViewModel(authService, readinessProbe, _connectivity, _navigation, _dialogs, _uriLauncher, demoAccount)
         {
             Email = " jan@fixflow.test ",
             Password = "secret",
@@ -132,6 +133,25 @@ public sealed class LoginViewModelTests : IDisposable
         await login;
         _viewModel.ErrorMessage.ShouldBe(AppResources.LoginServerUnavailable);
         _viewModel.StatusMessage.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task Should_Log_In_With_Demo_Credentials_When_Demo_Login_Is_Used()
+    {
+        await _viewModel.DemoLoginCommand.ExecuteAsync(null);
+
+        _viewModel.Email.ShouldBe("demo@fixflow.test");
+        _viewModel.IsDemoLoginAvailable.ShouldBeTrue();
+        await _navigation.Received(1).NavigateToRootAsync<WorkOrderListViewModel>();
+    }
+
+    [Theory]
+    [InlineData("", "", false)]
+    [InlineData("demo@fixflow.test", "", false)]
+    [InlineData("demo@fixflow.test", "demo-secret", true)]
+    public void Should_Offer_Demo_Login_Only_When_Build_Provides_Credentials(string email, string password, bool expected)
+    {
+        new DemoAccount(email, password).IsAvailable.ShouldBe(expected);
     }
 
     [Theory]

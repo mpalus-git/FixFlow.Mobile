@@ -23,6 +23,7 @@ public sealed class CoreServiceCollectionExtensionsTests
             .AddSingleton(Substitute.For<INavigationService>())
             .AddSingleton(Substitute.For<IDialogService>())
             .AddSingleton(Substitute.For<IUriLauncher>())
+            .AddSingleton(new DemoAccount(string.Empty, string.Empty))
             .AddCore();
         services.AddFixFlowApi(new Uri("https://api.test"));
         using var provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
