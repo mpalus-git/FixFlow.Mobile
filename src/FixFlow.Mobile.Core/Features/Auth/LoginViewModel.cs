@@ -35,10 +35,16 @@ public sealed partial class LoginViewModel(
     public partial string Password { get; set; } = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasErrorMessage))]
     public partial string? ErrorMessage { get; private set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasStatusMessage))]
     public partial string? StatusMessage { get; private set; }
+
+    public bool HasErrorMessage => ErrorMessage is not null;
+
+    public bool HasStatusMessage => StatusMessage is not null;
 
     private bool CanLogin => !string.IsNullOrWhiteSpace(Email) && !string.IsNullOrEmpty(Password);
 

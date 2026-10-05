@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Shell xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       xmlns:auth="clr-namespace:FixFlow.Mobile.Features.Auth"
        xmlns:resources="clr-namespace:FixFlow.Mobile.Core.Resources;assembly=FixFlow.Mobile.Core"
        xmlns:workOrders="clr-namespace:FixFlow.Mobile.Features.WorkOrders"
-       x:Class="FixFlow.Mobile.AppShell">
+       x:Class="FixFlow.Mobile.AppShell"
+       FlyoutBehavior="Disabled">
+    <ShellContent ContentTemplate="{DataTemplate auth:StartupPage}"
+                  Route="Startup" />
+    <ShellContent Title="{x:Static resources:AppResources.LoginTitle}"
+                  ContentTemplate="{DataTemplate auth:LoginPage}"
+                  Route="Login" />
     <ShellContent Title="{x:Static resources:AppResources.WorkOrderListTitle}"
                   ContentTemplate="{DataTemplate workOrders:WorkOrderListPage}"
                   Route="WorkOrderList" />

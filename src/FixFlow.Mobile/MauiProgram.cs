@@ -38,6 +38,8 @@ public static partial class MauiProgram
         builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
         builder.Services.AddSingleton<IDialogService, PageDialogService>();
         builder.Services.AddTransient<AppShell>();
+        builder.Services.AddTransient<StartupPage>();
+        builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<WorkOrderListPage>();
 
         var app = builder.Build();
