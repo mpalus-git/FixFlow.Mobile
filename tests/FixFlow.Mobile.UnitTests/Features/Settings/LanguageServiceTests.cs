@@ -8,8 +8,7 @@ namespace FixFlow.Mobile.UnitTests.Features.Settings;
 [Collection(GlobalCultureTests.Name)]
 public sealed class LanguageServiceTests : IDisposable
 {
-    private readonly CultureInfo _originalCulture = CultureInfo.CurrentCulture;
-    private readonly CultureInfo _originalUiCulture = CultureInfo.CurrentUICulture;
+    private readonly GlobalCultureScope _cultureScope = new();
     private readonly ISettingsStore _settingsStore = Substitute.For<ISettingsStore>();
     private readonly LanguageService _service;
 
@@ -67,12 +66,5 @@ public sealed class LanguageServiceTests : IDisposable
         raised.ShouldBe(0);
     }
 
-    public void Dispose()
-    {
-        CultureInfo.DefaultThreadCurrentCulture = null;
-        CultureInfo.DefaultThreadCurrentUICulture = null;
-        CultureInfo.CurrentCulture = _originalCulture;
-        CultureInfo.CurrentUICulture = _originalUiCulture;
-        AppResources.Culture = null;
-    }
+    public void Dispose() => _cultureScope.Dispose();
 }

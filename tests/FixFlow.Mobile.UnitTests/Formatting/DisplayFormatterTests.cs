@@ -1,7 +1,5 @@
-using System.Globalization;
 using FixFlow.Mobile.Core.Features.Settings;
 using FixFlow.Mobile.Core.Formatting;
-using FixFlow.Mobile.Core.Resources;
 using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
 
@@ -12,8 +10,7 @@ public sealed class DisplayFormatterTests : IDisposable
 {
     private const char NoBreakSpace = ' ';
 
-    private readonly CultureInfo _originalCulture = CultureInfo.CurrentCulture;
-    private readonly CultureInfo _originalUiCulture = CultureInfo.CurrentUICulture;
+    private readonly GlobalCultureScope _cultureScope = new();
     private readonly LanguageService _languageService = new(Substitute.For<ISettingsStore>());
     private readonly DisplayFormatter _formatter;
 
@@ -56,12 +53,5 @@ public sealed class DisplayFormatterTests : IDisposable
         _formatter.FormatMoney((decimal)amount).Replace(NoBreakSpace, ' ').ShouldBe(expected);
     }
 
-    public void Dispose()
-    {
-        CultureInfo.DefaultThreadCurrentCulture = null;
-        CultureInfo.DefaultThreadCurrentUICulture = null;
-        CultureInfo.CurrentCulture = _originalCulture;
-        CultureInfo.CurrentUICulture = _originalUiCulture;
-        AppResources.Culture = null;
-    }
+    public void Dispose() => _cultureScope.Dispose();
 }
