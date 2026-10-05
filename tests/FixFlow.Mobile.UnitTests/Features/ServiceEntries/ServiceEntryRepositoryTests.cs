@@ -30,6 +30,24 @@ public sealed class ServiceEntryRepositoryTests : IAsyncLifetime
         stored.Parts[0].Amount.ShouldBe(24.68m);
     }
 
+    [Fact]
+    public async Task Should_Replace_Entries_Of_Work_Order_Only_When_Server_Returns_New_List()
+    {
+        var otherWorkOrderEntry = CreateEntry(Now) with { WorkOrderId = Guid.NewGuid() };
+        await _repository.ReplaceForWorkOrderAsync(otherWorkOrderEntry.WorkOrderId, [otherWorkOrderEntry]);
+        await _repository.ReplaceForWorkOrderAsync(WorkOrderId, [CreateEntry(Now, new ServiceEntryPart(Guid.NewGuid(), "Stara", "S-1", 1, 1m))]);
+
+        var later = CreateEntry(Now.AddHours(2));
+        var earlier = CreateEntry(Now.AddHours(1)) with { IsCorrection = true, WorkStartedAt = null, WorkFinishedAt = null, Latitude = null, Longitude = null };
+        await _repository.ReplaceForWorkOrderAsync(WorkOrderId, [later, earlier]);
+
+        var stored = await _repository.GetForWorkOrderAsync(WorkOrderId);
+        stored.Count.ShouldBe(2);
+        ShouldMatch(stored[0], earlier);
+        ShouldMatch(stored[1], later);
+        ShouldMatch((await _repository.GetForWorkOrderAsync(otherWorkOrderEntry.WorkOrderId)).ShouldHaveSingleItem(), otherWorkOrderEntry);
+    }
+
     public async ValueTask DisposeAsync() => await _userDatabase.DisposeAsync();
 
     private static void ShouldMatch(ServiceEntry actual, ServiceEntry expected)
