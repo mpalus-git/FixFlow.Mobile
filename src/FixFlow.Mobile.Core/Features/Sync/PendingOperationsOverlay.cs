@@ -23,7 +23,7 @@ public static class PendingOperationsOverlay
         return operations.Where(operation => operation.WorkOrderId == workOrder.Id).Aggregate(workOrder, (current, operation) => operation.Kind switch
         {
             OutboxOperationKind.StartWork when current.Status == WorkOrderStatus.Assigned =>
-                current with { Status = WorkOrderStatus.InProgress, StartedAt = current.StartedAt ?? operation.CreatedAt },
+                current with { Status = WorkOrderStatus.InProgress, StartedAt = current.StartedAt ?? OutboxPayload.StartedAt(operation) },
             OutboxOperationKind.CompleteWorkOrder when current.Status == WorkOrderStatus.InProgress =>
                 current with { Status = WorkOrderStatus.Completed, CompletedAt = operation.CreatedAt, IsOverdue = false },
             _ => current,

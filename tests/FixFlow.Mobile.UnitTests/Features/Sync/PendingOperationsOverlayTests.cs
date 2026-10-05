@@ -14,10 +14,15 @@ public sealed class PendingOperationsOverlayTests
     {
         var workOrder = TestWorkOrders.Create("ZL-1", Now.AddHours(2));
 
-        var overlaid = PendingOperationsOverlay.Apply(workOrder, [Operation(workOrder.Id, OutboxOperationKind.StartWork, Now)]);
+        var start = Operation(workOrder.Id, OutboxOperationKind.StartWork, Now) with
+        {
+            Payload = OutboxPayload.Serialize(new PendingStart(Now.AddMinutes(-3))),
+        };
+
+        var overlaid = PendingOperationsOverlay.Apply(workOrder, [start]);
 
         overlaid.Status.ShouldBe(WorkOrderStatus.InProgress);
-        overlaid.StartedAt.ShouldBe(Now);
+        overlaid.StartedAt.ShouldBe(Now.AddMinutes(-3));
     }
 
     [Fact]

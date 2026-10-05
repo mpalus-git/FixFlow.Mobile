@@ -6,7 +6,7 @@ namespace FixFlow.Mobile.Core.Features.Sync;
 public sealed class OutboxWriter(OutboxRepository outbox, TimeProvider timeProvider, IMessenger messenger)
 {
     public Task<OutboxOperation> StartWorkAsync(Guid workOrderId) =>
-        EnqueueAsync(workOrderId, OutboxOperationKind.StartWork, OutboxPayload.Empty);
+        EnqueueAsync(workOrderId, OutboxOperationKind.StartWork, OutboxPayload.Serialize(new PendingStart(timeProvider.GetUtcNow())));
 
     public Task<OutboxOperation> AddServiceEntryAsync(Guid workOrderId, PendingServiceEntry entry)
     {

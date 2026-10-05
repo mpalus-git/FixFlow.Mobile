@@ -11,6 +11,15 @@ public static class OutboxPayload
 
     public static string Serialize(PendingServiceEntry entry) => JsonSerializer.Serialize(entry, Options);
 
+    public static string Serialize(PendingStart start) => JsonSerializer.Serialize(start, Options);
+
+    public static DateTimeOffset StartedAt(OutboxOperation operation)
+    {
+        ArgumentNullException.ThrowIfNull(operation);
+
+        return JsonSerializer.Deserialize<PendingStart>(operation.Payload, Options)?.StartedAt ?? operation.CreatedAt;
+    }
+
     public static PendingServiceEntry ToServiceEntry(OutboxOperation operation)
     {
         ArgumentNullException.ThrowIfNull(operation);

@@ -53,6 +53,18 @@ public sealed class OutboxDispatcherTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Should_Send_Start_Time_From_Device_When_Start_Is_Sent_Later()
+    {
+        var startedOffline = _timeProvider.GetUtcNow();
+        await QueueAsync(_writer.StartWorkAsync(WorkOrderId));
+        _timeProvider.Advance(TimeSpan.FromHours(2));
+
+        await DispatchAsync();
+
+        _api.SentStarts.ShouldHaveSingleItem().RootElement.GetProperty("startedAt").GetDateTimeOffset().ShouldBe(startedOffline);
+    }
+
+    [Fact]
     public async Task Should_Keep_Operation_And_Hold_Later_Ones_When_Server_Is_Unavailable()
     {
         await QueueAsync(_writer.StartWorkAsync(WorkOrderId));
