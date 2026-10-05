@@ -33,8 +33,26 @@
   <data name="WorkOrderListEmpty" xml:space="preserve">
     <value>You have no assigned work orders.</value>
   </data>
+  <data name="LoginTitle" xml:space="preserve">
+    <value>Sign in</value>
+  </data>
+  <data name="LoginSubtitle" xml:space="preserve">
+    <value>Field technician app</value>
+  </data>
+  <data name="LoginEmailLabel" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="LoginPasswordLabel" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="LoginButton" xml:space="preserve">
+    <value>Sign in</value>
+  </data>
   <data name="LoginInvalidCredentials" xml:space="preserve">
     <value>Invalid email or password.</value>
+  </data>
+  <data name="LoginRateLimited" xml:space="preserve">
+    <value>Too many sign-in attempts. Try again in {0} s.</value>
   </data>
   <data name="LoginConnectionFailed" xml:space="preserve">
     <value>Could not connect to the server. Try again.</value>
@@ -42,10 +60,25 @@
   <data name="LoginOffline" xml:space="preserve">
     <value>No internet connection. Signing in requires network access.</value>
   </data>
+  <data name="LoginServerStarting" xml:space="preserve">
+    <value>The server is starting, this can take up to a minute.</value>
+  </data>
+  <data name="LoginServerUnavailable" xml:space="preserve">
+    <value>The server is not responding. Try again in a moment.</value>
+  </data>
   <data name="LoginFailed" xml:space="preserve">
     <value>Sign-in failed.</value>
   </data>
+  <data name="NotTechnicianTitle" xml:space="preserve">
+    <value>No access to the app</value>
+  </data>
   <data name="NotTechnicianMessage" xml:space="preserve">
     <value>The mobile app is for technicians. Dispatchers and administrators use the web panel.</value>
+  </data>
+  <data name="OpenWebPanelButton" xml:space="preserve">
+    <value>Open web panel</value>
+  </data>
+  <data name="CloseButton" xml:space="preserve">
+    <value>Close</value>
   </data>
 </root>

@@ -3,8 +3,10 @@ using System.Text;
 using System.Text.Json;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Connectivity;
+using FixFlow.Mobile.Core.Dialogs;
 using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.WorkOrders;
+using FixFlow.Mobile.Core.Launching;
 using FixFlow.Mobile.Core.Navigation;
 using FixFlow.Mobile.Core.Resources;
 using FixFlow.Mobile.UnitTests.Api;
@@ -19,10 +21,13 @@ public sealed class LoginViewModelTests : IDisposable
     private readonly FakeTimeProvider _timeProvider = new(new DateTimeOffset(2026, 10, 5, 8, 0, 0, TimeSpan.Zero));
     private readonly IConnectivityService _connectivity = Substitute.For<IConnectivityService>();
     private readonly INavigationService _navigation = Substitute.For<INavigationService>();
+    private readonly IDialogService _dialogs = Substitute.For<IDialogService>();
+    private readonly IUriLauncher _uriLauncher = Substitute.For<IUriLauncher>();
     private readonly StubHttpMessageHandler _handler;
     private readonly AuthenticationHandler _authenticationHandler;
     private readonly TokenRefresher _refresher;
     private readonly LoginViewModel _viewModel;
+    private HttpStatusCode _readyStatus = HttpStatusCode.OK;
     private Func<HttpResponseMessage>? _loginResponse;
     private string _role = SessionUser.TechnicianRole;
 
@@ -35,7 +40,8 @@ public sealed class LoginViewModelTests : IDisposable
         _refresher = new TokenRefresher(anonymousApi, session, _timeProvider);
         _authenticationHandler = new AuthenticationHandler(session, _refresher) { InnerHandler = _handler };
         var authService = new AuthService(anonymousApi, RestService.ForGenerated<IFixFlowApi>(CreateClient(_authenticationHandler)), session, _timeProvider);
-        _viewModel = new LoginViewModel(authService, _connectivity, _navigation)
+        var readinessProbe = new ServerReadinessProbe(CreateClient(_handler), _timeProvider);
+        _viewModel = new LoginViewModel(authService, readinessProbe, _connectivity, _navigation, _dialogs, _uriLauncher)
         {
             Email = " jan@fixflow.test ",
             Password = "secret",
@@ -64,6 +70,31 @@ public sealed class LoginViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task Should_Show_Seconds_From_Retry_After_When_Login_Is_Rate_Limited()
+    {
+        _loginResponse = () =>
+        {
+            var response = Problem(HttpStatusCode.TooManyRequests, new { status = 429 });
+            response.Headers.Add("Retry-After", "42");
+            return response;
+        };
+
+        await _viewModel.LoginCommand.ExecuteAsync(null);
+
+        _viewModel.ErrorMessage.ShouldNotBeNull().ShouldContain("42");
+    }
+
+    [Fact]
+    public async Task Should_Show_Validation_Messages_From_Api_When_Request_Is_Invalid()
+    {
+        _loginResponse = () => Problem(HttpStatusCode.BadRequest, new { status = 400, errors = new { email = new List<string> { "Email must be a valid email address." } } });
+
+        await _viewModel.LoginCommand.ExecuteAsync(null);
+
+        _viewModel.ErrorMessage.ShouldBe("Email must be a valid email address.");
+    }
+
+    [Fact]
     public async Task Should_Show_Offline_Message_Without_Request_When_Device_Is_Offline()
     {
         _connectivity.IsOnline.Returns(false);
@@ -75,14 +106,32 @@ public sealed class LoginViewModelTests : IDisposable
     }
 
     [Fact]
-    public async Task Should_Reject_Login_When_User_Is_Not_Technician()
+    public async Task Should_Offer_Web_Panel_When_User_Is_Not_Technician()
     {
         _role = "Dispatcher";
+        _dialogs.ConfirmAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(true);
 
         await _viewModel.LoginCommand.ExecuteAsync(null);
 
-        _viewModel.ErrorMessage.ShouldBe(AppResources.NotTechnicianMessage);
+        await _uriLauncher.Received(1).OpenAsync(LoginViewModel.WebPanelUri);
         await _navigation.DidNotReceive().NavigateToRootAsync<WorkOrderListViewModel>();
+    }
+
+    [Fact]
+    public async Task Should_Show_Server_Unavailable_When_Server_Does_Not_Start_In_Time()
+    {
+        _readyStatus = HttpStatusCode.ServiceUnavailable;
+
+        var login = _viewModel.LoginCommand.ExecuteAsync(null);
+        while (!login.IsCompleted)
+        {
+            _timeProvider.Advance(TimeSpan.FromSeconds(3));
+            await Task.Delay(10, TestContext.Current.CancellationToken);
+        }
+
+        await login;
+        _viewModel.ErrorMessage.ShouldBe(AppResources.LoginServerUnavailable);
+        _viewModel.StatusMessage.ShouldBeNull();
     }
 
     [Theory]
@@ -109,6 +158,7 @@ public sealed class LoginViewModelTests : IDisposable
 
     private HttpResponseMessage Route(HttpRequestMessage request) => request.RequestUri!.AbsolutePath switch
     {
+        "/api/v1/system/ready" => new HttpResponseMessage(_readyStatus),
         "/api/v1/auth/login" => _loginResponse?.Invoke() ?? Json(new
         {
             accessToken = "access-1",

@@ -1,6 +1,8 @@
 using FixFlow.Mobile.Core;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Connectivity;
+using FixFlow.Mobile.Core.Dialogs;
+using FixFlow.Mobile.Core.Launching;
 using FixFlow.Mobile.Core.Navigation;
 using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.Settings;
@@ -19,6 +21,8 @@ public sealed class CoreServiceCollectionExtensionsTests
             .AddSingleton(Substitute.For<ISecureStore>())
             .AddSingleton(Substitute.For<IConnectivityService>())
             .AddSingleton(Substitute.For<INavigationService>())
+            .AddSingleton(Substitute.For<IDialogService>())
+            .AddSingleton(Substitute.For<IUriLauncher>())
             .AddCore();
         services.AddFixFlowApi(new Uri("https://api.test"));
         using var provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
