@@ -126,7 +126,7 @@ jobs:
         run: dotnet workload restore src/FixFlow.Mobile/FixFlow.Mobile.csproj
 
       - name: Build
-        run: dotnet build src/FixFlow.Mobile --configuration Release --framework net10.0-android
+        run: dotnet build src/FixFlow.Mobile --configuration Release --framework net10.0-android -p:CiCheckBuild=true
 
   build-windows:
     runs-on: windows-latest
@@ -140,14 +140,8 @@ jobs:
         with:
           global-json-file: global.json
 
-      - uses: actions/cache@v6
-        with:
-          path: ~/.nuget/packages
-          key: nuget-windows-${{ hashFiles('global.json', 'Directory.Packages.props') }}
-          restore-keys: nuget-windows-
-
       - name: Install workloads
-        run: dotnet workload restore src/FixFlow.Mobile/FixFlow.Mobile.csproj
+        run: dotnet workload install maui-windows
 
       - name: Build
-        run: dotnet build src/FixFlow.Mobile --configuration Release --framework net10.0-windows10.0.19041.0
+        run: dotnet build src/FixFlow.Mobile --configuration Release -p:FixFlowPlatform=windows
