@@ -44,6 +44,8 @@ public static class CoreServiceCollectionExtensions
         services.AddSingleton<WorkOrderListPresenter>();
         services.AddSingleton<WorkOrderDetailsPresenter>();
         services.AddTransient<WorkOrderListViewModel>();
+        services.AddTransient<WorkOrderDetailsSources>();
+        services.AddTransient<WorkOrderDetailsViewModel>();
 
         return services;
     }

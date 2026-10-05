@@ -177,4 +177,13 @@
   <data name="DetailsCreatedAt" xml:space="preserve">
     <value>Utworzono: {0}</value>
   </data>
+  <data name="DetailsRefreshFailed" xml:space="preserve">
+    <value>Nie udało się odświeżyć zlecenia. Widzisz dane zapisane na urządzeniu.</value>
+  </data>
+  <data name="DetailsLoadFailed" xml:space="preserve">
+    <value>Nie udało się pobrać zlecenia. Sprawdź połączenie i spróbuj ponownie.</value>
+  </data>
+  <data name="WorkOrderNoLongerAssigned" xml:space="preserve">
+    <value>To zlecenie nie jest już do Ciebie przypisane.</value>
+  </data>
 </root>
