@@ -40,5 +40,9 @@ public static class DatabaseMigrations
                 search_text TEXT NOT NULL)
             """,
         ]),
+        new(3, "create_sync_states",
+        [
+            "CREATE TABLE sync_states (key TEXT NOT NULL PRIMARY KEY, value TEXT NOT NULL, updated_at INTEGER NOT NULL)",
+        ]),
     ];
 }
