@@ -15,4 +15,22 @@
   <data name="WorkOrderListTitle" xml:space="preserve">
     <value>Moje zlecenia</value>
   </data>
+  <data name="OfflineLastSync" xml:space="preserve">
+    <value>Brak połączenia. Ostatnia synchronizacja: {0}</value>
+  </data>
+  <data name="OfflineNeverSynced" xml:space="preserve">
+    <value>Brak połączenia. Dane nie były jeszcze synchronizowane.</value>
+  </data>
+  <data name="LoadingMessage" xml:space="preserve">
+    <value>Ładowanie…</value>
+  </data>
+  <data name="ErrorTitle" xml:space="preserve">
+    <value>Coś poszło nie tak</value>
+  </data>
+  <data name="RetryButton" xml:space="preserve">
+    <value>Spróbuj ponownie</value>
+  </data>
+  <data name="WorkOrderListEmpty" xml:space="preserve">
+    <value>Nie masz przypisanych zleceń.</value>
+  </data>
 </root>
