@@ -1,24 +1,41 @@
 using FixFlow.Tools.Comments;
 
-if (args is not ["check-comments"] and not ["check-comments", _])
+return args switch
 {
-    Console.Error.WriteLine("Usage: FixFlow.Tools check-comments [directory]");
+    ["check-comments"] => CheckComments(Directory.GetCurrentDirectory()),
+    ["check-comments", var directory] => CheckComments(directory),
+    ["strip-comments", var file] => StripComments(file),
+    _ => PrintUsage(),
+};
+
+static int CheckComments(string rootDirectory)
+{
+    var violations = CommentChecker.CreateDefault().Check(rootDirectory);
+
+    foreach (var violation in violations)
+    {
+        Console.WriteLine($"{violation.Path}:{violation.Line}: {violation.Text}");
+    }
+
+    if (violations.Count > 0)
+    {
+        Console.WriteLine($"Found {violations.Count} comment(s).");
+        return 1;
+    }
+
+    Console.WriteLine("No comments found.");
+    return 0;
+}
+
+static int StripComments(string file)
+{
+    File.WriteAllText(file, CSharpCommentStripper.Strip(File.ReadAllText(file)));
+    Console.WriteLine($"Stripped comments from {file}");
+    return 0;
+}
+
+static int PrintUsage()
+{
+    Console.Error.WriteLine("Usage: FixFlow.Tools check-comments [directory] | strip-comments <file.cs>");
     return 2;
 }
-
-var rootDirectory = args.Length == 2 ? args[1] : Directory.GetCurrentDirectory();
-var violations = CommentChecker.CreateDefault().Check(rootDirectory);
-
-foreach (var violation in violations)
-{
-    Console.WriteLine($"{violation.Path}:{violation.Line}: {violation.Text}");
-}
-
-if (violations.Count > 0)
-{
-    Console.WriteLine($"Found {violations.Count} comment(s).");
-    return 1;
-}
-
-Console.WriteLine("No comments found.");
-return 0;
