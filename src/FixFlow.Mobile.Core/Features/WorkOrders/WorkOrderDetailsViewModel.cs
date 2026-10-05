@@ -88,6 +88,7 @@ public sealed partial class WorkOrderDetailsViewModel(
                     Screen.ShowError(AppResources.WorkOrderNoLongerAssigned);
                     break;
                 default:
+                    await ShowLocalAsync();
                     ShowRefreshFailure(result.Error);
                     break;
             }

@@ -104,6 +104,17 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Should_Show_Saved_Client_And_Notice_When_Only_Device_History_Fails()
+    {
+        _api.Failures[$"/api/v1/devices/{_api.DeviceId}/work-orders"] = HttpStatusCode.NotFound;
+
+        await _viewModel.OnNavigatedToAsync(_api.WorkOrderId);
+
+        _viewModel.Details.ShouldNotBeNull().Client.ShouldNotBeNull();
+        _viewModel.Notice.ShouldBe(AppResources.DetailsRefreshFailed);
+    }
+
+    [Fact]
     public async Task Should_Keep_Local_Details_And_Show_Notice_When_Refresh_Fails()
     {
         await _viewModel.OnNavigatedToAsync(_api.WorkOrderId);
