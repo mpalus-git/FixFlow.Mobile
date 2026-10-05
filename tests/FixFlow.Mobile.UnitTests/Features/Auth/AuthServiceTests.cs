@@ -5,17 +5,19 @@ using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Api.Errors;
 using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.UnitTests.Api;
+using FixFlow.Mobile.UnitTests.Storage;
 using Microsoft.Extensions.Time.Testing;
 using Refit;
 
 namespace FixFlow.Mobile.UnitTests.Features.Auth;
 
-public sealed class AuthServiceTests : IDisposable
+public sealed class AuthServiceTests : IAsyncDisposable
 {
     private static readonly Guid UserId = Guid.NewGuid();
 
     private readonly FakeTimeProvider _timeProvider = new(new DateTimeOffset(2026, 10, 5, 8, 0, 0, TimeSpan.Zero));
     private readonly InMemorySecureStore _secureStore = new();
+    private readonly TestUserDatabase _userDatabase = new();
     private readonly SessionStore _session;
     private readonly StubHttpMessageHandler _handler;
     private readonly AuthenticationHandler _authenticationHandler;
@@ -38,7 +40,7 @@ public sealed class AuthServiceTests : IDisposable
         _refresher = new TokenRefresher(anonymousApi, _session, _timeProvider);
         _authenticationHandler = new AuthenticationHandler(_session, _refresher) { InnerHandler = _handler };
         var api = RestService.ForGenerated<IFixFlowApi>(new HttpClient(_authenticationHandler, disposeHandler: false) { BaseAddress = new Uri("https://api.test") });
-        _service = new AuthService(anonymousApi, api, _session, _timeProvider);
+        _service = new AuthService(anonymousApi, api, _session, _userDatabase.Database, _timeProvider);
     }
 
     [Fact]
@@ -50,6 +52,7 @@ public sealed class AuthServiceTests : IDisposable
         result.User.ShouldBe(new SessionUser(UserId, "jan@fixflow.test", "Jan Kowalski", SessionUser.TechnicianRole));
         _session.AccessToken.ShouldBe("access-1");
         (await _session.GetRefreshTokenAsync()).ShouldBe("refresh-1");
+        _userDatabase.Database.UserId.ShouldBe(UserId);
         _handler.Requests.Single(request => request.RequestUri!.AbsolutePath == "/api/v1/users/me")
             .Headers.Authorization!.Parameter.ShouldBe("access-1");
     }
@@ -106,6 +109,7 @@ public sealed class AuthServiceTests : IDisposable
 
         _revokedTokens.ShouldBe(["refresh-1"]);
         endReason.ShouldBe(SessionEndReason.SignedOut);
+        _userDatabase.Database.UserId.ShouldBeNull();
         _secureStore.Values.ShouldBeEmpty();
     }
 
@@ -142,11 +146,12 @@ public sealed class AuthServiceTests : IDisposable
         _secureStore.Values.ShouldBeEmpty();
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         _authenticationHandler.Dispose();
         _refresher.Dispose();
         _handler.Dispose();
+        await _userDatabase.DisposeAsync();
     }
 
     private async Task<HttpResponseMessage> RouteAsync(HttpRequestMessage request, CancellationToken cancellationToken)

@@ -1,5 +1,6 @@
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Api.Errors;
+using FixFlow.Mobile.Core.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FixFlow.Mobile.Core.Features.Auth;
@@ -8,11 +9,21 @@ public sealed class AuthService(
     [FromKeyedServices(ApiServiceCollectionExtensions.AnonymousClientKey)] IFixFlowApi anonymousApi,
     IFixFlowApi api,
     SessionStore session,
+    UserDatabase userDatabase,
     TimeProvider timeProvider)
 {
     public static readonly TimeSpan RevokeTimeout = TimeSpan.FromSeconds(5);
 
-    public Task<SessionUser?> RestoreSessionAsync() => session.RestoreAsync();
+    public async Task<SessionUser?> RestoreSessionAsync()
+    {
+        var user = await session.RestoreAsync();
+        if (user is not null)
+        {
+            await userDatabase.OpenAsync(user.Id);
+        }
+
+        return user;
+    }
 
     public async Task<LoginResult> LoginAsync(string email, string password, CancellationToken cancellationToken)
     {
@@ -40,6 +51,7 @@ public sealed class AuthService(
         }
 
         await session.StartAsync(tokens, user);
+        await userDatabase.OpenAsync(user.Id);
         return LoginResult.Succeeded(user);
     }
 
@@ -50,6 +62,7 @@ public sealed class AuthService(
             await RevokeAsync(refreshToken);
         }
 
+        await userDatabase.CloseAsync();
         session.End(SessionEndReason.SignedOut);
     }
 

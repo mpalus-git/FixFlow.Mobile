@@ -2,14 +2,16 @@ using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Navigation;
+using FixFlow.Mobile.UnitTests.Storage;
 using NSubstitute;
 using Refit;
 
 namespace FixFlow.Mobile.UnitTests.Features.Auth;
 
-public sealed class StartupViewModelTests : IDisposable
+public sealed class StartupViewModelTests : IAsyncDisposable
 {
     private readonly InMemorySecureStore _secureStore = new();
+    private readonly TestUserDatabase _userDatabase = new();
     private readonly INavigationService _navigation = Substitute.For<INavigationService>();
     private readonly HttpClient _httpClient = new() { BaseAddress = new Uri("https://api.test") };
     private readonly SessionStore _session;
@@ -19,7 +21,7 @@ public sealed class StartupViewModelTests : IDisposable
     {
         _session = new SessionStore(_secureStore, TimeProvider.System);
         var api = RestService.ForGenerated<IFixFlowApi>(_httpClient);
-        _viewModel = new StartupViewModel(new AuthService(api, api, _session, TimeProvider.System), _navigation);
+        _viewModel = new StartupViewModel(new AuthService(api, api, _session, _userDatabase.Database, TimeProvider.System), _navigation);
     }
 
     [Fact]
@@ -33,6 +35,7 @@ public sealed class StartupViewModelTests : IDisposable
 
         await _navigation.Received(1).NavigateToRootAsync<WorkOrderListViewModel>();
         await _navigation.DidNotReceive().NavigateToRootAsync<LoginViewModel>();
+        _userDatabase.Database.UserId.ShouldBe(_session.CurrentUser!.Id);
     }
 
     [Fact]
@@ -43,5 +46,9 @@ public sealed class StartupViewModelTests : IDisposable
         await _navigation.Received(1).NavigateToRootAsync<LoginViewModel>();
     }
 
-    public void Dispose() => _httpClient.Dispose();
+    public async ValueTask DisposeAsync()
+    {
+        _httpClient.Dispose();
+        await _userDatabase.DisposeAsync();
+    }
 }

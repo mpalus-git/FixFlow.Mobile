@@ -11,14 +11,16 @@ using FixFlow.Mobile.Core.Navigation;
 using FixFlow.Mobile.Core.Resources;
 using FixFlow.Mobile.UnitTests.Api;
 using Microsoft.Extensions.Time.Testing;
+using FixFlow.Mobile.UnitTests.Storage;
 using NSubstitute;
 using Refit;
 
 namespace FixFlow.Mobile.UnitTests.Features.Auth;
 
-public sealed class LoginViewModelTests : IDisposable
+public sealed class LoginViewModelTests : IAsyncDisposable
 {
     private readonly FakeTimeProvider _timeProvider = new(new DateTimeOffset(2026, 10, 5, 8, 0, 0, TimeSpan.Zero));
+    private readonly TestUserDatabase _userDatabase = new();
     private readonly IConnectivityService _connectivity = Substitute.For<IConnectivityService>();
     private readonly INavigationService _navigation = Substitute.For<INavigationService>();
     private readonly IDialogService _dialogs = Substitute.For<IDialogService>();
@@ -39,7 +41,7 @@ public sealed class LoginViewModelTests : IDisposable
         var anonymousApi = RestService.ForGenerated<IFixFlowApi>(CreateClient(_handler));
         _refresher = new TokenRefresher(anonymousApi, session, _timeProvider);
         _authenticationHandler = new AuthenticationHandler(session, _refresher) { InnerHandler = _handler };
-        var authService = new AuthService(anonymousApi, RestService.ForGenerated<IFixFlowApi>(CreateClient(_authenticationHandler)), session, _timeProvider);
+        var authService = new AuthService(anonymousApi, RestService.ForGenerated<IFixFlowApi>(CreateClient(_authenticationHandler)), session, _userDatabase.Database, _timeProvider);
         var readinessProbe = new ServerReadinessProbe(CreateClient(_handler), _timeProvider);
         var demoAccount = new DemoAccount("demo@fixflow.test", "demo-secret");
         _viewModel = new LoginViewModel(authService, readinessProbe, _connectivity, _navigation, _dialogs, _uriLauncher, demoAccount)
@@ -166,11 +168,12 @@ public sealed class LoginViewModelTests : IDisposable
         _viewModel.LoginCommand.CanExecute(null).ShouldBe(expected);
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         _authenticationHandler.Dispose();
         _refresher.Dispose();
         _handler.Dispose();
+        await _userDatabase.DisposeAsync();
     }
 
     private static HttpClient CreateClient(HttpMessageHandler handler) =>

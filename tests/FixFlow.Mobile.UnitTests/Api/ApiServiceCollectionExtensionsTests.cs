@@ -1,6 +1,7 @@
 using System.Net;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Features.Auth;
+using FixFlow.Mobile.Core.Storage;
 using FixFlow.Mobile.UnitTests.Features.Auth;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
@@ -15,7 +16,7 @@ public sealed class ApiServiceCollectionExtensionsTests
     public async Task Should_Not_Retry_Post_When_Server_Returns_503()
     {
         using var handler = new StubHttpMessageHandler(_ => new HttpResponseMessage(HttpStatusCode.ServiceUnavailable));
-        using var provider = BuildProvider(handler);
+        await using var provider = BuildProvider(handler);
         var api = provider.GetRequiredService<IFixFlowApi>();
 
         using var response = await AdvanceUntilCompleted(api.StartWorkAsync(Guid.NewGuid(), TestContext.Current.CancellationToken));
@@ -30,7 +31,7 @@ public sealed class ApiServiceCollectionExtensionsTests
         var attempts = 0;
         using var handler = new StubHttpMessageHandler(_ => new HttpResponseMessage(
             Interlocked.Increment(ref attempts) == 1 ? HttpStatusCode.ServiceUnavailable : HttpStatusCode.NotFound));
-        using var provider = BuildProvider(handler);
+        await using var provider = BuildProvider(handler);
         var api = provider.GetRequiredService<IFixFlowApi>();
 
         using var response = await AdvanceUntilCompleted(api.GetWorkOrderAsync(Guid.NewGuid(), TestContext.Current.CancellationToken));
@@ -41,10 +42,10 @@ public sealed class ApiServiceCollectionExtensionsTests
     }
 
     [Fact]
-    public void Should_Resolve_Readiness_Probe_And_Auth_Service_When_Api_Is_Registered()
+    public async Task Should_Resolve_Readiness_Probe_And_Auth_Service_When_Api_Is_Registered()
     {
         using var handler = new StubHttpMessageHandler(_ => new HttpResponseMessage(HttpStatusCode.OK));
-        using var provider = BuildProvider(handler);
+        await using var provider = BuildProvider(handler);
 
         provider.GetService<ServerReadinessProbe>().ShouldNotBeNull();
         provider.GetService<AuthService>().ShouldNotBeNull();
@@ -55,7 +56,9 @@ public sealed class ApiServiceCollectionExtensionsTests
         var services = new ServiceCollection()
             .AddSingleton<TimeProvider>(_timeProvider)
             .AddSingleton<ISecureStore, InMemorySecureStore>()
-            .AddSingleton<SessionStore>();
+            .AddSingleton<SessionStore>()
+            .AddSingleton(new LocalDatabaseOptions(Path.GetTempPath()))
+            .AddSingleton<UserDatabase>();
         services.AddFixFlowApi(new Uri("https://api.test")).ConfigurePrimaryHttpMessageHandler(() => handler);
         return services.BuildServiceProvider();
     }
