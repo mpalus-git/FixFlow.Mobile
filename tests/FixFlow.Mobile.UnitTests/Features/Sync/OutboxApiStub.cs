@@ -12,12 +12,17 @@ internal sealed class OutboxApiStub
 
     public Dictionary<string, Func<HttpResponseMessage>> Overrides { get; } = [];
 
+    public Dictionary<string, Func<Task<HttpResponseMessage>>> AsyncOverrides { get; } = [];
+
     public string RemoteStatus { get; set; } = "Assigned";
 
     public async Task<HttpResponseMessage> RouteAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         var call = $"{request.Method} {request.RequestUri!.AbsolutePath}";
-        Calls.Add(call);
+        lock (Calls)
+        {
+            Calls.Add(call);
+        }
         if (request.Content is not null && call.EndsWith("/service-entries", StringComparison.Ordinal))
         {
             SentEntries.Add(JsonDocument.Parse(await request.Content.ReadAsStringAsync(cancellationToken)));
@@ -26,6 +31,16 @@ internal sealed class OutboxApiStub
         if (Overrides.TryGetValue(call, out var respond))
         {
             return respond();
+        }
+
+        if (AsyncOverrides.TryGetValue(call, out var respondAsync))
+        {
+            return await respondAsync();
+        }
+
+        if (call == "GET /api/v1/work-orders")
+        {
+            return Json(HttpStatusCode.OK, """{"items":[],"page":1,"pageSize":100,"totalCount":0}""");
         }
 
         if (request.Method == HttpMethod.Get)

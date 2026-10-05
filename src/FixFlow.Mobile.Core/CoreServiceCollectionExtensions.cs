@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.Messaging;
 using FixFlow.Mobile.Core.Api;
+using FixFlow.Mobile.Core.Connectivity;
 using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.Parts;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
@@ -36,6 +37,14 @@ public static class CoreServiceCollectionExtensions
         services.AddTransient<OutboxWriter>();
         services.AddSingleton(OutboxRetryPolicy.CreateDefault());
         services.AddTransient<OutboxDispatcher>();
+        services.AddSingleton(provider => new SyncCoordinator(
+            provider.GetRequiredService<UserDatabase>(),
+            provider.GetRequiredService<IConnectivityService>(),
+            provider.GetRequiredService<ServerWarmup>(),
+            provider.GetRequiredService<ServerReadinessProbe>,
+            provider.GetRequiredService<OutboxDispatcher>,
+            provider.GetRequiredService<WorkOrderSyncService>,
+            provider.GetRequiredService<IMessenger>()));
         services.AddTransient<WorkOrderSyncService>();
         services.AddTransient<WorkOrderDetailsSyncService>();
         services.AddTransient<WorkOrderRepository>();
