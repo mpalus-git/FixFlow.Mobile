@@ -5,15 +5,20 @@ namespace FixFlow.Mobile.Core.Features.WorkOrders;
 
 public sealed class WorkOrderListPresenter(WorkOrderSectionClassifier classifier, DisplayFormatter formatter)
 {
-    public IReadOnlyList<WorkOrderGroup> Present(IEnumerable<WorkOrder> workOrders) =>
-    [
-        .. classifier.Group(workOrders).Select(group => new WorkOrderGroup(
-            group.Section,
-            WorkOrderTexts.Section(group.Section),
-            group.WorkOrders.Select(workOrder => ToItem(group.Section, workOrder)))),
-    ];
+    public IReadOnlyList<WorkOrderGroup> Present(IEnumerable<WorkOrder> workOrders, IReadOnlySet<Guid> pendingWorkOrderIds)
+    {
+        ArgumentNullException.ThrowIfNull(pendingWorkOrderIds);
 
-    private WorkOrderListItem ToItem(WorkOrderSection section, WorkOrder workOrder) => new(
+        return
+        [
+            .. classifier.Group(workOrders).Select(group => new WorkOrderGroup(
+                group.Section,
+                WorkOrderTexts.Section(group.Section),
+                group.WorkOrders.Select(workOrder => ToItem(group.Section, workOrder, pendingWorkOrderIds.Contains(workOrder.Id))))),
+        ];
+    }
+
+    private WorkOrderListItem ToItem(WorkOrderSection section, WorkOrder workOrder, bool isPending) => new(
         workOrder.Id,
         workOrder.Number,
         workOrder.ClientName,
@@ -24,5 +29,6 @@ public sealed class WorkOrderListPresenter(WorkOrderSectionClassifier classifier
         workOrder.Status,
         WorkOrderTexts.Status(workOrder.Status),
         workOrder.Priority,
-        WorkOrderTexts.Priority(workOrder.Priority));
+        WorkOrderTexts.Priority(workOrder.Priority),
+        isPending);
 }

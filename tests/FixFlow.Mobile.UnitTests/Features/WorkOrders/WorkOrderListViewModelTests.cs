@@ -34,6 +34,7 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
     private readonly StubHttpMessageHandler _handler;
     private readonly SessionStore _session;
     private readonly WorkOrderRepository _workOrders;
+    private readonly OutboxRepository _outbox;
     private readonly WorkOrderListViewModel _viewModel;
     private Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> _respond;
     private int _remoteCount = 2;
@@ -55,10 +56,12 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
             new ServerWarmup(),
             _workOrders,
             new SyncStateRepository(_userDatabase.Database, _timeProvider));
+        _outbox = new OutboxRepository(_userDatabase.Database);
         _viewModel = new WorkOrderListViewModel(
             new ScreenState(formatter),
             new AuthService(api, api, _session, _userDatabase.Database, _timeProvider),
             _workOrders,
+            _outbox,
             sync,
             new WorkOrderListPresenter(new WorkOrderSectionClassifier(clock), formatter),
             _connectivity,
@@ -90,6 +93,21 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
         release.SetResult();
         await load;
         _viewModel.Groups.SelectMany(group => group).Count().ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task Should_Show_Queued_Start_As_In_Progress_And_Pending_When_Device_Is_Offline()
+    {
+        var workOrder = TestWorkOrders.Create("ZL-LOCAL", Now.AddDays(1));
+        await _workOrders.ReplaceAllAsync([workOrder]);
+        await new OutboxWriter(_outbox, _timeProvider, _messenger).StartWorkAsync(workOrder.Id);
+        _connectivity.IsOnline.Returns(false);
+
+        await _viewModel.LoadCommand.ExecuteAsync(null);
+
+        var item = _viewModel.Groups.SelectMany(group => group).ShouldHaveSingleItem();
+        item.IsInProgress.ShouldBeTrue();
+        item.IsPending.ShouldBeTrue();
     }
 
     [Fact]

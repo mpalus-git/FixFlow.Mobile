@@ -231,4 +231,7 @@
   <data name="DetailsDownloadProtocolButton" xml:space="preserve">
     <value>Download PDF protocol</value>
   </data>
+  <data name="PendingSyncLabel" xml:space="preserve">
+    <value>Waiting to be sent</value>
+  </data>
 </root>

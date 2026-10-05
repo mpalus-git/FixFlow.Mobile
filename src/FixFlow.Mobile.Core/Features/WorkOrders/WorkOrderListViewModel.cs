@@ -15,6 +15,7 @@ public sealed partial class WorkOrderListViewModel : ObservableObject, IRecipien
 {
     private readonly AuthService _authService;
     private readonly WorkOrderRepository _workOrders;
+    private readonly OutboxRepository _outbox;
     private readonly WorkOrderSyncService _sync;
     private readonly WorkOrderListPresenter _presenter;
     private readonly IConnectivityService _connectivity;
@@ -24,6 +25,7 @@ public sealed partial class WorkOrderListViewModel : ObservableObject, IRecipien
         ScreenState screen,
         AuthService authService,
         WorkOrderRepository workOrders,
+        OutboxRepository outbox,
         WorkOrderSyncService sync,
         WorkOrderListPresenter presenter,
         IConnectivityService connectivity,
@@ -34,6 +36,7 @@ public sealed partial class WorkOrderListViewModel : ObservableObject, IRecipien
         Screen = screen;
         _authService = authService;
         _workOrders = workOrders;
+        _outbox = outbox;
         _sync = sync;
         _presenter = presenter;
         _connectivity = connectivity;
@@ -136,7 +139,10 @@ public sealed partial class WorkOrderListViewModel : ObservableObject, IRecipien
 
     private async Task ShowLocalAsync(bool updateScreen)
     {
-        Groups = _presenter.Present(await _workOrders.GetAllAsync());
+        var operations = await _outbox.GetAllAsync();
+        Groups = _presenter.Present(
+            PendingOperationsOverlay.Apply(await _workOrders.GetAllAsync(), operations),
+            operations.Select(operation => operation.WorkOrderId).ToHashSet());
         if (updateScreen)
         {
             Screen.ShowContent(hasItems: Groups.Count > 0);

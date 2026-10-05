@@ -43,7 +43,7 @@
                         <Grid Padding="16,4">
                             <Border Style="{StaticResource CardBorder}">
                                 <Grid ColumnDefinitions="*,Auto"
-                                      RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+                                      RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
                                       RowSpacing="2">
                                     <Label Text="{Binding Number}"
                                            FontAttributes="Bold" />
@@ -74,6 +74,12 @@
                                            Grid.ColumnSpan="2"
                                            Text="{Binding DateText}"
                                            Style="{StaticResource SecondaryLabel}" />
+                                    <Label Grid.Row="5"
+                                           Grid.ColumnSpan="2"
+                                           Text="{x:Static resources:AppResources.PendingSyncLabel}"
+                                           IsVisible="{Binding IsPending}"
+                                           Style="{StaticResource SecondaryLabel}"
+                                           FontAttributes="Italic" />
                                     <Label Grid.Row="4"
                                            Grid.ColumnSpan="2"
                                            Text="{Binding PriorityText}"
