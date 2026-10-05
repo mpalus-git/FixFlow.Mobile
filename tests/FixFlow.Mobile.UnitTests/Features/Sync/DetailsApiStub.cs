@@ -29,6 +29,11 @@ internal sealed class DetailsApiStub
             };
         }
 
+        if (path == $"/api/v1/work-orders/{WorkOrderId}/protocol")
+        {
+            return new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(Encoding.ASCII.GetBytes("%PDF-1.7")) };
+        }
+
         object content = path switch
         {
             _ when path == $"/api/v1/work-orders/{WorkOrderId}" => new
@@ -52,7 +57,7 @@ internal sealed class DetailsApiStub
                 new
                 {
                     id = Guid.NewGuid(), workOrderId = WorkOrderId, technicianId = Guid.NewGuid(), technicianName = "Jan Kowalski",
-                    note = "Wymiana filtra", isCorrection = false, photoUrls = Array.Empty<string>(), createdAt = Now,
+                    note = "Wymiana filtra", isCorrection = false, latitude = 50.0614, longitude = 19.9366, photoUrls = Array.Empty<string>(), createdAt = Now,
                     parts = new[] { new { partId = Guid.NewGuid(), partName = "Filtr", catalogNumber = "FP-100", quantity = 2, unitPrice = 12.34m } },
                 },
             },

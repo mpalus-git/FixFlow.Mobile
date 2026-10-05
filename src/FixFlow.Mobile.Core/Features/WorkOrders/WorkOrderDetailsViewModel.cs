@@ -2,7 +2,10 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FixFlow.Mobile.Core.Api.Errors;
 using FixFlow.Mobile.Core.Connectivity;
+using FixFlow.Mobile.Core.Dialogs;
+using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Sync;
+using FixFlow.Mobile.Core.Launching;
 using FixFlow.Mobile.Core.Navigation;
 using FixFlow.Mobile.Core.Resources;
 using FixFlow.Mobile.Core.Screens;
@@ -15,7 +18,12 @@ public sealed partial class WorkOrderDetailsViewModel(
     WorkOrderDetailsSyncService sync,
     SyncStateRepository syncStates,
     WorkOrderDetailsPresenter presenter,
-    IConnectivityService connectivity) : ObservableObject, INavigatedTo<Guid>
+    ServiceProtocolService protocols,
+    IConnectivityService connectivity,
+    IMapLauncher maps,
+    IUriLauncher uris,
+    IDialogService dialogs,
+    INavigationService navigation) : ObservableObject, INavigatedTo<Guid>
 {
     private Guid _workOrderId;
 
@@ -89,6 +97,62 @@ public sealed partial class WorkOrderDetailsViewModel(
             IsRefreshing = false;
         }
     }
+
+    [RelayCommand]
+    private async Task CallClientAsync()
+    {
+        if (Details?.Client is { } client
+            && !await uris.OpenAsync(new Uri("tel:" + new string([.. client.Phone.Where(character => char.IsDigit(character) || character == '+')]))))
+        {
+            await ShowErrorAsync(AppResources.PhoneUnavailable);
+        }
+    }
+
+    [RelayCommand]
+    private async Task OpenAddressAsync()
+    {
+        if (Details?.Client is { } client && !await maps.OpenAddressAsync(client.Name, client.Street, client.PostalCode, client.City))
+        {
+            await ShowErrorAsync(AppResources.MapUnavailable);
+        }
+    }
+
+    [RelayCommand]
+    private async Task OpenEntryLocationAsync(ServiceEntryView entry)
+    {
+        if (entry is { Latitude: { } latitude, Longitude: { } longitude }
+            && !await maps.OpenLocationAsync(Details?.Number ?? string.Empty, latitude, longitude))
+        {
+            await ShowErrorAsync(AppResources.MapUnavailable);
+        }
+    }
+
+    [RelayCommand]
+    private async Task DownloadProtocolAsync(CancellationToken cancellationToken)
+    {
+        if (Details is not { CanDownloadProtocol: true } details)
+        {
+            return;
+        }
+
+        if (!connectivity.IsOnline)
+        {
+            await ShowErrorAsync(AppResources.ProtocolRequiresConnection);
+            return;
+        }
+
+        if (await protocols.OpenAsync(_workOrderId, details.Number, cancellationToken) is { } error)
+        {
+            await ShowErrorAsync(error.Detail ?? AppResources.ProtocolFailed);
+        }
+    }
+
+    [RelayCommand]
+    private Task OpenHistoryItemAsync(DeviceHistoryView item) =>
+        navigation.NavigateToAsync<WorkOrderDetailsViewModel, Guid>(item.WorkOrderId);
+
+    private Task ShowErrorAsync(string message) =>
+        dialogs.ShowAlertAsync(AppResources.ErrorTitle, message, AppResources.CloseButton);
 
     private async Task ShowLocalAsync()
     {

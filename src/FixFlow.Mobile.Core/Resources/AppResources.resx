@@ -186,4 +186,16 @@
   <data name="WorkOrderNoLongerAssigned" xml:space="preserve">
     <value>To zlecenie nie jest już do Ciebie przypisane.</value>
   </data>
+  <data name="MapUnavailable" xml:space="preserve">
+    <value>Nie udało się otworzyć mapy.</value>
+  </data>
+  <data name="PhoneUnavailable" xml:space="preserve">
+    <value>Nie udało się otworzyć aplikacji do dzwonienia.</value>
+  </data>
+  <data name="ProtocolRequiresConnection" xml:space="preserve">
+    <value>Protokół można pobrać tylko przy połączeniu z siecią.</value>
+  </data>
+  <data name="ProtocolFailed" xml:space="preserve">
+    <value>Nie udało się pobrać protokołu.</value>
+  </data>
 </root>

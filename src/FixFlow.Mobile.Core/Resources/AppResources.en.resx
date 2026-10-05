@@ -186,4 +186,16 @@
   <data name="WorkOrderNoLongerAssigned" xml:space="preserve">
     <value>This work order is no longer assigned to you.</value>
   </data>
+  <data name="MapUnavailable" xml:space="preserve">
+    <value>Could not open the map.</value>
+  </data>
+  <data name="PhoneUnavailable" xml:space="preserve">
+    <value>Could not open the phone app.</value>
+  </data>
+  <data name="ProtocolRequiresConnection" xml:space="preserve">
+    <value>The protocol can only be downloaded with a network connection.</value>
+  </data>
+  <data name="ProtocolFailed" xml:space="preserve">
+    <value>Could not download the protocol.</value>
+  </data>
 </root>
