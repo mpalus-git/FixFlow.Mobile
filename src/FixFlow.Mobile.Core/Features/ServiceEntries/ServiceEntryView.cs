@@ -9,7 +9,8 @@ public sealed record ServiceEntryView(
     string? WorkTimeText,
     IReadOnlyList<ServiceEntryPartView> Parts,
     double? Latitude,
-    double? Longitude)
+    double? Longitude,
+    bool IsPending)
 {
     public bool HasLocation => Latitude is not null && Longitude is not null;
 

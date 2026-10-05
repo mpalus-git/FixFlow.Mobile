@@ -1,4 +1,5 @@
 using System.Net;
+using CommunityToolkit.Mvvm.Messaging;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Connectivity;
 using FixFlow.Mobile.Core.Dialogs;
@@ -45,7 +46,8 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
             new ClientRepository(database),
             new DeviceRepository(database),
             new ServiceEntryRepository(database),
-            new DeviceHistoryRepository(database));
+            new DeviceHistoryRepository(database),
+            new OutboxRepository(database));
         var api = RestService.ForGenerated<IFixFlowApi>(new HttpClient(_handler, disposeHandler: false) { BaseAddress = new Uri("https://api.test") });
         var formatter = new DisplayFormatter(new LanguageService(Substitute.For<ISettingsStore>()), BusinessClock.CreateForWarsaw(timeProvider));
         _viewModel = new WorkOrderDetailsViewModel(
@@ -88,6 +90,22 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
         _viewModel.Details.ShouldNotBeNull().Number.ShouldBe("ZL-LOCAL");
         _viewModel.Screen.IsOffline.ShouldBeTrue();
         _handler.Requests.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Should_Show_Queued_Start_And_Entry_When_Device_Is_Offline()
+    {
+        await _sources.WorkOrders.ReplaceAllAsync([TestWorkOrders.Create("ZL-LOCAL", DetailsApiStub.Now) with { Id = _api.WorkOrderId }]);
+        var writer = new OutboxWriter(_sources.Outbox, TimeProvider.System, new WeakReferenceMessenger());
+        await writer.StartWorkAsync(_api.WorkOrderId);
+        await writer.AddServiceEntryAsync(_api.WorkOrderId, new PendingServiceEntry(Guid.CreateVersion7(), "Offline", false, null, null, null, null, []));
+        _connectivity.IsOnline.Returns(false);
+
+        await _viewModel.OnNavigatedToAsync(_api.WorkOrderId);
+
+        var details = _viewModel.Details.ShouldNotBeNull();
+        details.StatusText.ShouldBe(WorkOrderTexts.Status(WorkOrderStatus.InProgress));
+        details.Entries.ShouldHaveSingleItem().IsPending.ShouldBeTrue();
     }
 
     [Fact]

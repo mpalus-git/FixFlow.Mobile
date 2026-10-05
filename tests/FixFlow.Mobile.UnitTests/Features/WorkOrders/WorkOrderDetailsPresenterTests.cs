@@ -1,6 +1,7 @@
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Settings;
+using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Formatting;
 using Microsoft.Extensions.Time.Testing;
@@ -32,7 +33,7 @@ public sealed class WorkOrderDetailsPresenterTests : IDisposable
         var client = new Client(Guid.NewGuid(), "Piekarnia", "Długa", "12A", "31-147", "Kraków", "Anna Kowalska", "+48 600 100 200", null, null);
         var device = new Device(Guid.NewGuid(), client.Id, "SN-1", "Altherma 3", "Daikin", new DateOnly(2021, 3, 14), null);
 
-        var view = _presenter.Present(_workOrder, client, device, [], []);
+        var view = _presenter.Present(_workOrder, client, device, [], [], []);
 
         view.Client.ShouldNotBeNull().AddressText.ShouldBe("Długa 12A, 31-147 Kraków");
         view.Client.ContactText.ShouldBe("Osoba kontaktowa: Anna Kowalska");
@@ -48,7 +49,7 @@ public sealed class WorkOrderDetailsPresenterTests : IDisposable
         var work = CreateEntry(isCorrection: false, filter);
         var correction = CreateEntry(isCorrection: true, filter with { Quantity = 1 });
 
-        var view = _presenter.Present(_workOrder, null, null, [work, correction], []);
+        var view = _presenter.Present(_workOrder, null, null, [work, correction], [], []);
 
         var returned = view.Entries[1].Parts.ShouldHaveSingleItem();
         returned.QuantityText.ShouldBe("-1 szt.");
@@ -65,7 +66,7 @@ public sealed class WorkOrderDetailsPresenterTests : IDisposable
             WorkFinishedAt = new DateTimeOffset(2026, 10, 5, 8, 45, 0, TimeSpan.Zero),
         };
 
-        var view = _presenter.Present(_workOrder, null, null, [entry], []);
+        var view = _presenter.Present(_workOrder, null, null, [entry], [], []);
 
         view.Entries.ShouldHaveSingleItem().WorkTimeText.ShouldBe("Czas pracy: 05.10.2026 08:15 – 10:45 (2 h 30 min)");
     }
@@ -76,9 +77,23 @@ public sealed class WorkOrderDetailsPresenterTests : IDisposable
         var current = new DeviceHistoryItem(_workOrder.Id, _workOrder.DeviceId, _workOrder.Number, WorkOrderStatus.InProgress, WorkOrderPriority.Normal, "Bieżące", "Jan Kowalski", Now, null, null, 0);
         var previous = current with { WorkOrderId = Guid.NewGuid(), Number = "ZL-2026-0007", Status = WorkOrderStatus.Invoiced, CompletedAt = Now.AddDays(-30), ServiceEntryCount = 3 };
 
-        var view = _presenter.Present(_workOrder, null, null, [], [current, previous]);
+        var view = _presenter.Present(_workOrder, null, null, [], [current, previous], []);
 
         view.History.ShouldBe([new DeviceHistoryView(previous.WorkOrderId, "ZL-2026-0007", "Rozliczone", "05.09.2026 08:00", "Jan Kowalski", "Wpisy: 3")]);
+    }
+
+    [Fact]
+    public void Should_Append_Queued_Entry_As_Pending_And_Count_Its_Parts_When_Entry_Waits_In_Queue()
+    {
+        var confirmed = CreateEntry(isCorrection: false, new ServiceEntryPart(Guid.NewGuid(), "Filtr", "FP-100", 1, 10m));
+        var pending = new PendingServiceEntry(Guid.CreateVersion7(), "Druga wizyta", false, null, null, null, null, [new PendingServiceEntryPart(Guid.NewGuid(), "Uszczelka", "U-1", 2, 2.5m)]);
+        var operation = new OutboxOperation(Guid.CreateVersion7(), _workOrder.Id, OutboxOperationKind.AddServiceEntry, OutboxPayload.Serialize(pending), Now, 0, null, null);
+
+        var view = _presenter.Present(_workOrder, null, null, [confirmed], [], [operation]);
+
+        view.Entries.Select(entry => entry.IsPending).ShouldBe([false, true]);
+        view.Entries[1].Note.ShouldBe("Druga wizyta");
+        view.PartsTotalText.ShouldBe($"Części netto razem: {_formatter.FormatMoney(15m)}");
     }
 
     [Theory]
@@ -88,7 +103,7 @@ public sealed class WorkOrderDetailsPresenterTests : IDisposable
     [InlineData(WorkOrderStatus.Invoiced, true)]
     public void Should_Offer_Protocol_Only_When_Work_Order_Is_Completed_Or_Invoiced(WorkOrderStatus status, bool expected)
     {
-        _presenter.Present(_workOrder with { Status = status }, null, null, [], []).CanDownloadProtocol.ShouldBe(expected);
+        _presenter.Present(_workOrder with { Status = status }, null, null, [], [], []).CanDownloadProtocol.ShouldBe(expected);
     }
 
     public void Dispose() => _cultureScope.Dispose();
