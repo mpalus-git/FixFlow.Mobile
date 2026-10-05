@@ -133,7 +133,7 @@ namespace FixFlow.Mobile.Core.Api
     public partial record AddServiceEntryRequest
     {
         [JsonConstructor]
-        public AddServiceEntryRequest(bool? @isCorrection, double? @latitude, double? @longitude, string @note, ICollection<ServiceEntryPartRequest>? @parts, ICollection<string>? @photoUrls, System.DateTimeOffset? @workFinishedAt, System.DateTimeOffset? @workStartedAt)
+        public AddServiceEntryRequest(System.Guid? @id, bool? @isCorrection, double? @latitude, double? @longitude, string @note, ICollection<ServiceEntryPartRequest>? @parts, ICollection<string>? @photoUrls, System.DateTimeOffset? @workFinishedAt, System.DateTimeOffset? @workStartedAt)
         {
             this.Note = @note;
             this.IsCorrection = @isCorrection;
@@ -143,6 +143,7 @@ namespace FixFlow.Mobile.Core.Api
             this.Latitude = @latitude;
             this.Longitude = @longitude;
             this.Parts = @parts;
+            this.Id = @id;
         }
 
         [JsonPropertyName("note")]
@@ -169,6 +170,9 @@ namespace FixFlow.Mobile.Core.Api
 
         [JsonPropertyName("parts")]
         public ICollection<ServiceEntryPartRequest>? Parts { get; init; }
+
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; init; }
 
         private IDictionary<string, object>? _additionalProperties;
 
