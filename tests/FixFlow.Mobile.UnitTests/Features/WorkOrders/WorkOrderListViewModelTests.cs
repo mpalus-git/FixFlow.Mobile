@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using CommunityToolkit.Mvvm.Messaging;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Connectivity;
 using FixFlow.Mobile.Core.Features.Auth;
@@ -27,6 +28,7 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
     private readonly InMemorySecureStore _secureStore = new();
     private readonly TestUserDatabase _userDatabase = new();
     private readonly IConnectivityService _connectivity = Substitute.For<IConnectivityService>();
+    private readonly WeakReferenceMessenger _messenger = new();
     private readonly StubHttpMessageHandler _handler;
     private readonly SessionStore _session;
     private readonly WorkOrderRepository _workOrders;
@@ -57,7 +59,8 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
             _workOrders,
             sync,
             new WorkOrderListPresenter(new WorkOrderSectionClassifier(clock), formatter),
-            _connectivity);
+            _connectivity,
+            _messenger);
     }
 
     public async ValueTask InitializeAsync() => await _userDatabase.Database.OpenAsync(Guid.NewGuid());
@@ -157,6 +160,20 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
         await load;
         _viewModel.Notice.ShouldBeNull();
         _viewModel.Screen.Status.ShouldBe(ScreenStatus.Content);
+    }
+
+    [Fact]
+    public async Task Should_Update_Connection_Indicator_When_Connectivity_Changes()
+    {
+        await _viewModel.LoadCommand.ExecuteAsync(null);
+
+        _messenger.Send(new ConnectivityChangedMessage(IsOnline: false));
+        await Task.Delay(50, TestContext.Current.CancellationToken);
+        _viewModel.Screen.IsOffline.ShouldBeTrue();
+        _viewModel.Screen.OfflineMessage.ShouldNotBeNull().ShouldContain("05.10.2026 10:00");
+
+        _messenger.Send(new ConnectivityChangedMessage(IsOnline: true));
+        _viewModel.Screen.IsOffline.ShouldBeFalse();
     }
 
     [Fact]

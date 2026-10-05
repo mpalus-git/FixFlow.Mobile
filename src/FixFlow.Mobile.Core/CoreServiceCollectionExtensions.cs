@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.Messaging;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.Parts;
@@ -16,6 +17,7 @@ public static class CoreServiceCollectionExtensions
     public static IServiceCollection AddCore(this IServiceCollection services)
     {
         services.AddSingleton(TimeProvider.System);
+        services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
         services.AddSingleton(provider => BusinessClock.CreateForWarsaw(provider.GetRequiredService<TimeProvider>()));
         services.AddSingleton<ILanguageService, LanguageService>();
         services.AddSingleton<SessionStore>();
