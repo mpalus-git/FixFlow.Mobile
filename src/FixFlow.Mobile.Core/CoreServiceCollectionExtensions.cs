@@ -1,3 +1,4 @@
+using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.Parts;
 using FixFlow.Mobile.Core.Features.Settings;
@@ -19,6 +20,7 @@ public static class CoreServiceCollectionExtensions
         services.AddSingleton<ILanguageService, LanguageService>();
         services.AddSingleton<SessionStore>();
         services.AddSingleton<UserDatabase>();
+        services.AddSingleton<ServerWarmup>();
         services.AddSingleton<SessionEndNavigator>();
         services.AddSingleton<DisplayFormatter>();
         services.AddTransient<ScreenState>();
