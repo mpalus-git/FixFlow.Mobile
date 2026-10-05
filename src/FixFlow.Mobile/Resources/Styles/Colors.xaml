@@ -13,6 +13,8 @@
     <Color x:Key="MutedDark">#262626</Color>
     <Color x:Key="MutedForegroundLight">#737373</Color>
     <Color x:Key="MutedForegroundDark">#A1A1A1</Color>
+    <Color x:Key="InputLight">#E5E5E5</Color>
+    <Color x:Key="InputDark">#313131</Color>
     <Color x:Key="DestructiveTextLight">#C10007</Color>
     <Color x:Key="DestructiveTextDark">#FFA2A2</Color>
 </ResourceDictionary>
