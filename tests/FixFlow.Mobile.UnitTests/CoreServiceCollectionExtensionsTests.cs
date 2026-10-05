@@ -24,6 +24,8 @@ public sealed class CoreServiceCollectionExtensionsTests
             .AddSingleton(Substitute.For<INavigationService>())
             .AddSingleton(Substitute.For<IDialogService>())
             .AddSingleton(Substitute.For<IUriLauncher>())
+            .AddSingleton(Substitute.For<IMapLauncher>())
+            .AddSingleton(Substitute.For<IDocumentLauncher>())
             .AddSingleton(new DemoAccount(string.Empty, string.Empty))
             .AddSingleton(new LocalDatabaseOptions(Path.GetTempPath()))
             .AddCore();

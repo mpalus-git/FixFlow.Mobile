@@ -37,6 +37,10 @@ public static partial class MauiProgram
         builder.Services.AddSingleton<IConnectivityService, EssentialsConnectivityService>();
         builder.Services.AddSingleton(Launcher.Default);
         builder.Services.AddSingleton<IUriLauncher, EssentialsUriLauncher>();
+        builder.Services.AddSingleton(Map.Default);
+        builder.Services.AddSingleton<IMapLauncher, EssentialsMapLauncher>();
+        builder.Services.AddSingleton(FileSystem.Current);
+        builder.Services.AddSingleton<IDocumentLauncher, EssentialsDocumentLauncher>();
         builder.Services.AddSingleton(new DemoAccount(BuildConfiguration.DemoTechnicianEmail, BuildConfiguration.DemoTechnicianPassword));
         builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
         builder.Services.AddSingleton<IDialogService, PageDialogService>();
@@ -44,6 +48,7 @@ public static partial class MauiProgram
         builder.Services.AddTransient<StartupPage>();
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<WorkOrderListPage>();
+        builder.Services.AddTransient<WorkOrderDetailsPage>();
 
         var app = builder.Build();
         app.Services.GetRequiredService<ILanguageService>().ApplySavedLanguage();

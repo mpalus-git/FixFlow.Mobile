@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.Parts;
+using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Settings;
 using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Features.WorkOrders;
@@ -32,10 +33,19 @@ public static class CoreServiceCollectionExtensions
         services.AddTransient<PartRepository>();
         services.AddTransient<SyncStateRepository>();
         services.AddTransient<WorkOrderSyncService>();
+        services.AddTransient<WorkOrderDetailsSyncService>();
         services.AddTransient<WorkOrderRepository>();
+        services.AddTransient<ClientRepository>();
+        services.AddTransient<DeviceRepository>();
+        services.AddTransient<DeviceHistoryRepository>();
+        services.AddTransient<ServiceProtocolService>();
+        services.AddTransient<ServiceEntryRepository>();
         services.AddSingleton<WorkOrderSectionClassifier>();
         services.AddSingleton<WorkOrderListPresenter>();
+        services.AddSingleton<WorkOrderDetailsPresenter>();
         services.AddTransient<WorkOrderListViewModel>();
+        services.AddTransient<WorkOrderDetailsSources>();
+        services.AddTransient<WorkOrderDetailsViewModel>();
 
         return services;
     }

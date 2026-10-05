@@ -4,5 +4,5 @@ namespace FixFlow.Mobile.Launching;
 
 public sealed class EssentialsUriLauncher(ILauncher launcher) : IUriLauncher
 {
-    public Task OpenAsync(Uri uri) => launcher.OpenAsync(uri);
+    public Task<bool> OpenAsync(Uri uri) => launcher.OpenAsync(uri);
 }

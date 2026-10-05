@@ -1,5 +1,3 @@
-using System.Globalization;
-using System.Text;
 using FixFlow.Mobile.Core.Formatting;
 using FixFlow.Mobile.Core.Resources;
 
@@ -11,7 +9,7 @@ public sealed class WorkOrderListPresenter(WorkOrderSectionClassifier classifier
     [
         .. classifier.Group(workOrders).Select(group => new WorkOrderGroup(
             group.Section,
-            Text($"WorkOrderSection{group.Section}"),
+            WorkOrderTexts.Section(group.Section),
             group.WorkOrders.Select(workOrder => ToItem(group.Section, workOrder)))),
     ];
 
@@ -21,16 +19,10 @@ public sealed class WorkOrderListPresenter(WorkOrderSectionClassifier classifier
         workOrder.ClientName,
         workOrder.DeviceModel,
         section == WorkOrderSection.RecentlyCompleted && workOrder.CompletedAt is { } completedAt
-            ? Format(AppResources.WorkOrderCompletedAt, formatter.FormatDateTime(completedAt))
-            : Format(AppResources.WorkOrderDueAt, formatter.FormatDateTime(workOrder.DueDate)),
+            ? WorkOrderTexts.Format(AppResources.WorkOrderCompletedAt, formatter.FormatDateTime(completedAt))
+            : WorkOrderTexts.Format(AppResources.WorkOrderDueAt, formatter.FormatDateTime(workOrder.DueDate)),
         workOrder.Status,
-        Text($"WorkOrderStatus{workOrder.Status}"),
+        WorkOrderTexts.Status(workOrder.Status),
         workOrder.Priority,
-        Text($"WorkOrderPriority{workOrder.Priority}"));
-
-    private static string Text(string key) =>
-        AppResources.ResourceManager.GetString(key, AppResources.Culture) ?? key;
-
-    private static string Format(string pattern, string value) =>
-        string.Format(CultureInfo.CurrentCulture, CompositeFormat.Parse(pattern), value);
+        WorkOrderTexts.Priority(workOrder.Priority));
 }

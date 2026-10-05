@@ -22,7 +22,10 @@
                      Command="{Binding RefreshCommand}"
                      IsRefreshing="{Binding IsRefreshing}">
             <CollectionView ItemsSource="{Binding Groups}"
-                            IsGrouped="True">
+                            IsGrouped="True"
+                            SelectionMode="Single"
+                            SelectedItem="{Binding SelectedWorkOrder}"
+                            SelectionChangedCommand="{Binding OpenSelectedWorkOrderCommand}">
                 <CollectionView.EmptyView>
                     <controls:EmptyView Message="{x:Static resources:AppResources.WorkOrderListEmpty}" />
                 </CollectionView.EmptyView>

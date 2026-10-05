@@ -4,5 +4,6 @@ public enum PullOutcome
 {
     Succeeded,
     ServerUnavailable,
+    NotFound,
     Failed,
 }

@@ -150,4 +150,85 @@
   <data name="WorkOrderListLoadFailed" xml:space="preserve">
     <value>Nie udało się pobrać zleceń. Sprawdź połączenie i spróbuj ponownie.</value>
   </data>
+  <data name="DetailsContactPerson" xml:space="preserve">
+    <value>Osoba kontaktowa: {0}</value>
+  </data>
+  <data name="DetailsSerialNumber" xml:space="preserve">
+    <value>Nr seryjny: {0}</value>
+  </data>
+  <data name="DetailsInstalledOn" xml:space="preserve">
+    <value>Zainstalowane: {0}</value>
+  </data>
+  <data name="DetailsWorkTime" xml:space="preserve">
+    <value>Czas pracy: {0} – {1} ({2})</value>
+  </data>
+  <data name="DetailsDuration" xml:space="preserve">
+    <value>{0} h {1} min</value>
+  </data>
+  <data name="DetailsQuantity" xml:space="preserve">
+    <value>{0} szt.</value>
+  </data>
+  <data name="DetailsPartsTotal" xml:space="preserve">
+    <value>Części netto razem: {0}</value>
+  </data>
+  <data name="DetailsEntryCount" xml:space="preserve">
+    <value>Wpisy: {0}</value>
+  </data>
+  <data name="DetailsCreatedAt" xml:space="preserve">
+    <value>Utworzono: {0}</value>
+  </data>
+  <data name="DetailsRefreshFailed" xml:space="preserve">
+    <value>Nie udało się odświeżyć zlecenia. Widzisz dane zapisane na urządzeniu.</value>
+  </data>
+  <data name="DetailsLoadFailed" xml:space="preserve">
+    <value>Nie udało się pobrać zlecenia. Sprawdź połączenie i spróbuj ponownie.</value>
+  </data>
+  <data name="WorkOrderNoLongerAssigned" xml:space="preserve">
+    <value>To zlecenie nie jest już do Ciebie przypisane.</value>
+  </data>
+  <data name="MapUnavailable" xml:space="preserve">
+    <value>Nie udało się otworzyć mapy.</value>
+  </data>
+  <data name="PhoneUnavailable" xml:space="preserve">
+    <value>Nie udało się otworzyć aplikacji do dzwonienia.</value>
+  </data>
+  <data name="ProtocolRequiresConnection" xml:space="preserve">
+    <value>Protokół można pobrać tylko przy połączeniu z siecią.</value>
+  </data>
+  <data name="ProtocolFailed" xml:space="preserve">
+    <value>Nie udało się pobrać protokołu.</value>
+  </data>
+  <data name="DetailsClientSection" xml:space="preserve">
+    <value>Klient</value>
+  </data>
+  <data name="DetailsDeviceSection" xml:space="preserve">
+    <value>Urządzenie</value>
+  </data>
+  <data name="DetailsCallButton" xml:space="preserve">
+    <value>Zadzwoń</value>
+  </data>
+  <data name="DetailsOpenMapButton" xml:space="preserve">
+    <value>Pokaż na mapie</value>
+  </data>
+  <data name="DetailsEntriesSection" xml:space="preserve">
+    <value>Wpisy serwisowe</value>
+  </data>
+  <data name="DetailsNoEntries" xml:space="preserve">
+    <value>Brak wpisów serwisowych.</value>
+  </data>
+  <data name="DetailsCorrectionBadge" xml:space="preserve">
+    <value>Korekta</value>
+  </data>
+  <data name="DetailsShowLocationButton" xml:space="preserve">
+    <value>Pokaż pozycję GPS</value>
+  </data>
+  <data name="DetailsHistorySection" xml:space="preserve">
+    <value>Twoje wcześniejsze zlecenia na tym urządzeniu</value>
+  </data>
+  <data name="DetailsNoHistory" xml:space="preserve">
+    <value>Brak wcześniejszych zleceń na tym urządzeniu.</value>
+  </data>
+  <data name="DetailsDownloadProtocolButton" xml:space="preserve">
+    <value>Pobierz protokół PDF</value>
+  </data>
 </root>

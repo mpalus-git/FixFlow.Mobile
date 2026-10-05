@@ -16,7 +16,8 @@
     "^/api/v1/parts$",
     "^/api/v1/parts/[{]partId[}]$",
     "^/api/v1/clients/[{]clientId[}]$",
-    "^/api/v1/devices/[{]deviceId[}]$"
+    "^/api/v1/devices/[{]deviceId[}]$",
+    "^/api/v1/devices/[{]deviceId[}]/work-orders$"
   ],
   "trimUnusedSchema": true,
   "keepSchemaPatterns": [
@@ -25,6 +26,9 @@
   ],
   "useCancellationTokens": true,
   "returnIApiResponse": true,
+  "responseTypeOverride": {
+    "GetServiceProtocol": "IApiResponse<System.IO.Stream>"
+  },
   "operationNameTemplate": "{operationName}Async",
   "generateXmlDocCodeComments": false,
   "generateStatusCodeComments": false,

@@ -20,6 +20,9 @@ public sealed class DisplayFormatter(ILanguageService languageService, BusinessC
             IsEnglish ? EnglishDateTimePattern : PolishDateTimePattern,
             languageService.CurrentCulture);
 
+    public string FormatTime(DateTimeOffset instant) =>
+        clock.ToBusinessTime(instant).ToString("HH:mm", languageService.CurrentCulture);
+
     public string FormatDate(DateOnly date) =>
         date.ToString(IsEnglish ? EnglishDatePattern : PolishDatePattern, languageService.CurrentCulture);
 
