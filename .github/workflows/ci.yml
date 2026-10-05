@@ -74,7 +74,7 @@ jobs:
       - uses: actions/cache@v6
         with:
           path: ~/.nuget/packages
-          key: nuget-android-${{ hashFiles('global.json', 'Directory.Packages.props', '**/*.csproj') }}
+          key: nuget-android-${{ hashFiles('global.json', 'Directory.Packages.props') }}
           restore-keys: nuget-android-
 
       - name: Install workloads
@@ -98,7 +98,7 @@ jobs:
       - uses: actions/cache@v6
         with:
           path: ~/.nuget/packages
-          key: nuget-windows-${{ hashFiles('global.json', 'Directory.Packages.props', '**/*.csproj') }}
+          key: nuget-windows-${{ hashFiles('global.json', 'Directory.Packages.props') }}
           restore-keys: nuget-windows-
 
       - name: Install workloads
