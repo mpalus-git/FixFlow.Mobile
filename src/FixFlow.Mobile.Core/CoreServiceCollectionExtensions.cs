@@ -1,3 +1,5 @@
+using CommunityToolkit.Mvvm.Messaging;
+using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.Parts;
 using FixFlow.Mobile.Core.Features.Settings;
@@ -15,10 +17,12 @@ public static class CoreServiceCollectionExtensions
     public static IServiceCollection AddCore(this IServiceCollection services)
     {
         services.AddSingleton(TimeProvider.System);
+        services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
         services.AddSingleton(provider => BusinessClock.CreateForWarsaw(provider.GetRequiredService<TimeProvider>()));
         services.AddSingleton<ILanguageService, LanguageService>();
         services.AddSingleton<SessionStore>();
         services.AddSingleton<UserDatabase>();
+        services.AddSingleton<ServerWarmup>();
         services.AddSingleton<SessionEndNavigator>();
         services.AddSingleton<DisplayFormatter>();
         services.AddTransient<ScreenState>();
@@ -27,7 +31,10 @@ public static class CoreServiceCollectionExtensions
         services.AddTransient<LoginViewModel>();
         services.AddTransient<PartRepository>();
         services.AddTransient<SyncStateRepository>();
+        services.AddTransient<WorkOrderSyncService>();
         services.AddTransient<WorkOrderRepository>();
+        services.AddSingleton<WorkOrderSectionClassifier>();
+        services.AddSingleton<WorkOrderListPresenter>();
         services.AddTransient<WorkOrderListViewModel>();
 
         return services;

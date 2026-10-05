@@ -96,4 +96,58 @@
   <data name="DemoLoginButton" xml:space="preserve">
     <value>Zaloguj się kontem demo</value>
   </data>
+  <data name="WorkOrderSectionOverdue" xml:space="preserve">
+    <value>Zaległe</value>
+  </data>
+  <data name="WorkOrderSectionToday" xml:space="preserve">
+    <value>Dziś</value>
+  </data>
+  <data name="WorkOrderSectionUpcoming" xml:space="preserve">
+    <value>Nadchodzące</value>
+  </data>
+  <data name="WorkOrderSectionRecentlyCompleted" xml:space="preserve">
+    <value>Zakończone ostatnio</value>
+  </data>
+  <data name="WorkOrderStatusNew" xml:space="preserve">
+    <value>Nowe</value>
+  </data>
+  <data name="WorkOrderStatusAssigned" xml:space="preserve">
+    <value>Przypisane</value>
+  </data>
+  <data name="WorkOrderStatusInProgress" xml:space="preserve">
+    <value>W toku</value>
+  </data>
+  <data name="WorkOrderStatusCompleted" xml:space="preserve">
+    <value>Zakończone</value>
+  </data>
+  <data name="WorkOrderStatusInvoiced" xml:space="preserve">
+    <value>Rozliczone</value>
+  </data>
+  <data name="WorkOrderPriorityLow" xml:space="preserve">
+    <value>Niski priorytet</value>
+  </data>
+  <data name="WorkOrderPriorityNormal" xml:space="preserve">
+    <value>Normalny priorytet</value>
+  </data>
+  <data name="WorkOrderPriorityHigh" xml:space="preserve">
+    <value>Wysoki priorytet</value>
+  </data>
+  <data name="WorkOrderPriorityCritical" xml:space="preserve">
+    <value>Krytyczny priorytet</value>
+  </data>
+  <data name="WorkOrderDueAt" xml:space="preserve">
+    <value>Termin: {0}</value>
+  </data>
+  <data name="WorkOrderCompletedAt" xml:space="preserve">
+    <value>Zakończono: {0}</value>
+  </data>
+  <data name="ServerStartingNotice" xml:space="preserve">
+    <value>Serwer się uruchamia. Pracujesz na danych zapisanych na urządzeniu.</value>
+  </data>
+  <data name="RefreshFailedNotice" xml:space="preserve">
+    <value>Nie udało się odświeżyć listy. Widzisz dane zapisane na urządzeniu.</value>
+  </data>
+  <data name="WorkOrderListLoadFailed" xml:space="preserve">
+    <value>Nie udało się pobrać zleceń. Sprawdź połączenie i spróbuj ponownie.</value>
+  </data>
 </root>

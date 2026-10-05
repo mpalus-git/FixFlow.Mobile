@@ -15,6 +15,6 @@ public partial class WorkOrderListPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        _viewModel.RefreshCommand.Execute(null);
+        _viewModel.LoadCommand.Execute(null);
     }
 }

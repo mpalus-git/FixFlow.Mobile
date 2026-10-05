@@ -96,4 +96,58 @@
   <data name="DemoLoginButton" xml:space="preserve">
     <value>Sign in with demo account</value>
   </data>
+  <data name="WorkOrderSectionOverdue" xml:space="preserve">
+    <value>Overdue</value>
+  </data>
+  <data name="WorkOrderSectionToday" xml:space="preserve">
+    <value>Today</value>
+  </data>
+  <data name="WorkOrderSectionUpcoming" xml:space="preserve">
+    <value>Upcoming</value>
+  </data>
+  <data name="WorkOrderSectionRecentlyCompleted" xml:space="preserve">
+    <value>Recently completed</value>
+  </data>
+  <data name="WorkOrderStatusNew" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="WorkOrderStatusAssigned" xml:space="preserve">
+    <value>Assigned</value>
+  </data>
+  <data name="WorkOrderStatusInProgress" xml:space="preserve">
+    <value>In progress</value>
+  </data>
+  <data name="WorkOrderStatusCompleted" xml:space="preserve">
+    <value>Completed</value>
+  </data>
+  <data name="WorkOrderStatusInvoiced" xml:space="preserve">
+    <value>Invoiced</value>
+  </data>
+  <data name="WorkOrderPriorityLow" xml:space="preserve">
+    <value>Low priority</value>
+  </data>
+  <data name="WorkOrderPriorityNormal" xml:space="preserve">
+    <value>Normal priority</value>
+  </data>
+  <data name="WorkOrderPriorityHigh" xml:space="preserve">
+    <value>High priority</value>
+  </data>
+  <data name="WorkOrderPriorityCritical" xml:space="preserve">
+    <value>Critical priority</value>
+  </data>
+  <data name="WorkOrderDueAt" xml:space="preserve">
+    <value>Due: {0}</value>
+  </data>
+  <data name="WorkOrderCompletedAt" xml:space="preserve">
+    <value>Completed: {0}</value>
+  </data>
+  <data name="ServerStartingNotice" xml:space="preserve">
+    <value>The server is starting. You are working with data saved on the device.</value>
+  </data>
+  <data name="RefreshFailedNotice" xml:space="preserve">
+    <value>Could not refresh the list. You are seeing data saved on the device.</value>
+  </data>
+  <data name="WorkOrderListLoadFailed" xml:space="preserve">
+    <value>Could not load work orders. Check your connection and try again.</value>
+  </data>
 </root>

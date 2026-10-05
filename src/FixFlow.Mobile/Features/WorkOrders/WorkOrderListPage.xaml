@@ -11,15 +11,88 @@
         <ToolbarItem Text="{x:Static resources:AppResources.LogoutButton}"
                      Command="{Binding LogoutCommand}" />
     </ContentPage.ToolbarItems>
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,Auto,*">
         <controls:OfflineBanner IsVisible="{Binding Screen.IsOffline}"
                                 Message="{Binding Screen.OfflineMessage}" />
-        <controls:LoadingView Grid.Row="1"
+        <controls:OfflineBanner Grid.Row="1"
+                                IsVisible="{Binding HasNotice}"
+                                Message="{Binding Notice}" />
+
+        <RefreshView Grid.Row="2"
+                     Command="{Binding RefreshCommand}"
+                     IsRefreshing="{Binding IsRefreshing}">
+            <CollectionView ItemsSource="{Binding Groups}"
+                            IsGrouped="True">
+                <CollectionView.EmptyView>
+                    <controls:EmptyView Message="{x:Static resources:AppResources.WorkOrderListEmpty}" />
+                </CollectionView.EmptyView>
+                <CollectionView.GroupHeaderTemplate>
+                    <DataTemplate x:DataType="viewModels:WorkOrderGroup">
+                        <Label Text="{Binding Title}"
+                               FontSize="14"
+                               FontAttributes="Bold"
+                               Padding="16,20,16,8"
+                               SemanticProperties.HeadingLevel="Level2" />
+                    </DataTemplate>
+                </CollectionView.GroupHeaderTemplate>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="viewModels:WorkOrderListItem">
+                        <Grid Padding="16,4">
+                            <Border Style="{StaticResource CardBorder}">
+                                <Grid ColumnDefinitions="*,Auto"
+                                      RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+                                      RowSpacing="2">
+                                    <Label Text="{Binding Number}"
+                                           FontAttributes="Bold" />
+                                    <Border Grid.Column="1"
+                                            Style="{StaticResource StatusBadge}">
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border" Binding="{Binding IsInProgress}" Value="True">
+                                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                                            </DataTrigger>
+                                        </Border.Triggers>
+                                        <Label Text="{Binding StatusText}"
+                                               FontSize="12">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding IsInProgress}" Value="True">
+                                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource PrimaryForegroundLight}, Dark={StaticResource PrimaryForegroundDark}}" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                    </Border>
+                                    <Label Grid.Row="1"
+                                           Grid.ColumnSpan="2"
+                                           Text="{Binding ClientName}" />
+                                    <Label Grid.Row="2"
+                                           Grid.ColumnSpan="2"
+                                           Text="{Binding DeviceModel}"
+                                           Style="{StaticResource SecondaryLabel}" />
+                                    <Label Grid.Row="3"
+                                           Grid.ColumnSpan="2"
+                                           Text="{Binding DateText}"
+                                           Style="{StaticResource SecondaryLabel}" />
+                                    <Label Grid.Row="4"
+                                           Grid.ColumnSpan="2"
+                                           Text="{Binding PriorityText}"
+                                           IsVisible="{Binding IsUrgent}"
+                                           Style="{StaticResource ErrorLabel}" />
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.Footer>
+                    <BoxView HeightRequest="16"
+                             Color="Transparent" />
+                </CollectionView.Footer>
+            </CollectionView>
+        </RefreshView>
+
+        <controls:LoadingView Grid.Row="2"
+                              Style="{StaticResource ScreenOverlay}"
                               IsVisible="{Binding Screen.IsLoading}" />
-        <controls:EmptyView Grid.Row="1"
-                            IsVisible="{Binding Screen.IsEmpty}"
-                            Message="{x:Static resources:AppResources.WorkOrderListEmpty}" />
-        <controls:ErrorView Grid.Row="1"
+        <controls:ErrorView Grid.Row="2"
+                            Style="{StaticResource ScreenOverlay}"
                             IsVisible="{Binding Screen.IsError}"
                             Message="{Binding Screen.ErrorMessage}"
                             RetryCommand="{Binding RefreshCommand}" />
