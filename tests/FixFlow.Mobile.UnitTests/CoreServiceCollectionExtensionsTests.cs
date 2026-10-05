@@ -1,5 +1,7 @@
 using FixFlow.Mobile.Core;
+using FixFlow.Mobile.Core.Features.Settings;
 using Microsoft.Extensions.DependencyInjection;
+using NSubstitute;
 
 namespace FixFlow.Mobile.UnitTests;
 
@@ -9,6 +11,7 @@ public sealed class CoreServiceCollectionExtensionsTests
     public void Should_Resolve_All_ViewModels_When_Core_Services_Are_Registered()
     {
         using var provider = new ServiceCollection()
+            .AddSingleton(Substitute.For<ISettingsStore>())
             .AddCore()
             .BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
 
