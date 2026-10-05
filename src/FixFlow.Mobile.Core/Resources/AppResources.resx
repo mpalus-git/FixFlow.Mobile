@@ -84,4 +84,13 @@
   <data name="AppName" xml:space="preserve">
     <value>FixFlow</value>
   </data>
+  <data name="LogoutButton" xml:space="preserve">
+    <value>Wyloguj</value>
+  </data>
+  <data name="SessionExpiredTitle" xml:space="preserve">
+    <value>Sesja wygasła</value>
+  </data>
+  <data name="SessionExpiredMessage" xml:space="preserve">
+    <value>Zaloguj się ponownie. Dane zapisane na urządzeniu zostały zachowane.</value>
+  </data>
 </root>

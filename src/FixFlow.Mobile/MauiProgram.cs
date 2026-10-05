@@ -44,6 +44,7 @@ public static partial class MauiProgram
 
         var app = builder.Build();
         app.Services.GetRequiredService<ILanguageService>().ApplySavedLanguage();
+        app.Services.GetRequiredService<SessionEndNavigator>().Start();
 
         return app;
     }

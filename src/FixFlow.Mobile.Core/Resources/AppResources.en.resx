@@ -84,4 +84,13 @@
   <data name="AppName" xml:space="preserve">
     <value>FixFlow</value>
   </data>
+  <data name="LogoutButton" xml:space="preserve">
+    <value>Sign out</value>
+  </data>
+  <data name="SessionExpiredTitle" xml:space="preserve">
+    <value>Session expired</value>
+  </data>
+  <data name="SessionExpiredMessage" xml:space="preserve">
+    <value>Sign in again. Data saved on the device has been kept.</value>
+  </data>
 </root>

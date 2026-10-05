@@ -15,6 +15,7 @@ public static class CoreServiceCollectionExtensions
         services.AddSingleton(provider => BusinessClock.CreateForWarsaw(provider.GetRequiredService<TimeProvider>()));
         services.AddSingleton<ILanguageService, LanguageService>();
         services.AddSingleton<SessionStore>();
+        services.AddSingleton<SessionEndNavigator>();
         services.AddSingleton<DisplayFormatter>();
         services.AddTransient<ScreenState>();
 

@@ -21,7 +21,7 @@ public sealed class ShellNavigationService : INavigationService
 
     public Task NavigateToRootAsync<TViewModel>()
         where TViewModel : class =>
-        Shell.Current.GoToAsync($"//{NavigationRoute.For<TViewModel>()}");
+        MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync($"//{NavigationRoute.For<TViewModel>()}"));
 
     public Task GoBackAsync() => Shell.Current.GoToAsync("..");
 }
