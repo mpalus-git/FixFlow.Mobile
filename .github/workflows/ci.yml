@@ -54,6 +54,39 @@ jobs:
       - name: Check comments
         run: dotnet run --project tools/FixFlow.Tools --configuration Release -- check-comments .
 
+  api-client:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Install workload set
+        run: dotnet workload update
+
+      - name: Regenerate API client
+        run: ./scripts/generate-api-client.sh
+
+      - name: Compare with committed client
+        run: git diff --exit-code -- src/FixFlow.Mobile.Core/Api/FixFlowApi.g.cs
+
+  contract-drift:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Compare contract with FixFlow.Api main
+        run: |
+          if ! curl -fsSL https://raw.githubusercontent.com/mpalus-git/FixFlow.Api/main/openapi/v1.json -o "$RUNNER_TEMP/v1.json"; then
+            echo "::warning::Could not download the FixFlow.Api contract"
+            exit 0
+          fi
+          if ! cmp -s "$RUNNER_TEMP/v1.json" openapi/fixflow-api.v1.json; then
+            echo "::warning::openapi/fixflow-api.v1.json differs from FixFlow.Api main. Run scripts/sync-api-contract.sh and scripts/generate-api-client.sh."
+          fi
+
   build-android:
     runs-on: ubuntu-26.04
     steps:

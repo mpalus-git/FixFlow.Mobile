@@ -1,0 +1,5178 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "FixFlow API",
+    "description": "Field service work order management API for dispatchers and technicians.",
+    "version": "1"
+  },
+  "paths": {
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Log in with email and password",
+        "description": "Returns a short-lived JWT access token and a refresh token that starts a new session. Wrong credentials and locked out accounts return the same 401 response, so the endpoint does not reveal whether an account exists. Requests are rate limited per client IP address.",
+        "operationId": "Login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthTokensResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Exchange a refresh token for a new token pair",
+        "description": "Rotates the refresh token: the submitted token is revoked and a new access token and refresh token are returned. Submitting a refresh token that was already used revokes every token of that session, which forces the user to log in again. Requests are rate limited per client IP address.",
+        "operationId": "RefreshTokens",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthTokensResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Log out and revoke the current session",
+        "description": "Revokes the submitted refresh token together with every token of its session. The access token stays valid until it expires. The response is 204 also when the refresh token is unknown or belongs to another user.",
+        "operationId": "Logout",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogoutRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Create a user account",
+        "description": "Creates an account with the given role and initial password. Only administrators can create accounts; there is no public registration.",
+        "operationId": "CreateUser",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "List user accounts",
+        "description": "Returns one page of user accounts ordered by full name and email, optionally limited to one role and to active or deactivated accounts, for example role=Technician&isActive=true when a dispatcher chooses a technician for a work order. Available to dispatchers and administrators.",
+        "operationId": "ListUsers",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number, starting from 1.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Number of users per page, from 1 to 100.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "description": "Role of the listed users: Admin, Dispatcher or Technician.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "isActive",
+            "in": "query",
+            "description": "When true, lists only active accounts, for example when choosing a technician for a work order; when false, only deactivated accounts.",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResponseOfUserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users/me": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get the current user account",
+        "description": "Returns the identifier, email and role of the account that owns the access token. Available to every signed-in user.",
+        "operationId": "GetCurrentUser",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users/me/password": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Change the password of the current user",
+        "description": "Replaces the password of the signed-in user after checking the current one. All refresh tokens of the user are revoked, which signs out other devices, and a new token pair is returned for the calling device. Access tokens issued before stay valid until they expire. Requests are rate limited per client IP address.",
+        "operationId": "ChangePassword",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthTokensResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users/{userId}/deactivate": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Deactivate a user account",
+        "description": "Blocks signing in to the account and revokes all its refresh tokens. Access tokens issued before stay valid until they expire. A technician with assigned or in-progress work orders cannot be deactivated until the work orders are unassigned or completed, and administrators cannot deactivate their own account. Deactivating an already deactivated account has no effect. Available to administrators.",
+        "operationId": "DeactivateUser",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users/{userId}/activate": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Activate a user account",
+        "description": "Allows a deactivated account to sign in again with its current password. Activating an active account has no effect. Available to administrators.",
+        "operationId": "ActivateUser",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users/{userId}/password": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Reset the password of a user account",
+        "description": "Replaces the password of any account, for example when the user forgot it, lifts a lockout after failed sign-ins and revokes all refresh tokens of the account. Access tokens issued before stay valid until they expire. Available to administrators.",
+        "operationId": "ResetPassword",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/users/{userId}": {
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Update a user account",
+        "description": "Changes the first and last name of any account. The email, role and password are not changed. Available to administrators.",
+        "operationId": "UpdateUser",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/clients": {
+      "post": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "Create a client",
+        "description": "Creates a client with a postal address and contact details. Available to dispatchers and administrators.",
+        "operationId": "CreateClient",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateClientRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "headers": {
+              "ETag": {
+                "description": "Current version of the resource, to be sent in If-Match when changing it.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "List active clients",
+        "description": "Returns one page of active clients ordered by name. Archived clients are not listed. The optional search matches a fragment of the client name regardless of letter case.",
+        "operationId": "ListClients",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number, starting from 1.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Number of clients per page, from 1 to 100.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Case-insensitive fragment of the client name.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResponseOfClientResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/clients/{clientId}": {
+      "get": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "Get a client",
+        "description": "Returns a client by identifier, including archived clients so that historical work orders keep their client details.",
+        "operationId": "GetClient",
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "description": "Current version of the resource, to be sent in If-Match when changing it.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "Update a client",
+        "description": "Replaces the name, address and contact details of an active client. Archived clients cannot be modified. The If-Match header must carry the ETag of the client; a client changed in the meantime is rejected with 412. Available to dispatchers and administrators.",
+        "operationId": "UpdateClient",
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "ETag of the resource returned by the last read or change. A different current version is rejected with 412.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateClientRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "description": "Current version of the resource, to be sent in If-Match when changing it.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Precondition Failed",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Precondition Required",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/clients/{clientId}/archive": {
+      "post": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "Archive a client",
+        "description": "Hides the client from lists while keeping it and its history available by identifier. All active devices of the client are archived in the same operation and no new devices can be added to it. Archiving an already archived client has no effect. Available to dispatchers and administrators.",
+        "operationId": "ArchiveClient",
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/devices": {
+      "post": {
+        "tags": [
+          "Devices"
+        ],
+        "summary": "Create a device",
+        "description": "Registers a device of an active client. The serial number is trimmed, stored in upper case and must be unique, also among archived devices. Available to dispatchers and administrators.",
+        "operationId": "CreateDevice",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDeviceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "headers": {
+              "ETag": {
+                "description": "Current version of the resource, to be sent in If-Match when changing it.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Devices"
+        ],
+        "summary": "List active devices",
+        "description": "Returns one page of active devices ordered by serial number, each with the name of the client that owns it. Archived devices are not listed. The optional client filter limits the list to devices of one client, and the optional search matches a fragment of the serial number, model or manufacturer regardless of letter case.",
+        "operationId": "ListDevices",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number, starting from 1.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Number of devices per page, from 1 to 100.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "clientId",
+            "in": "query",
+            "description": "Identifier of the client whose devices are listed.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Case-insensitive fragment of the serial number, model or manufacturer.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResponseOfDeviceListItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/devices/{deviceId}": {
+      "get": {
+        "tags": [
+          "Devices"
+        ],
+        "summary": "Get a device",
+        "description": "Returns a device by identifier, including archived devices so that historical work orders keep their device details.",
+        "operationId": "GetDevice",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "description": "Current version of the resource, to be sent in If-Match when changing it.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Devices"
+        ],
+        "summary": "Update a device",
+        "description": "Replaces the serial number, model, manufacturer and installation date of an active device. The owning client cannot be changed and archived devices cannot be modified. The If-Match header must carry the ETag of the device; a device changed in the meantime is rejected with 412. Available to dispatchers and administrators.",
+        "operationId": "UpdateDevice",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "ETag of the resource returned by the last read or change. A different current version is rejected with 412.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDeviceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "description": "Current version of the resource, to be sent in If-Match when changing it.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Precondition Failed",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Precondition Required",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/devices/{deviceId}/archive": {
+      "post": {
+        "tags": [
+          "Devices"
+        ],
+        "summary": "Archive a device",
+        "description": "Hides the device from lists while keeping it and its history available by identifier. The serial number of an archived device stays reserved. Archiving an already archived device has no effect. Available to dispatchers and administrators.",
+        "operationId": "ArchiveDevice",
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/work-orders": {
+      "post": {
+        "tags": [
+          "WorkOrders"
+        ],
+        "summary": "Create a work order",
+        "description": "Creates an unassigned work order in the New status for an active device. The due date must be in the future. Available to dispatchers and administrators.",
+        "operationId": "CreateWorkOrder",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWorkOrderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "headers": {
+              "ETag": {
+                "description": "Current version of the resource, to be sent in If-Match when changing it.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "WorkOrders"
+        ],
+        "summary": "List work orders",
+        "description": "Returns one page of work orders sorted by the requested field and direction, by default by due date ascending, with ties ordered by identifier so that pages neither skip nor repeat work orders. Each work order comes with the serial number and model of the device, the client name and the technician email. The list can be filtered by status, technician, device, client, overdue flag and due date range, and searched by a fragment of the work order number, description, serial number or client name. Technicians only see work orders assigned to them.",
+        "operationId": "ListWorkOrders",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number, starting from 1.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Number of work orders per page, from 1 to 100.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Status of the listed work orders.",
+            "schema": {
+              "$ref": "#/components/schemas/WorkOrderStatus"
+            }
+          },
+          {
+            "name": "technicianId",
+            "in": "query",
+            "description": "Identifier of the assigned technician.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Identifier of the serviced device.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "clientId",
+            "in": "query",
+            "description": "Identifier of the client whose devices were serviced.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "isOverdue",
+            "in": "query",
+            "description": "When true, lists only overdue work orders; when false, only work orders that are not overdue.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "dueFrom",
+            "in": "query",
+            "description": "First day of the due date range, inclusive, as a calendar date in the Europe/Warsaw time zone.",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "dueTo",
+            "in": "query",
+            "description": "Last day of the due date range, inclusive, as a calendar date in the Europe/Warsaw time zone.",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Case-insensitive fragment of the work order number, the fault description, the device serial number or the client name.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Field the work orders are sorted by. Priority is sorted by importance from Low to Critical and status in lifecycle order from New to Invoiced.",
+            "schema": {
+              "enum": [
+                "DueDate",
+                "CreatedAt",
+                "Priority",
+                "Status",
+                "ClientName"
+              ],
+              "type": "string",
+              "default": "DueDate"
+            }
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "description": "Direction of sorting: Asc for ascending, Desc for descending.",
+            "schema": {
+              "enum": [
+                "Asc",
+                "Desc"
+              ],
+              "type": "string",
+              "default": "Asc"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResponseOfWorkOrderListItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/work-orders/{workOrderId}": {
+      "get": {
+        "tags": [
+          "WorkOrders"
+        ],
+        "summary": "Get a work order",
+        "description": "Returns a work order by identifier. Technicians can only get work orders assigned to them; other work orders are reported as not found.",
+        "operationId": "GetWorkOrder",
+        "parameters": [
+          {
+            "name": "workOrderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "description": "Current version of the resource, to be sent in If-Match when changing it.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "WorkOrders"
+        ],
+        "summary": "Update a work order",
+        "description": "Replaces the description, priority and due date of a work order without changing its status or technician. A changed due date must be in the future. Completed and invoiced work orders cannot be edited. The If-Match header must carry the ETag of the work order; a work order changed in the meantime is rejected with 412. Available to dispatchers and administrators.",
+        "operationId": "UpdateWorkOrder",
+        "parameters": [
+          {
+            "name": "workOrderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "ETag of the resource returned by the last read or change. A different current version is rejected with 412.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWorkOrderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "description": "Current version of the resource, to be sent in If-Match when changing it.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Precondition Failed",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Precondition Required",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/work-orders/{workOrderId}/assign": {
+      "post": {
+        "tags": [
+          "WorkOrders"
+        ],
+        "summary": "Assign a technician to a work order",
+        "description": "Assigns an active user with the Technician role to a work order in the New status and moves it to Assigned, optionally changing the deadline in the same operation. To change the technician of an assigned work order, use reassign. Available to dispatchers and administrators.",
+        "operationId": "AssignTechnician",
+        "parameters": [
+          {
+            "name": "workOrderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignTechnicianRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "description": "Current version of the resource, to be sent in If-Match when changing it.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/work-orders/{workOrderId}/reassign": {
+      "post": {
+        "tags": [
+          "WorkOrders"
+        ],
+        "summary": "Move an assigned work order to another technician or date",
+        "description": "Changes the technician and optionally the deadline of a work order in the Assigned status in one operation, so the work order is never left unassigned in between. The same technician can be passed to change only the deadline. Work orders in progress cannot be reassigned. Available to dispatchers and administrators.",
+        "operationId": "ReassignTechnician",
+        "parameters": [
+          {
+            "name": "workOrderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReassignTechnicianRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "description": "Current version of the resource, to be sent in If-Match when changing it.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/work-orders/{workOrderId}/unassign": {
+      "post": {
+        "tags": [
+          "WorkOrders"
+        ],
+        "summary": "Unassign the technician from a work order",
+        "description": "Removes the technician from a work order in the Assigned status and moves it back to New. Work that has already started cannot be unassigned. Available to dispatchers and administrators.",
+        "operationId": "UnassignTechnician",
+        "parameters": [
+          {
+            "name": "workOrderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "description": "Current version of the resource, to be sent in If-Match when changing it.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/work-orders/{workOrderId}/start": {
+      "post": {
+        "tags": [
+          "WorkOrders"
+        ],
+        "summary": "Start work on a work order",
+        "description": "Moves a work order assigned to the calling technician from Assigned to InProgress. A technician can have only one work order in progress at a time. Work orders of other technicians are reported as not found. Available to technicians only.",
+        "operationId": "StartWork",
+        "parameters": [
+          {
+            "name": "workOrderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "description": "Current version of the resource, to be sent in If-Match when changing it.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/work-orders/{workOrderId}/complete": {
+      "post": {
+        "tags": [
+          "WorkOrders"
+        ],
+        "summary": "Complete a work order",
+        "description": "Moves a work order from InProgress to Completed. The work order must have at least one service entry. After completion no service entries can be added and the work order cannot be edited. Available to the assigned technician and, as a fallback, to dispatchers and administrators; work orders of other technicians are reported as not found.",
+        "operationId": "CompleteWorkOrder",
+        "parameters": [
+          {
+            "name": "workOrderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "description": "Current version of the resource, to be sent in If-Match when changing it.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/work-orders/{workOrderId}/invoice": {
+      "post": {
+        "tags": [
+          "WorkOrders"
+        ],
+        "summary": "Mark a work order as invoiced",
+        "description": "Moves a completed work order to Invoiced, which is the final status. Available to dispatchers and administrators.",
+        "operationId": "InvoiceWorkOrder",
+        "parameters": [
+          {
+            "name": "workOrderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "description": "Current version of the resource, to be sent in If-Match when changing it.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOrderResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/work-orders/{workOrderId}/protocol": {
+      "get": {
+        "tags": [
+          "WorkOrders"
+        ],
+        "summary": "Download the service protocol",
+        "description": "Returns the service protocol of a completed or invoiced work order as a PDF document in Polish, named after the work order number, for example protokol-ZL-2026-0042.pdf. The protocol lists the client, the device, all service entries with work time, the net used parts with amounts in PLN and fields for signatures. Technicians can only download protocols of work orders assigned to them; other work orders are reported as not found.",
+        "operationId": "GetServiceProtocol",
+        "parameters": [
+          {
+            "name": "workOrderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stream"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/parts": {
+      "post": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Create a part",
+        "description": "Adds a part to the warehouse catalog with an initial stock quantity. The catalog number is trimmed, stored in upper case and must be unique, also among archived parts. Available to dispatchers and administrators.",
+        "operationId": "CreatePart",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePartRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "headers": {
+              "ETag": {
+                "description": "Current version of the resource, to be sent in If-Match when changing it.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "List active parts",
+        "description": "Returns one page of active parts with their current stock quantities, ordered by name and catalog number. Archived parts are not listed. The optional search matches a fragment of the name or catalog number regardless of letter case.",
+        "operationId": "ListParts",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number, starting from 1.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Number of parts per page, from 1 to 100.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Case-insensitive fragment of the name or catalog number.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResponseOfPartResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/parts/{partId}": {
+      "get": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Get a part",
+        "description": "Returns a part with its current stock quantity by identifier, including archived parts so that historical service entries keep their part details.",
+        "operationId": "GetPart",
+        "parameters": [
+          {
+            "name": "partId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "description": "Current version of the resource, to be sent in If-Match when changing it.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Update a part",
+        "description": "Replaces the name, catalog number and unit price of an active part. The stock quantity is not changed and archived parts cannot be modified. A new price applies only to parts used afterwards. The If-Match header must carry the ETag of the part; a part changed in the meantime is rejected with 412. Available to dispatchers and administrators.",
+        "operationId": "UpdatePart",
+        "parameters": [
+          {
+            "name": "partId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "ETag of the resource returned by the last read or change. A different current version is rejected with 412.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePartRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "description": "Current version of the resource, to be sent in If-Match when changing it.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Precondition Failed",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Precondition Required",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/parts/{partId}/archive": {
+      "post": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Archive a part",
+        "description": "Hides the part from lists and prevents it from being used in new service entries, while keeping it available by identifier. The catalog number of an archived part stays reserved and its stock can still be replenished. Archiving an already archived part has no effect. Available to dispatchers and administrators.",
+        "operationId": "ArchivePart",
+        "parameters": [
+          {
+            "name": "partId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/parts/{partId}/restock": {
+      "post": {
+        "tags": [
+          "Parts"
+        ],
+        "summary": "Register a part delivery",
+        "description": "Increases the stock quantity of a part by the number of delivered units, also for archived parts. A delivery registered at the same time as another stock change is rejected with a conflict and can be retried. Available to dispatchers and administrators.",
+        "operationId": "RestockPart",
+        "parameters": [
+          {
+            "name": "partId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RestockPartRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "description": "Current version of the resource, to be sent in If-Match when changing it.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/work-orders/{workOrderId}/service-entries": {
+      "post": {
+        "tags": [
+          "ServiceEntries"
+        ],
+        "summary": "Add a service entry",
+        "description": "Adds a work entry or a correction entry to a work order in progress assigned to the calling technician. Parts used in a work entry are taken from stock at their current price and the entry is rejected if the stock would drop below zero. A correction returns parts to stock, at most the net quantity used on the work order, at the price of their last use. Entries cannot be changed or deleted. Work orders of other technicians are reported as not found. Available to technicians only.",
+        "operationId": "AddServiceEntry",
+        "parameters": [
+          {
+            "name": "workOrderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddServiceEntryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceEntryResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "ServiceEntries"
+        ],
+        "summary": "List service entries of a work order",
+        "description": "Returns all work and correction entries of a work order, oldest first. Technicians see only entries of work orders assigned to them; other work orders are reported as not found.",
+        "operationId": "ListServiceEntries",
+        "parameters": [
+          {
+            "name": "workOrderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ServiceEntryResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/dashboard/summary": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Get dashboard summary",
+        "description": "Returns aggregated work order counts read from a single consistent database snapshot: the number of work orders in each status in lifecycle order (including zeros), the number of work orders flagged as overdue (the same criterion as the isOverdue=true filter of the work order list), and the workload of every active technician sorted by email, including technicians without work orders. The current week runs from Monday to Sunday in the Europe/Warsaw time zone; its bounds are returned as calendar dates usable as dueFrom and dueTo of the work order list. Available to dispatchers and administrators.",
+        "operationId": "GetDashboardSummary",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardSummaryResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/demo-data/reset": {
+      "post": {
+        "tags": [
+          "DemoData"
+        ],
+        "summary": "Reset demo data to its initial state",
+        "description": "Deletes all clients, devices, parts, work orders and service entries and recreates the demo data set. Restores the demo dispatcher and technician accounts: configured passwords, active status, no sign-in lockout, and revokes their refresh tokens. Accounts created by administrators are kept. Available to administrators on instances with demo data enabled; otherwise returns 409.",
+        "operationId": "ResetDemoData",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AddServiceEntryRequest": {
+        "required": [
+          "note"
+        ],
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "string",
+            "description": "Description of the performed work or, for a correction, its reason."
+          },
+          "isCorrection": {
+            "type": "boolean",
+            "description": "True for a correction entry that returns parts to stock; false for a work entry.",
+            "default": false
+          },
+          "photoUrls": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "Absolute http or https addresses of photos, at most 10."
+          },
+          "workStartedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Time when the work started; required for a work entry and not allowed for a correction. Cannot be earlier than the start of the work order.",
+            "format": "date-time"
+          },
+          "workFinishedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Time when the work finished; required for a work entry and not allowed for a correction. Must be after the start and not in the future.",
+            "format": "date-time"
+          },
+          "latitude": {
+            "type": [
+              "null",
+              "number"
+            ],
+            "description": "Latitude of the place where the work started, from -90 to 90; optional, given together with longitude and not allowed for a correction.",
+            "format": "double"
+          },
+          "longitude": {
+            "type": [
+              "null",
+              "number"
+            ],
+            "description": "Longitude of the place where the work started, from -180 to 180; optional, given together with latitude and not allowed for a correction.",
+            "format": "double"
+          },
+          "parts": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/ServiceEntryPartRequest"
+            },
+            "description": "Parts used in a work entry or returned in a correction, at most 20, each part at most once. Required for a correction."
+          }
+        },
+        "description": "New service entry of a work order in progress. A work entry records performed work and used parts; a correction entry returns wrongly recorded parts to stock and has no work time or location."
+      },
+      "AssignTechnicianRequest": {
+        "required": [
+          "technicianId"
+        ],
+        "type": "object",
+        "properties": {
+          "technicianId": {
+            "type": "string",
+            "description": "Identifier of a user with the Technician role.",
+            "format": "uuid"
+          },
+          "dueDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "New UTC deadline; it must be in the future when it differs from the current one. When omitted, the deadline does not change.",
+            "format": "date-time"
+          }
+        },
+        "description": "Technician to assign to a work order and an optional new deadline."
+      },
+      "AuthTokensResponse": {
+        "required": [
+          "accessToken",
+          "accessTokenExpiresAt",
+          "refreshToken",
+          "refreshTokenExpiresAt"
+        ],
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "JWT access token to send in the Authorization header as a Bearer token."
+          },
+          "accessTokenExpiresAt": {
+            "type": "string",
+            "description": "UTC time when the access token expires.",
+            "format": "date-time"
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "Opaque refresh token used once to obtain a new token pair."
+          },
+          "refreshTokenExpiresAt": {
+            "type": "string",
+            "description": "UTC time when the refresh token expires.",
+            "format": "date-time"
+          }
+        },
+        "description": "Access and refresh tokens issued for an authenticated session."
+      },
+      "ChangePasswordRequest": {
+        "required": [
+          "currentPassword",
+          "newPassword"
+        ],
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "description": "Current password of the account."
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "New password. At least 8 characters with an uppercase letter, a lowercase letter, a digit and a non-alphanumeric character, different from the current one."
+          }
+        },
+        "description": "Change of the password of the signed-in user."
+      },
+      "ClientAddress": {
+        "required": [
+          "street",
+          "buildingNumber",
+          "postalCode",
+          "city"
+        ],
+        "type": "object",
+        "properties": {
+          "street": {
+            "type": "string",
+            "description": "Street name."
+          },
+          "buildingNumber": {
+            "type": "string",
+            "description": "Building number, optionally with a letter or apartment, for example 12A or 12/4."
+          },
+          "postalCode": {
+            "type": "string",
+            "description": "Polish postal code in the NN-NNN format."
+          },
+          "city": {
+            "type": "string",
+            "description": "City."
+          }
+        },
+        "description": "Postal address of a client."
+      },
+      "ClientResponse": {
+        "required": [
+          "id",
+          "name",
+          "address",
+          "contactPerson",
+          "phone",
+          "email",
+          "createdAt",
+          "archivedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier of the client.",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "description": "Company or person name."
+          },
+          "address": {
+            "description": "Postal address.",
+            "$ref": "#/components/schemas/ClientAddress"
+          },
+          "contactPerson": {
+            "type": "string",
+            "description": "Contact person at the client."
+          },
+          "phone": {
+            "type": "string",
+            "description": "Contact phone number."
+          },
+          "email": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Contact email address."
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "UTC time when the client was created.",
+            "format": "date-time"
+          },
+          "archivedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "UTC time when the client was archived; null for active clients.",
+            "format": "date-time"
+          }
+        },
+        "description": "Client of the service company."
+      },
+      "CreateClientRequest": {
+        "required": [
+          "name",
+          "address",
+          "contactPerson",
+          "phone"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Company or person name."
+          },
+          "address": {
+            "description": "Postal address.",
+            "$ref": "#/components/schemas/ClientAddress"
+          },
+          "contactPerson": {
+            "type": "string",
+            "description": "Contact person at the client."
+          },
+          "phone": {
+            "type": "string",
+            "description": "Contact phone number."
+          },
+          "email": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Optional contact email address."
+          }
+        },
+        "description": "Data of a new client."
+      },
+      "CreateDeviceRequest": {
+        "required": [
+          "clientId",
+          "serialNumber",
+          "model",
+          "manufacturer",
+          "installationDate"
+        ],
+        "type": "object",
+        "properties": {
+          "clientId": {
+            "type": "string",
+            "description": "Identifier of an active client that owns the device.",
+            "format": "uuid"
+          },
+          "serialNumber": {
+            "type": "string",
+            "description": "Serial number, unique across all devices regardless of letter case and surrounding spaces."
+          },
+          "model": {
+            "type": "string",
+            "description": "Device model."
+          },
+          "manufacturer": {
+            "type": "string",
+            "description": "Device manufacturer."
+          },
+          "installationDate": {
+            "type": "string",
+            "description": "Calendar date when the device was installed; cannot be in the future in the Europe/Warsaw time zone.",
+            "format": "date"
+          }
+        },
+        "description": "Data of a new device."
+      },
+      "CreatePartRequest": {
+        "required": [
+          "name",
+          "catalogNumber",
+          "stockQuantity",
+          "unitPrice"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Part name."
+          },
+          "catalogNumber": {
+            "type": "string",
+            "description": "Catalog number, unique across all parts regardless of letter case and surrounding spaces."
+          },
+          "stockQuantity": {
+            "type": "integer",
+            "description": "Initial number of units in stock, from 0 to 100000.",
+            "format": "int32"
+          },
+          "unitPrice": {
+            "type": "number",
+            "description": "Net unit price in PLN with at most two decimal places.",
+            "format": "decimal"
+          }
+        },
+        "description": "Data of a new part."
+      },
+      "CreateUserRequest": {
+        "required": [
+          "email",
+          "fullName",
+          "password",
+          "role"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email address used as the login of the new account."
+          },
+          "fullName": {
+            "type": "string",
+            "description": "First and last name of the user, up to 100 characters."
+          },
+          "password": {
+            "type": "string",
+            "description": "Initial password. At least 8 characters with an uppercase letter, a lowercase letter, a digit and a non-alphanumeric character."
+          },
+          "role": {
+            "type": "string",
+            "description": "Role of the new account: Admin, Dispatcher or Technician."
+          }
+        },
+        "description": "Data of a new user account created by an administrator."
+      },
+      "CreateWorkOrderRequest": {
+        "required": [
+          "deviceId",
+          "description",
+          "dueDate"
+        ],
+        "type": "object",
+        "properties": {
+          "deviceId": {
+            "type": "string",
+            "description": "Identifier of an active device to service.",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the fault."
+          },
+          "dueDate": {
+            "type": "string",
+            "description": "UTC deadline of the work order; must be in the future.",
+            "format": "date-time"
+          },
+          "priority": {
+            "description": "Priority of the work order; Normal when omitted.",
+            "$ref": "#/components/schemas/WorkOrderPriority"
+          }
+        },
+        "description": "Data of a new work order."
+      },
+      "DashboardSummaryResponse": {
+        "required": [
+          "generatedAt",
+          "weekStart",
+          "weekEnd",
+          "statusCounts",
+          "overdueCount",
+          "technicians"
+        ],
+        "type": "object",
+        "properties": {
+          "generatedAt": {
+            "type": "string",
+            "description": "UTC time when the summary was calculated.",
+            "format": "date-time"
+          },
+          "weekStart": {
+            "type": "string",
+            "description": "Monday of the current week in the Europe/Warsaw time zone.",
+            "format": "date"
+          },
+          "weekEnd": {
+            "type": "string",
+            "description": "Sunday of the current week in the Europe/Warsaw time zone.",
+            "format": "date"
+          },
+          "statusCounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkOrderStatusCountResponse"
+            },
+            "description": "Number of work orders in each status, in lifecycle order, including statuses without work orders."
+          },
+          "overdueCount": {
+            "type": "integer",
+            "description": "Number of work orders flagged as overdue.",
+            "format": "int32"
+          },
+          "technicians": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TechnicianWorkloadResponse"
+            },
+            "description": "Workload of every active technician, sorted by full name and email."
+          }
+        },
+        "description": "Aggregated work order counts for the dispatcher dashboard."
+      },
+      "DeviceListItemResponse": {
+        "required": [
+          "id",
+          "clientId",
+          "clientName",
+          "serialNumber",
+          "model",
+          "manufacturer",
+          "installationDate",
+          "createdAt",
+          "archivedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier of the device.",
+            "format": "uuid"
+          },
+          "clientId": {
+            "type": "string",
+            "description": "Identifier of the client that owns the device.",
+            "format": "uuid"
+          },
+          "clientName": {
+            "type": "string",
+            "description": "Name of the client that owns the device."
+          },
+          "serialNumber": {
+            "type": "string",
+            "description": "Unique serial number, stored trimmed and in upper case."
+          },
+          "model": {
+            "type": "string",
+            "description": "Device model."
+          },
+          "manufacturer": {
+            "type": "string",
+            "description": "Device manufacturer."
+          },
+          "installationDate": {
+            "type": "string",
+            "description": "Calendar date when the device was installed.",
+            "format": "date"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "UTC time when the device was created.",
+            "format": "date-time"
+          },
+          "archivedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "UTC time when the device was archived; null for active devices.",
+            "format": "date-time"
+          }
+        },
+        "description": "Device on a list, with the name of the client that owns it."
+      },
+      "DeviceResponse": {
+        "required": [
+          "id",
+          "clientId",
+          "serialNumber",
+          "model",
+          "manufacturer",
+          "installationDate",
+          "createdAt",
+          "archivedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier of the device.",
+            "format": "uuid"
+          },
+          "clientId": {
+            "type": "string",
+            "description": "Identifier of the client that owns the device.",
+            "format": "uuid"
+          },
+          "serialNumber": {
+            "type": "string",
+            "description": "Unique serial number, stored trimmed and in upper case."
+          },
+          "model": {
+            "type": "string",
+            "description": "Device model."
+          },
+          "manufacturer": {
+            "type": "string",
+            "description": "Device manufacturer."
+          },
+          "installationDate": {
+            "type": "string",
+            "description": "Calendar date when the device was installed.",
+            "format": "date"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "UTC time when the device was created.",
+            "format": "date-time"
+          },
+          "archivedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "UTC time when the device was archived; null for active devices.",
+            "format": "date-time"
+          }
+        },
+        "description": "Device installed at a client and serviced by the company."
+      },
+      "HttpValidationProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instance": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "LoginRequest": {
+        "required": [
+          "email",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email address of the user account."
+          },
+          "password": {
+            "type": "string",
+            "description": "Password of the user account."
+          }
+        },
+        "description": "Credentials of an existing user account."
+      },
+      "LogoutRequest": {
+        "required": [
+          "refreshToken"
+        ],
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "description": "Refresh token of the current session."
+          }
+        },
+        "description": "Refresh token of the session to end."
+      },
+      "PagedResponseOfClientResponse": {
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClientResponse"
+            },
+            "description": "Items on the requested page."
+          },
+          "page": {
+            "type": "integer",
+            "description": "Requested page number, starting from 1.",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "Requested page size.",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Number of items on all pages.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a list."
+      },
+      "PagedResponseOfDeviceListItemResponse": {
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeviceListItemResponse"
+            },
+            "description": "Items on the requested page."
+          },
+          "page": {
+            "type": "integer",
+            "description": "Requested page number, starting from 1.",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "Requested page size.",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Number of items on all pages.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a list."
+      },
+      "PagedResponseOfPartResponse": {
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartResponse"
+            },
+            "description": "Items on the requested page."
+          },
+          "page": {
+            "type": "integer",
+            "description": "Requested page number, starting from 1.",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "Requested page size.",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Number of items on all pages.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a list."
+      },
+      "PagedResponseOfUserResponse": {
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserResponse"
+            },
+            "description": "Items on the requested page."
+          },
+          "page": {
+            "type": "integer",
+            "description": "Requested page number, starting from 1.",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "Requested page size.",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Number of items on all pages.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a list."
+      },
+      "PagedResponseOfWorkOrderListItemResponse": {
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkOrderListItemResponse"
+            },
+            "description": "Items on the requested page."
+          },
+          "page": {
+            "type": "integer",
+            "description": "Requested page number, starting from 1.",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "Requested page size.",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Number of items on all pages.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a list."
+      },
+      "PartResponse": {
+        "required": [
+          "id",
+          "name",
+          "catalogNumber",
+          "stockQuantity",
+          "unitPrice",
+          "createdAt",
+          "archivedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier of the part.",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "description": "Part name."
+          },
+          "catalogNumber": {
+            "type": "string",
+            "description": "Unique catalog number, stored trimmed and in upper case."
+          },
+          "stockQuantity": {
+            "type": "integer",
+            "description": "Number of units currently in stock.",
+            "format": "int32"
+          },
+          "unitPrice": {
+            "type": "number",
+            "description": "Current net unit price in PLN.",
+            "format": "decimal"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "UTC time when the part was created.",
+            "format": "date-time"
+          },
+          "archivedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "UTC time when the part was archived; null for active parts.",
+            "format": "date-time"
+          }
+        },
+        "description": "Spare part from the warehouse catalog."
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instance": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "errorCode": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Stable machine-readable code of a business error, for example WorkOrder.NotFound. Absent for authentication and authorization failures."
+          }
+        },
+        "description": "Error response in the RFC 9457 problem details format."
+      },
+      "ReassignTechnicianRequest": {
+        "required": [
+          "technicianId"
+        ],
+        "type": "object",
+        "properties": {
+          "technicianId": {
+            "type": "string",
+            "description": "Identifier of an active user with the Technician role; may be the currently assigned technician when only the deadline changes.",
+            "format": "uuid"
+          },
+          "dueDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "New UTC deadline; it must be in the future when it differs from the current one. When omitted, the deadline does not change.",
+            "format": "date-time"
+          }
+        },
+        "description": "Technician and optional new deadline of an assigned work order."
+      },
+      "RefreshRequest": {
+        "required": [
+          "refreshToken"
+        ],
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "description": "Refresh token to exchange. Each refresh token can be used only once."
+          }
+        },
+        "description": "Refresh token received from the last login or refresh."
+      },
+      "ResetPasswordRequest": {
+        "required": [
+          "newPassword"
+        ],
+        "type": "object",
+        "properties": {
+          "newPassword": {
+            "type": "string",
+            "description": "New password. At least 8 characters with an uppercase letter, a lowercase letter, a digit and a non-alphanumeric character."
+          }
+        },
+        "description": "New password set by an administrator for a user account."
+      },
+      "RestockPartRequest": {
+        "required": [
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "integer",
+            "description": "Number of delivered units, from 1 to 100000.",
+            "format": "int32"
+          }
+        },
+        "description": "Delivery of units of a part to the warehouse."
+      },
+      "ServiceEntryPartRequest": {
+        "required": [
+          "partId",
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "partId": {
+            "type": "string",
+            "description": "Identifier of the part.",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "Number of units, from 1 to 1000.",
+            "format": "int32"
+          }
+        },
+        "description": "Quantity of one part used or returned in a service entry."
+      },
+      "ServiceEntryPartResponse": {
+        "required": [
+          "partId",
+          "partName",
+          "catalogNumber",
+          "quantity",
+          "unitPrice"
+        ],
+        "type": "object",
+        "properties": {
+          "partId": {
+            "type": "string",
+            "description": "Identifier of the part.",
+            "format": "uuid"
+          },
+          "partName": {
+            "type": "string",
+            "description": "Current name of the part in the catalog, also for archived parts."
+          },
+          "catalogNumber": {
+            "type": "string",
+            "description": "Current catalog number of the part, also for archived parts."
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "Number of used or returned units.",
+            "format": "int32"
+          },
+          "unitPrice": {
+            "type": "number",
+            "description": "Net unit price in PLN at the time the part was used; for a correction, the price of the last use on the work order.",
+            "format": "decimal"
+          }
+        },
+        "description": "Quantity of one part in a service entry with its catalog details and unit price at the time of use."
+      },
+      "ServiceEntryResponse": {
+        "required": [
+          "id",
+          "workOrderId",
+          "technicianId",
+          "technicianName",
+          "note",
+          "isCorrection",
+          "photoUrls",
+          "workStartedAt",
+          "workFinishedAt",
+          "latitude",
+          "longitude",
+          "parts",
+          "createdAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier of the service entry.",
+            "format": "uuid"
+          },
+          "workOrderId": {
+            "type": "string",
+            "description": "Identifier of the work order.",
+            "format": "uuid"
+          },
+          "technicianId": {
+            "type": "string",
+            "description": "Identifier of the technician who added the entry.",
+            "format": "uuid"
+          },
+          "technicianName": {
+            "type": "string",
+            "description": "First and last name of the technician who added the entry."
+          },
+          "note": {
+            "type": "string",
+            "description": "Description of the performed work or the reason of the correction."
+          },
+          "isCorrection": {
+            "type": "boolean",
+            "description": "True for a correction entry whose parts were returned to stock."
+          },
+          "photoUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Addresses of attached photos."
+          },
+          "workStartedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "UTC time when the work started; null for a correction.",
+            "format": "date-time"
+          },
+          "workFinishedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "UTC time when the work finished; null for a correction.",
+            "format": "date-time"
+          },
+          "latitude": {
+            "type": [
+              "null",
+              "number"
+            ],
+            "description": "Latitude of the place where the work started, if recorded.",
+            "format": "double"
+          },
+          "longitude": {
+            "type": [
+              "null",
+              "number"
+            ],
+            "description": "Longitude of the place where the work started, if recorded.",
+            "format": "double"
+          },
+          "parts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServiceEntryPartResponse"
+            },
+            "description": "Parts used in a work entry or returned in a correction."
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "UTC time when the entry was added.",
+            "format": "date-time"
+          }
+        },
+        "description": "Service entry of a work order: performed work with used parts, or a correction returning parts to stock."
+      },
+      "Stream": {
+        "type": "string",
+        "format": "binary"
+      },
+      "TechnicianWorkloadResponse": {
+        "required": [
+          "technicianId",
+          "email",
+          "fullName",
+          "assignedCount",
+          "inProgressCount",
+          "overdueCount",
+          "dueThisWeekCount"
+        ],
+        "type": "object",
+        "properties": {
+          "technicianId": {
+            "type": "string",
+            "description": "Identifier of the technician.",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email of the technician."
+          },
+          "fullName": {
+            "type": "string",
+            "description": "First and last name of the technician."
+          },
+          "assignedCount": {
+            "type": "integer",
+            "description": "Number of work orders assigned to the technician and not started yet.",
+            "format": "int32"
+          },
+          "inProgressCount": {
+            "type": "integer",
+            "description": "Number of work orders in progress; at most one.",
+            "format": "int32"
+          },
+          "overdueCount": {
+            "type": "integer",
+            "description": "Number of assigned or in-progress work orders flagged as overdue.",
+            "format": "int32"
+          },
+          "dueThisWeekCount": {
+            "type": "integer",
+            "description": "Number of assigned or in-progress work orders due in the current week.",
+            "format": "int32"
+          }
+        },
+        "description": "Open work orders of one active technician."
+      },
+      "UpdateClientRequest": {
+        "required": [
+          "name",
+          "address",
+          "contactPerson",
+          "phone"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Company or person name."
+          },
+          "address": {
+            "description": "Postal address.",
+            "$ref": "#/components/schemas/ClientAddress"
+          },
+          "contactPerson": {
+            "type": "string",
+            "description": "Contact person at the client."
+          },
+          "phone": {
+            "type": "string",
+            "description": "Contact phone number."
+          },
+          "email": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Optional contact email address."
+          }
+        },
+        "description": "New data of an existing client. All fields are replaced."
+      },
+      "UpdateDeviceRequest": {
+        "required": [
+          "serialNumber",
+          "model",
+          "manufacturer",
+          "installationDate"
+        ],
+        "type": "object",
+        "properties": {
+          "serialNumber": {
+            "type": "string",
+            "description": "Serial number, unique across all devices regardless of letter case and surrounding spaces."
+          },
+          "model": {
+            "type": "string",
+            "description": "Device model."
+          },
+          "manufacturer": {
+            "type": "string",
+            "description": "Device manufacturer."
+          },
+          "installationDate": {
+            "type": "string",
+            "description": "Calendar date when the device was installed; cannot be in the future in the Europe/Warsaw time zone.",
+            "format": "date"
+          }
+        },
+        "description": "New data of an existing device. All fields are replaced; the owning client cannot be changed."
+      },
+      "UpdatePartRequest": {
+        "required": [
+          "name",
+          "catalogNumber",
+          "unitPrice"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Part name."
+          },
+          "catalogNumber": {
+            "type": "string",
+            "description": "Catalog number, unique across all parts regardless of letter case and surrounding spaces."
+          },
+          "unitPrice": {
+            "type": "number",
+            "description": "Net unit price in PLN with at most two decimal places.",
+            "format": "decimal"
+          }
+        },
+        "description": "New data of an existing part. All fields are replaced; the stock quantity changes only through deliveries and service entries."
+      },
+      "UpdateUserRequest": {
+        "required": [
+          "fullName"
+        ],
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "description": "First and last name of the user, up to 100 characters."
+          }
+        },
+        "description": "Editable data of a user account."
+      },
+      "UpdateWorkOrderRequest": {
+        "required": [
+          "description",
+          "priority",
+          "dueDate"
+        ],
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "Description of the fault."
+          },
+          "priority": {
+            "description": "Priority of the work order.",
+            "$ref": "#/components/schemas/WorkOrderPriority"
+          },
+          "dueDate": {
+            "type": "string",
+            "description": "UTC deadline of the work order; a changed deadline must be in the future, an unchanged one is accepted even when it has passed.",
+            "format": "date-time"
+          }
+        },
+        "description": "New details of an existing work order. All fields are replaced."
+      },
+      "UserResponse": {
+        "required": [
+          "id",
+          "email",
+          "fullName",
+          "role",
+          "isActive"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier of the user account.",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address of the user account."
+          },
+          "fullName": {
+            "type": "string",
+            "description": "First and last name of the user shown in clients instead of the email."
+          },
+          "role": {
+            "type": "string",
+            "description": "Role of the user account."
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "False when an administrator deactivated the account; a deactivated account cannot sign in."
+          }
+        },
+        "description": "User account."
+      },
+      "WorkOrderListItemResponse": {
+        "required": [
+          "id",
+          "number",
+          "deviceId",
+          "deviceSerialNumber",
+          "deviceModel",
+          "clientId",
+          "clientName",
+          "description",
+          "priority",
+          "status",
+          "technicianId",
+          "technicianEmail",
+          "technicianName",
+          "dueDate",
+          "isOverdue",
+          "createdAt",
+          "startedAt",
+          "completedAt",
+          "invoicedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier of the work order.",
+            "format": "uuid"
+          },
+          "number": {
+            "type": "string",
+            "description": "Readable number of the work order, for example ZL/2026/0042, numbered from 1 in each year of creation in the Europe/Warsaw time zone."
+          },
+          "deviceId": {
+            "type": "string",
+            "description": "Identifier of the serviced device.",
+            "format": "uuid"
+          },
+          "deviceSerialNumber": {
+            "type": "string",
+            "description": "Serial number of the serviced device."
+          },
+          "deviceModel": {
+            "type": "string",
+            "description": "Model of the serviced device."
+          },
+          "clientId": {
+            "type": "string",
+            "description": "Identifier of the client owning the device.",
+            "format": "uuid"
+          },
+          "clientName": {
+            "type": "string",
+            "description": "Name of the client owning the device."
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the fault."
+          },
+          "priority": {
+            "description": "Priority of the work order.",
+            "$ref": "#/components/schemas/WorkOrderPriority"
+          },
+          "status": {
+            "description": "Current status of the work order.",
+            "$ref": "#/components/schemas/WorkOrderStatus"
+          },
+          "technicianId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Identifier of the assigned technician; null when no technician is assigned.",
+            "format": "uuid"
+          },
+          "technicianEmail": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Email of the assigned technician; null when no technician is assigned."
+          },
+          "technicianName": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "First and last name of the assigned technician; null when no technician is assigned."
+          },
+          "dueDate": {
+            "type": "string",
+            "description": "UTC deadline of the work order.",
+            "format": "date-time"
+          },
+          "isOverdue": {
+            "type": "boolean",
+            "description": "True when the deadline has passed and the work order is neither completed nor invoiced."
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "UTC time when the work order was created.",
+            "format": "date-time"
+          },
+          "startedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "UTC time when the technician started the work; null before the work is started.",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "UTC time when the work order was completed; null before completion.",
+            "format": "date-time"
+          },
+          "invoicedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "UTC time when the work order was invoiced; null before invoicing.",
+            "format": "date-time"
+          }
+        },
+        "description": "Work order on a list, with basic details of its device, client and technician."
+      },
+      "WorkOrderPriority": {
+        "enum": [
+          "Low",
+          "Normal",
+          "High",
+          "Critical"
+        ],
+        "type": "string",
+        "description": "Priority of a work order."
+      },
+      "WorkOrderResponse": {
+        "required": [
+          "id",
+          "number",
+          "deviceId",
+          "deviceSerialNumber",
+          "deviceModel",
+          "clientId",
+          "clientName",
+          "description",
+          "priority",
+          "status",
+          "technicianId",
+          "technicianEmail",
+          "technicianName",
+          "dueDate",
+          "isOverdue",
+          "createdAt",
+          "startedAt",
+          "completedAt",
+          "invoicedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier of the work order.",
+            "format": "uuid"
+          },
+          "number": {
+            "type": "string",
+            "description": "Readable number of the work order, for example ZL/2026/0042, numbered from 1 in each year of creation in the Europe/Warsaw time zone."
+          },
+          "deviceId": {
+            "type": "string",
+            "description": "Identifier of the serviced device.",
+            "format": "uuid"
+          },
+          "deviceSerialNumber": {
+            "type": "string",
+            "description": "Serial number of the serviced device."
+          },
+          "deviceModel": {
+            "type": "string",
+            "description": "Model of the serviced device."
+          },
+          "clientId": {
+            "type": "string",
+            "description": "Identifier of the client owning the device.",
+            "format": "uuid"
+          },
+          "clientName": {
+            "type": "string",
+            "description": "Name of the client owning the device."
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the fault."
+          },
+          "priority": {
+            "description": "Priority of the work order.",
+            "$ref": "#/components/schemas/WorkOrderPriority"
+          },
+          "status": {
+            "description": "Current status. Allowed transitions: New -> Assigned -> InProgress -> Completed -> Invoiced, and Assigned -> New when the technician is unassigned.",
+            "$ref": "#/components/schemas/WorkOrderStatus"
+          },
+          "technicianId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Identifier of the assigned technician; null when no technician is assigned.",
+            "format": "uuid"
+          },
+          "technicianEmail": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Email of the assigned technician; null when no technician is assigned."
+          },
+          "technicianName": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "First and last name of the assigned technician; null when no technician is assigned."
+          },
+          "dueDate": {
+            "type": "string",
+            "description": "UTC deadline of the work order.",
+            "format": "date-time"
+          },
+          "isOverdue": {
+            "type": "boolean",
+            "description": "True when the deadline has passed and the work order is neither completed nor invoiced. Set by an hourly job and recalculated immediately when the deadline changes."
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "UTC time when the work order was created.",
+            "format": "date-time"
+          },
+          "startedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "UTC time when the technician started the work; null before the work is started.",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "UTC time when the work order was completed; null before completion.",
+            "format": "date-time"
+          },
+          "invoicedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "UTC time when the work order was invoiced; null before invoicing.",
+            "format": "date-time"
+          }
+        },
+        "description": "Service work order with basic details of its device, client and technician."
+      },
+      "WorkOrderStatus": {
+        "enum": [
+          "New",
+          "Assigned",
+          "InProgress",
+          "Completed",
+          "Invoiced"
+        ],
+        "type": "string",
+        "description": "Status of a work order. Allowed transitions: New -> Assigned -> InProgress -> Completed -> Invoiced, and Assigned -> New when the technician is unassigned."
+      },
+      "WorkOrderStatusCountResponse": {
+        "required": [
+          "status",
+          "count"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "description": "Status of the work orders.",
+            "$ref": "#/components/schemas/WorkOrderStatus"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of work orders in the status.",
+            "format": "int32"
+          }
+        },
+        "description": "Number of work orders in one status."
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "description": "Access token returned by the login or refresh endpoint.",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Auth"
+    },
+    {
+      "name": "Users"
+    },
+    {
+      "name": "Clients"
+    },
+    {
+      "name": "Devices"
+    },
+    {
+      "name": "WorkOrders"
+    },
+    {
+      "name": "Parts"
+    },
+    {
+      "name": "ServiceEntries"
+    },
+    {
+      "name": "Dashboard"
+    },
+    {
+      "name": "DemoData"
+    }
+  ]
+}
