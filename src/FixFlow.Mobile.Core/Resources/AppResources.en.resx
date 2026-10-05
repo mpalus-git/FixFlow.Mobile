@@ -210,4 +210,25 @@
   <data name="DetailsOpenMapButton" xml:space="preserve">
     <value>Show on map</value>
   </data>
+  <data name="DetailsEntriesSection" xml:space="preserve">
+    <value>Service entries</value>
+  </data>
+  <data name="DetailsNoEntries" xml:space="preserve">
+    <value>No service entries.</value>
+  </data>
+  <data name="DetailsCorrectionBadge" xml:space="preserve">
+    <value>Correction</value>
+  </data>
+  <data name="DetailsShowLocationButton" xml:space="preserve">
+    <value>Show GPS position</value>
+  </data>
+  <data name="DetailsHistorySection" xml:space="preserve">
+    <value>Your previous work orders on this device</value>
+  </data>
+  <data name="DetailsNoHistory" xml:space="preserve">
+    <value>No previous work orders on this device.</value>
+  </data>
+  <data name="DetailsDownloadProtocolButton" xml:space="preserve">
+    <value>Download PDF protocol</value>
+  </data>
 </root>

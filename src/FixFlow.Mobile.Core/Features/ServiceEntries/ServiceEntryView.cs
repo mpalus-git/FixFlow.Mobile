@@ -14,4 +14,6 @@ public sealed record ServiceEntryView(
     public bool HasLocation => Latitude is not null && Longitude is not null;
 
     public bool HasParts => Parts.Count > 0;
+
+    public bool HasWorkTime => WorkTimeText is not null;
 }

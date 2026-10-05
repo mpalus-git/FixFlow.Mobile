@@ -23,4 +23,10 @@ public sealed record WorkOrderDetailsView(
     public bool HasEntries => Entries.Count > 0;
 
     public bool HasHistory => History.Count > 0;
+
+    public bool HasNoEntries => !HasEntries;
+
+    public bool HasNoHistory => !HasHistory;
+
+    public bool HasPartsTotal => PartsTotalText is not null;
 }
