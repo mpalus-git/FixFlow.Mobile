@@ -7,7 +7,7 @@ namespace FixFlow.Mobile.IntegrationTests;
 
 public sealed class ApiEnvironment : IAsyncLifetime
 {
-    public const string ApiImage = "ghcr.io/mpalus-git/fixflow.api:sha-800b461db7b7f0472bf644f60075f9f5a77303b4";
+    public const string ApiImage = "ghcr.io/mpalus-git/fixflow.api:sha-388294ddf5111adfaff6f5bb0a9217c9f3aa9e69";
     public const string AdminEmail = "admin@fixflow.local";
 
     private const string DatabaseAlias = "postgres";
