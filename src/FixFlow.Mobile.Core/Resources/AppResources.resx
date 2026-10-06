@@ -282,4 +282,13 @@
   <data name="CancelButton" xml:space="preserve">
     <value>Anuluj</value>
   </data>
+  <data name="WorkTimerSection" xml:space="preserve">
+    <value>Czas pracy</value>
+  </data>
+  <data name="RetryLocationButton" xml:space="preserve">
+    <value>Ustal pozycję ponownie</value>
+  </data>
+  <data name="OpenLocationSettingsButton" xml:space="preserve">
+    <value>Otwórz ustawienia lokalizacji</value>
+  </data>
 </root>
