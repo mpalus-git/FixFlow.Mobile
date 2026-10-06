@@ -540,6 +540,12 @@
   <data name="ChangePhotoCount" xml:space="preserve">
     <value>Zdjęcia: {0}</value>
   </data>
+  <data name="SyncLastSync" xml:space="preserve">
+    <value>Ostatnia synchronizacja: {0}</value>
+  </data>
+  <data name="SyncNeverSynced" xml:space="preserve">
+    <value>Dane nie były jeszcze synchronizowane.</value>
+  </data>
   <data name="SyncRejectedAt" xml:space="preserve">
     <value>Odrzucono {0}</value>
   </data>
@@ -551,5 +557,8 @@
   </data>
   <data name="SyncPendingRetry" xml:space="preserve">
     <value>Nieudane próby: {0}. Następna próba: {1}</value>
+  </data>
+  <data name="SyncFailedNotice" xml:space="preserve">
+    <value>Nie udało się połączyć z serwerem. Zmiany zostaną wysłane później.</value>
   </data>
 </root>
