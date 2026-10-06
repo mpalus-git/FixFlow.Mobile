@@ -21,11 +21,22 @@ public sealed class OutboxWriter(OutboxRepository outbox, TimeProvider timeProvi
     public Task<OutboxOperation> AddServiceEntryAsync(Guid workOrderId, PendingServiceEntry entry)
     {
         ArgumentNullException.ThrowIfNull(entry);
-        return EnqueueAsync(workOrderId, OutboxOperationKind.AddServiceEntry, OutboxPayload.Serialize(entry));
+        return EnqueueAsync(
+            workOrderId,
+            OutboxOperationKind.AddServiceEntry,
+            OutboxPayload.Serialize(entry),
+            entry.WorkFinishedAt is { } finishedAt ? connection => RestartTimer(connection, workOrderId, finishedAt) : null);
     }
 
     public Task<OutboxOperation> CompleteWorkOrderAsync(Guid workOrderId) =>
         EnqueueAsync(workOrderId, OutboxOperationKind.CompleteWorkOrder, OutboxPayload.Empty);
+
+    private static void RestartTimer(SQLiteConnection connection, Guid workOrderId, DateTimeOffset startedAt) =>
+        connection.Execute(
+            "UPDATE work_timers SET started_at = ?, location_status = ?, latitude = NULL, longitude = NULL WHERE work_order_id = ?",
+            startedAt,
+            nameof(WorkLocationStatus.NotRequired),
+            workOrderId);
 
     private async Task<OutboxOperation> EnqueueAsync(
         Guid workOrderId, OutboxOperationKind kind, string payload, Action<SQLiteConnection>? localChange = null)

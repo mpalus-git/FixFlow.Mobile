@@ -1,3 +1,4 @@
+using System.Globalization;
 using FixFlow.Mobile.Core.Formatting;
 using Microsoft.Extensions.Time.Testing;
 
@@ -32,5 +33,15 @@ public sealed class BusinessClockTests
         var businessTime = clock.ToBusinessTime(DateTimeOffset.Parse(utc, System.Globalization.CultureInfo.InvariantCulture));
 
         businessTime.ToString("yyyy-MM-ddTHH:mm:sszzz", System.Globalization.CultureInfo.InvariantCulture).ShouldBe(expected);
+    }
+
+    [Theory]
+    [InlineData("2026-07-01T12:00:00", "2026-07-01T10:00:00Z")]
+    [InlineData("2026-01-15T11:00:00", "2026-01-15T10:00:00Z")]
+    public void Should_Convert_Warsaw_Wall_Clock_To_Utc_When_Device_Is_In_Other_Zone(string warsaw, string expectedUtc)
+    {
+        var clock = BusinessClock.CreateForWarsaw(_timeProvider);
+
+        clock.FromBusinessTime(DateTime.Parse(warsaw, CultureInfo.InvariantCulture)).ShouldBe(DateTimeOffset.Parse(expectedUtc, CultureInfo.InvariantCulture));
     }
 }

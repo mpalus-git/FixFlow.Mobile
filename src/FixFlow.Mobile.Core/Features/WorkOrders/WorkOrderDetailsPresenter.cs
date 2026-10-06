@@ -54,10 +54,11 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter)
             {
                 WorkLocationStatus.Captured => AppResources.WorkLocationCaptured,
                 WorkLocationStatus.Denied => AppResources.WorkLocationDenied,
+                WorkLocationStatus.NotRequired => null,
                 _ => AppResources.WorkLocationUnavailable,
             },
             isLocating,
-            !isLocating && timer.LocationStatus != WorkLocationStatus.Captured,
+            !isLocating && timer.LocationStatus is not (WorkLocationStatus.Captured or WorkLocationStatus.NotRequired),
             !isLocating && timer.LocationStatus == WorkLocationStatus.Denied);
     }
 

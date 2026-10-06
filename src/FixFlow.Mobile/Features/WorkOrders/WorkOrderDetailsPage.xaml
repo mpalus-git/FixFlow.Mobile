@@ -61,7 +61,8 @@
                             <Label Text="{Binding WorkTimer.StartedText}"
                                    FontAttributes="Bold" />
                             <Label Text="{Binding WorkTimer.ElapsedText}" />
-                            <Grid ColumnDefinitions="Auto,*">
+                            <Grid ColumnDefinitions="Auto,*"
+                                  IsVisible="{Binding WorkTimer.HasLocationText}">
                                 <ActivityIndicator IsRunning="{Binding WorkTimer.IsLocating}"
                                                    IsVisible="{Binding WorkTimer.IsLocating}"
                                                    HeightRequest="20"

@@ -6,4 +6,5 @@ public enum WorkLocationStatus
     Captured,
     Denied,
     Unavailable,
+    NotRequired,
 }

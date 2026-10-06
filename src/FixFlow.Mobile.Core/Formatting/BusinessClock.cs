@@ -13,5 +13,11 @@ public sealed class BusinessClock(TimeProvider timeProvider, TimeZoneInfo timeZo
 
     public DateTimeOffset ToBusinessTime(DateTimeOffset instant) => TimeZoneInfo.ConvertTime(instant, timeZone);
 
+    public DateTimeOffset FromBusinessTime(DateTime businessDateTime)
+    {
+        var unspecified = DateTime.SpecifyKind(businessDateTime, DateTimeKind.Unspecified);
+        return new DateTimeOffset(unspecified, timeZone.GetUtcOffset(unspecified)).ToUniversalTime();
+    }
+
     public DateOnly ToBusinessDate(DateTimeOffset instant) => DateOnly.FromDateTime(ToBusinessTime(instant).DateTime);
 }
