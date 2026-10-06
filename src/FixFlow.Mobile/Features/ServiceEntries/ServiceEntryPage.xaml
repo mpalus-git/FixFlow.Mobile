@@ -69,50 +69,40 @@
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="viewModels:ServiceEntryPartDraft">
                             <Border Style="{StaticResource CardBorder}">
-                                <Grid ColumnDefinitions="*,Auto,Auto,Auto"
-                                      RowDefinitions="Auto,Auto,Auto"
-                                      ColumnSpacing="8">
-                                    <Label Grid.ColumnSpan="4"
-                                           Text="{Binding Name}"
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="{Binding Name}"
                                            FontAttributes="Bold" />
-                                    <Label Grid.Row="1"
-                                           Grid.ColumnSpan="4"
-                                           Text="{Binding DetailsText}"
+                                    <Label Text="{Binding DetailsText}"
                                            Style="{StaticResource SecondaryLabel}" />
-                                    <Button Grid.Row="2"
-                                            Text="{x:Static resources:AppResources.EntryRemovePartButton}"
-                                            Command="{Binding Parts.RemoveCommand, Source={RelativeSource AncestorType={x:Type viewModels:ServiceEntryViewModel}}, x:DataType=viewModels:ServiceEntryViewModel}"
-                                            CommandParameter="{Binding .}"
-                                            Style="{StaticResource OutlineButton}"
-                                            HorizontalOptions="Start"
-                                            Margin="0,8,0,0" />
-                                    <Button Grid.Row="2"
-                                            Grid.Column="1"
-                                            Text="{x:Static resources:AppResources.EntryDecreaseQuantity}"
-                                            SemanticProperties.Description="{x:Static resources:AppResources.EntryDecreaseQuantityDescription}"
-                                            Command="{Binding DecreaseCommand}"
-                                            Style="{StaticResource OutlineButton}"
-                                            Padding="0"
-                                            WidthRequest="48"
-                                            Margin="0,8,0,0" />
-                                    <Label Grid.Row="2"
-                                           Grid.Column="2"
-                                           Text="{Binding Quantity}"
-                                           FontAttributes="Bold"
-                                           MinimumWidthRequest="32"
-                                           HorizontalTextAlignment="Center"
-                                           VerticalOptions="Center"
-                                           Margin="0,8,0,0" />
-                                    <Button Grid.Row="2"
-                                            Grid.Column="3"
-                                            Text="{x:Static resources:AppResources.EntryIncreaseQuantity}"
-                                            SemanticProperties.Description="{x:Static resources:AppResources.EntryIncreaseQuantityDescription}"
-                                            Command="{Binding IncreaseCommand}"
-                                            Style="{StaticResource OutlineButton}"
-                                            Padding="0"
-                                            WidthRequest="48"
-                                            Margin="0,8,0,0" />
-                                </Grid>
+                                    <Grid ColumnDefinitions="*,Auto"
+                                          Margin="0,8,0,0">
+                                        <Button Text="{x:Static resources:AppResources.EntryRemovePartButton}"
+                                                Command="{Binding Parts.RemoveCommand, Source={RelativeSource AncestorType={x:Type viewModels:ServiceEntryViewModel}}, x:DataType=viewModels:ServiceEntryViewModel}"
+                                                CommandParameter="{Binding .}"
+                                                Style="{StaticResource OutlineButton}"
+                                                HorizontalOptions="Start" />
+                                        <HorizontalStackLayout Spacing="8"
+                                                               Grid.Column="1">
+                                            <Button Text="{x:Static resources:AppResources.EntryDecreaseQuantity}"
+                                                    SemanticProperties.Description="{x:Static resources:AppResources.EntryDecreaseQuantityDescription}"
+                                                    Command="{Binding DecreaseCommand}"
+                                                    Style="{StaticResource OutlineButton}"
+                                                    Padding="0"
+                                                    WidthRequest="48" />
+                                            <Label Text="{Binding Quantity}"
+                                                   FontAttributes="Bold"
+                                                   MinimumWidthRequest="32"
+                                                   HorizontalTextAlignment="Center"
+                                                   VerticalOptions="Center" />
+                                            <Button Text="{x:Static resources:AppResources.EntryIncreaseQuantity}"
+                                                    SemanticProperties.Description="{x:Static resources:AppResources.EntryIncreaseQuantityDescription}"
+                                                    Command="{Binding IncreaseCommand}"
+                                                    Style="{StaticResource OutlineButton}"
+                                                    Padding="0"
+                                                    WidthRequest="48" />
+                                        </HorizontalStackLayout>
+                                    </Grid>
+                                </VerticalStackLayout>
                             </Border>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
