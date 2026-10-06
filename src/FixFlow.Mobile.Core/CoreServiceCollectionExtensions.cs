@@ -80,6 +80,7 @@ public static class CoreServiceCollectionExtensions
             provider.GetRequiredService<ReminderReconciler>,
             provider.GetRequiredService<INotificationScheduler>()));
         services.AddTransient<WorkOrderListViewModel>();
+        services.AddTransient<SettingsViewModel>();
         services.AddTransient<WorkOrderDetailsSources>();
         services.AddTransient<WorkOrderDetailsViewModel>();
 

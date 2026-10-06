@@ -36,6 +36,7 @@ public sealed class CoreServiceCollectionExtensionsTests
             .AddSingleton(Substitute.For<IUiDispatcher>())
             .AddSingleton(Substitute.For<IClipboardService>())
             .AddSingleton(Substitute.For<INotificationScheduler>())
+            .AddSingleton(Substitute.For<IAppVersion>())
             .AddSingleton(new DemoAccount(string.Empty, string.Empty))
             .AddSingleton(new LocalDatabaseOptions(Path.GetTempPath()))
             .AddCore();

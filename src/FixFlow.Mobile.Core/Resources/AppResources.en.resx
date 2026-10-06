@@ -630,4 +630,7 @@
   <data name="NotNowButton" xml:space="preserve">
     <value>Not now</value>
   </data>
+  <data name="SettingsVersion" xml:space="preserve">
+    <value>Version {0} ({1})</value>
+  </data>
 </root>
