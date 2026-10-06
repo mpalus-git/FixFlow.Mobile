@@ -54,7 +54,7 @@
     </PropertyGroup>
     <WriteLinesToFile
       File="$(BuildConfigurationFile)"
-      Lines="namespace FixFlow.Mobile%3B;internal static class BuildConfiguration;{;    public const string ApiBaseUrl = &quot;$(FixFlowApiBaseUrl)&quot;%3B;    public const string DemoTechnicianEmail = @&quot;$(DemoTechnicianEmailLiteral)&quot;%3B;    public const string DemoTechnicianPassword = @&quot;$(DemoTechnicianPasswordLiteral)&quot;%3B;}"
+      Lines="namespace FixFlow.Mobile%3B;internal static class BuildConfiguration;{;    public const string ApiBaseUrl = &quot;$(FixFlowApiBaseUrl)&quot;%3B;    public const string DemoTechnicianEmail = @&quot;$(DemoTechnicianEmailLiteral)&quot;%3B;    public const string DemoTechnicianPassword = @&quot;$(DemoTechnicianPasswordLiteral)&quot;%3B;    public const string ApplicationDisplayVersion = &quot;$(ApplicationDisplayVersion)&quot;%3B;    public const string ApplicationVersion = &quot;$(ApplicationVersion)&quot;%3B;}"
       Overwrite="true"
       WriteOnlyWhenDifferent="true" />
     <ItemGroup>
