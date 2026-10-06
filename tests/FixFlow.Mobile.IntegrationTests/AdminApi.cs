@@ -60,6 +60,9 @@ public sealed class AdminApi : IDisposable
     public async Task ReassignAsync(Guid workOrderId, Guid technicianId) =>
         await PostAsync(_client, $"api/v1/work-orders/{workOrderId}/reassign", new { technicianId });
 
+    public async Task RestockAsync(Guid partId, int quantity) =>
+        await PostAsync(_client, $"api/v1/parts/{partId}/restock", new { quantity });
+
     public async Task<JsonElement> GetAsync(string path)
     {
         using var response = await _client.GetAsync(new Uri(path, UriKind.Relative));
