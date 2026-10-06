@@ -10,6 +10,8 @@ public sealed class DisabledNotificationScheduler : INotificationScheduler
 
     public Task<bool> RequestPermissionAsync() => Task.FromResult(false);
 
+    public Task OpenSettingsAsync() => Task.CompletedTask;
+
     public Task<IReadOnlyList<ScheduledReminder>> GetScheduledAsync() => Task.FromResult<IReadOnlyList<ScheduledReminder>>([]);
 
     public Task ScheduleAsync(ScheduledReminder reminder) => Task.CompletedTask;

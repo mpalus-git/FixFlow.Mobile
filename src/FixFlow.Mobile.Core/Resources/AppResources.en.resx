@@ -648,4 +648,22 @@
   <data name="LogoutConflictPart" xml:space="preserve">
     <value>to resolve: {0}</value>
   </data>
+  <data name="SettingsNotificationsHeader" xml:space="preserve">
+    <value>Reminders</value>
+  </data>
+  <data name="SettingsNotificationsDescription" xml:space="preserve">
+    <value>A notification one hour before an assigned work order is due.</value>
+  </data>
+  <data name="NotificationsEnabledStatus" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="NotificationsDisabledStatus" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="EnableNotificationsButton" xml:space="preserve">
+    <value>Turn on reminders</value>
+  </data>
+  <data name="OpenNotificationSettingsButton" xml:space="preserve">
+    <value>Open system settings</value>
+  </data>
 </root>

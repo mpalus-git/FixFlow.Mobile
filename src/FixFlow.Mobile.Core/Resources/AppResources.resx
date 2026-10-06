@@ -648,4 +648,22 @@
   <data name="LogoutConflictPart" xml:space="preserve">
     <value>do wyjaśnienia: {0}</value>
   </data>
+  <data name="SettingsNotificationsHeader" xml:space="preserve">
+    <value>Przypomnienia</value>
+  </data>
+  <data name="SettingsNotificationsDescription" xml:space="preserve">
+    <value>Powiadomienie godzinę przed terminem przypisanego zlecenia.</value>
+  </data>
+  <data name="NotificationsEnabledStatus" xml:space="preserve">
+    <value>Włączone</value>
+  </data>
+  <data name="NotificationsDisabledStatus" xml:space="preserve">
+    <value>Wyłączone</value>
+  </data>
+  <data name="EnableNotificationsButton" xml:space="preserve">
+    <value>Włącz przypomnienia</value>
+  </data>
+  <data name="OpenNotificationSettingsButton" xml:space="preserve">
+    <value>Otwórz ustawienia systemu</value>
+  </data>
 </root>

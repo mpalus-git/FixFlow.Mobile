@@ -7,9 +7,11 @@ using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Settings;
 using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Features.WorkOrders;
+using FixFlow.Mobile.Core.Notifications;
 using FixFlow.Mobile.Core.Resources;
 using FixFlow.Mobile.UnitTests.Api;
 using FixFlow.Mobile.UnitTests.Features.Auth;
+using FixFlow.Mobile.UnitTests.Features.WorkOrders;
 using FixFlow.Mobile.UnitTests.Storage;
 using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
@@ -33,6 +35,8 @@ public sealed class SettingsViewModelTests : IAsyncLifetime
     private readonly WeakReferenceMessenger _messenger = new();
     private readonly OutboxRepository _outbox;
     private readonly ThemeService _theme;
+    private FakeNotificationScheduler _scheduler = new() { IsEnabled = false };
+    private int _reconcileRequests;
 
     public SettingsViewModelTests()
     {
@@ -84,6 +88,65 @@ public sealed class SettingsViewModelTests : IAsyncLifetime
 
         _theme.CurrentTheme.ShouldBe(AppThemePreference.Dark);
         _settings.Received(1).SetString(ThemeService.ThemeKey, "dark");
+    }
+
+    [Fact]
+    public async Task Should_Request_Permission_And_Plan_Reminders_When_Reminders_Are_Turned_On_First_Time()
+    {
+        var viewModel = CreateViewModel();
+        await viewModel.RefreshNotificationsCommand.ExecuteAsync(null);
+        viewModel.CanEnableNotifications.ShouldBeTrue();
+        viewModel.EnableNotificationsText.ShouldBe(AppResources.EnableNotificationsButton);
+
+        await viewModel.EnableNotificationsCommand.ExecuteAsync(null);
+
+        _scheduler.PermissionRequests.ShouldBe(1);
+        _settings.Received(1).SetString(NotificationConsent.AskedKey, Arg.Any<string>());
+        viewModel.AreNotificationsEnabled.ShouldBeTrue();
+        viewModel.CanEnableNotifications.ShouldBeFalse();
+        viewModel.NotificationStatus.ShouldBe(AppResources.NotificationsEnabledStatus);
+        _reconcileRequests.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Should_Open_System_Settings_When_Permission_Was_Already_Requested()
+    {
+        _settings.GetString(NotificationConsent.AskedKey).Returns(bool.TrueString);
+        var viewModel = CreateViewModel();
+        await viewModel.RefreshNotificationsCommand.ExecuteAsync(null);
+        viewModel.EnableNotificationsText.ShouldBe(AppResources.OpenNotificationSettingsButton);
+
+        await viewModel.EnableNotificationsCommand.ExecuteAsync(null);
+
+        _scheduler.SettingsOpenings.ShouldBe(1);
+        _scheduler.PermissionRequests.ShouldBe(0);
+        _reconcileRequests.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task Should_Plan_Reminders_When_Notifications_Were_Turned_On_In_System_Settings()
+    {
+        var viewModel = CreateViewModel();
+        await viewModel.RefreshNotificationsCommand.ExecuteAsync(null);
+
+        _scheduler.IsEnabled = true;
+        await viewModel.RefreshNotificationsCommand.ExecuteAsync(null);
+        await viewModel.RefreshNotificationsCommand.ExecuteAsync(null);
+
+        viewModel.AreNotificationsEnabled.ShouldBeTrue();
+        _reconcileRequests.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Should_Hide_Reminders_When_Platform_Does_Not_Support_Notifications()
+    {
+        _scheduler = new FakeNotificationScheduler { IsSupported = false, IsEnabled = false };
+        var viewModel = CreateViewModel();
+
+        await viewModel.RefreshNotificationsCommand.ExecuteAsync(null);
+
+        viewModel.AreNotificationsSupported.ShouldBeFalse();
+        viewModel.CanEnableNotifications.ShouldBeFalse();
     }
 
     [Fact]
@@ -141,11 +204,20 @@ public sealed class SettingsViewModelTests : IAsyncLifetime
         return new SettingsViewModel(
             _language,
             _theme,
+            _scheduler,
+            _settings,
+            new ReminderCoordinator(_session, _messenger, CreateReconciler, _scheduler),
             _outbox,
             authService,
             _session,
             _appVersion,
             _dialogs);
+    }
+
+    private ReminderReconciler CreateReconciler()
+    {
+        _reconcileRequests++;
+        throw new InvalidOperationException("Reconciliation is not under test.");
     }
 
     private async Task QueueRejectedStartAndPendingCompletionAsync()
