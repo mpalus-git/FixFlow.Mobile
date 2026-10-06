@@ -80,7 +80,7 @@ public sealed partial class ServiceEntryViewModel(
         Number = workOrder.Number;
         _workOrderStartedAt = workOrder.StartedAt;
         _timer = await timers.GetAsync(parameter);
-        _initialStart = _timer?.StartedAt ?? await LastFinishAsync(workOrderOperations) ?? workOrder.StartedAt ?? clock.Now;
+        _initialStart = new[] { _timer?.StartedAt, await LastFinishAsync(workOrderOperations) }.Max() ?? workOrder.StartedAt ?? clock.Now;
         _initialFinish = clock.Now;
         (StartDate, StartTime) = ToPickers(_initialStart);
         (FinishDate, FinishTime) = ToPickers(_initialFinish);

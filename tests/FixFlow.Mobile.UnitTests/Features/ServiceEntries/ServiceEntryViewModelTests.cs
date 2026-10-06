@@ -84,6 +84,18 @@ public sealed class ServiceEntryViewModelTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Should_Start_After_Entry_Saved_On_Other_Device_When_Local_Timer_Is_Older()
+    {
+        var finishedElsewhere = StartedAt.AddMinutes(30);
+        await new ServiceEntryRepository(_userDatabase.Database).UpsertAsync(new ServiceEntry(
+            Guid.CreateVersion7(), _workOrder.Id, Guid.NewGuid(), "Jan Kowalski", "Z telefonu", false, StartedAt, finishedElsewhere, null, null, finishedElsewhere, []));
+
+        await _viewModel.OnNavigatedToAsync(_workOrder.Id);
+
+        _viewModel.StartTime.ShouldBe(new TimeSpan(10, 30, 0));
+    }
+
+    [Fact]
     public async Task Should_Show_Error_When_Work_Order_Is_Not_In_Progress()
     {
         var assigned = TestWorkOrders.Create("ZL-2", StartedAt);
