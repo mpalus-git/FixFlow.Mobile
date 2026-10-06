@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Maui.MainTheme.NoActionBar" parent="Maui.MainTheme">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="android:actionModeBackground">?attr/colorPrimary</item>
+        <item name="android:actionModeStyle">@style/ActionMode</item>
+        <item name="android:datePickerDialogTheme">@style/FixFlow.PickerDialog</item>
+        <item name="android:timePickerDialogTheme">@style/FixFlow.PickerDialog</item>
+    </style>
+    <style name="FixFlow.PickerDialog" parent="android:Theme.Material.Light.Dialog.Alert">
+        <item name="android:colorAccent">@color/pickerAccent</item>
+        <item name="android:buttonBarPositiveButtonStyle">@style/FixFlow.PickerDialogButton</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/FixFlow.PickerDialogButton</item>
+    </style>
+    <style name="FixFlow.PickerDialogButton" parent="android:Widget.Material.Button.Borderless.Colored">
+        <item name="android:textColor">@color/pickerAccent</item>
+    </style>
+</resources>
