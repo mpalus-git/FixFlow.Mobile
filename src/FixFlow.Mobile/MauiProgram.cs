@@ -32,7 +32,8 @@ public static partial class MauiProgram
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
-            .ConfigureMauiHandlers(ConfigurePlatformHandlers);
+            .ConfigureMauiHandlers(ConfigurePlatformHandlers)
+            .ConfigureImageSources(ConfigurePlatformImageSources);
 
         builder.Services.AddCore();
         builder.Services.AddFixFlowApi(new Uri(BuildConfiguration.ApiBaseUrl));
@@ -73,4 +74,6 @@ public static partial class MauiProgram
     }
 
     private static partial void ConfigurePlatformHandlers(IMauiHandlersCollection handlers);
+
+    private static partial void ConfigurePlatformImageSources(IImageSourceServiceCollection services);
 }
