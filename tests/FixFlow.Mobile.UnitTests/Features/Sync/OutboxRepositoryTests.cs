@@ -62,6 +62,15 @@ public sealed class OutboxRepositoryTests : IAsyncLifetime
 
     public async ValueTask DisposeAsync() => await _userDatabase.DisposeAsync();
 
+    [Fact]
+    public async Task Should_Not_Queue_Operation_When_Local_Change_Fails()
+    {
+        await Should.ThrowAsync<InvalidOperationException>(() =>
+            _repository.EnqueueAsync(CreateOperation(OutboxOperationKind.StartWork, Now), _ => throw new InvalidOperationException()));
+
+        (await _repository.GetAllAsync()).ShouldBeEmpty();
+    }
+
     private static OutboxOperation CreateOperation(OutboxOperationKind kind, DateTimeOffset createdAt) =>
         new(Guid.CreateVersion7(), WorkOrderId, kind, "{}", createdAt, 0, null, null);
 }

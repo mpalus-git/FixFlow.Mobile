@@ -7,10 +7,16 @@ public sealed class OutboxRepository(UserDatabase userDatabase)
 {
     private SQLiteAsyncConnection Connection => userDatabase.Current.Connection;
 
-    public async Task EnqueueAsync(OutboxOperation operation)
+    public async Task EnqueueAsync(OutboxOperation operation, Action<SQLiteConnection>? localChange = null)
     {
         ArgumentNullException.ThrowIfNull(operation);
-        await Connection.InsertAsync(OutboxOperationRow.From(operation));
+
+        var row = OutboxOperationRow.From(operation);
+        await Connection.RunInTransactionAsync(connection =>
+        {
+            localChange?.Invoke(connection);
+            connection.Insert(row);
+        });
     }
 
     public async Task<IReadOnlyList<OutboxOperation>> GetAllAsync()
