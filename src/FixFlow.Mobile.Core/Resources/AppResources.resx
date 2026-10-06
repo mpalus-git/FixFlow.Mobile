@@ -339,6 +339,33 @@
   <data name="EntryWorkFinishLabel" xml:space="preserve">
     <value>Koniec pracy</value>
   </data>
+  <data name="EntryPartsSection" xml:space="preserve">
+    <value>Zużyte części</value>
+  </data>
+  <data name="EntryPartSearchPlaceholder" xml:space="preserve">
+    <value>Szukaj po nazwie lub numerze katalogowym</value>
+  </data>
+  <data name="EntryNoPartsFound" xml:space="preserve">
+    <value>Brak pasujących części.</value>
+  </data>
+  <data name="EntryAddPartButton" xml:space="preserve">
+    <value>Dodaj</value>
+  </data>
+  <data name="EntryRemovePartButton" xml:space="preserve">
+    <value>Usuń</value>
+  </data>
+  <data name="EntryIncreaseQuantity" xml:space="preserve">
+    <value>+</value>
+  </data>
+  <data name="EntryDecreaseQuantity" xml:space="preserve">
+    <value>−</value>
+  </data>
+  <data name="EntryIncreaseQuantityDescription" xml:space="preserve">
+    <value>Zwiększ ilość</value>
+  </data>
+  <data name="EntryDecreaseQuantityDescription" xml:space="preserve">
+    <value>Zmniejsz ilość</value>
+  </data>
   <data name="EntrySaveButton" xml:space="preserve">
     <value>Zapisz wpis</value>
   </data>

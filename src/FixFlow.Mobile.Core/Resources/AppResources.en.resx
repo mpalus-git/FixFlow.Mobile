@@ -339,6 +339,33 @@
   <data name="EntryWorkFinishLabel" xml:space="preserve">
     <value>Work finished</value>
   </data>
+  <data name="EntryPartsSection" xml:space="preserve">
+    <value>Used parts</value>
+  </data>
+  <data name="EntryPartSearchPlaceholder" xml:space="preserve">
+    <value>Search by name or catalog number</value>
+  </data>
+  <data name="EntryNoPartsFound" xml:space="preserve">
+    <value>No matching parts.</value>
+  </data>
+  <data name="EntryAddPartButton" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="EntryRemovePartButton" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="EntryIncreaseQuantity" xml:space="preserve">
+    <value>+</value>
+  </data>
+  <data name="EntryDecreaseQuantity" xml:space="preserve">
+    <value>−</value>
+  </data>
+  <data name="EntryIncreaseQuantityDescription" xml:space="preserve">
+    <value>Increase quantity</value>
+  </data>
+  <data name="EntryDecreaseQuantityDescription" xml:space="preserve">
+    <value>Decrease quantity</value>
+  </data>
   <data name="EntrySaveButton" xml:space="preserve">
     <value>Save entry</value>
   </data>
