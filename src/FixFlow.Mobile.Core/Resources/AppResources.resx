@@ -513,4 +513,31 @@
   <data name="ChangeKindUploadPhoto" xml:space="preserve">
     <value>Zdjęcie do wpisu</value>
   </data>
+  <data name="ChangeHeader" xml:space="preserve">
+    <value>{0} · {1}</value>
+  </data>
+  <data name="ChangeStartedAt" xml:space="preserve">
+    <value>Rozpoczęto: {0}</value>
+  </data>
+  <data name="ChangeWorkTime" xml:space="preserve">
+    <value>Czas pracy: {0} – {1}</value>
+  </data>
+  <data name="ChangeNote" xml:space="preserve">
+    <value>Notatka: {0}</value>
+  </data>
+  <data name="ChangeCorrectionReason" xml:space="preserve">
+    <value>Powód korekty: {0}</value>
+  </data>
+  <data name="ChangeUsedParts" xml:space="preserve">
+    <value>Zużyte części:</value>
+  </data>
+  <data name="ChangeReturnedParts" xml:space="preserve">
+    <value>Części do zwrotu:</value>
+  </data>
+  <data name="ChangePartLine" xml:space="preserve">
+    <value>- {0} ({1}): {2} szt.</value>
+  </data>
+  <data name="ChangePhotoCount" xml:space="preserve">
+    <value>Zdjęcia: {0}</value>
+  </data>
 </root>

@@ -38,6 +38,7 @@ public static class CoreServiceCollectionExtensions
         services.AddSingleton(OutboxRetryPolicy.CreateDefault());
         services.AddTransient<OutboxDispatcher>();
         services.AddTransient<ConflictResolver>();
+        services.AddTransient<LocalChangeDescriber>();
         services.AddSingleton(provider => new SyncCoordinator(
             provider.GetRequiredService<UserDatabase>(),
             provider.GetRequiredService<IConnectivityService>(),
