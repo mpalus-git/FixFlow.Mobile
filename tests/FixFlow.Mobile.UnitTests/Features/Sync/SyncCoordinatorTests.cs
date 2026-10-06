@@ -150,7 +150,7 @@ public sealed class SyncCoordinatorTests : IAsyncLifetime
     private Task WaitForCompletionAsync()
     {
         var completed = new TaskCompletionSource();
-        _messenger.Register<SyncCompletedMessage>(completed, (recipient, _) => ((TaskCompletionSource)recipient).TrySetResult());
+        _messenger.Register<SyncCompletedMessage>(this, (_, _) => completed.TrySetResult());
         return completed.Task.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
     }
 }
