@@ -76,6 +76,7 @@
                                                 Command="{Binding DiscardAllCommand, Source={RelativeSource AncestorType={x:Type viewModels:SyncViewModel}}, x:DataType=viewModels:SyncViewModel}"
                                                 CommandParameter="{Binding .}"
                                                 IsVisible="{Binding HasFollowingChanges}"
+                                                LineBreakMode="WordWrap"
                                                 Style="{StaticResource OutlineButton}" />
                                     </VerticalStackLayout>
                                 </Border>

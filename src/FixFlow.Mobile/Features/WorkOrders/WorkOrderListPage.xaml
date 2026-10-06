@@ -11,7 +11,8 @@
         <ToolbarItem Text="{x:Static resources:AppResources.SyncTitle}"
                      Command="{Binding OpenSyncCommand}" />
         <ToolbarItem Text="{x:Static resources:AppResources.LogoutButton}"
-                     Command="{Binding LogoutCommand}" />
+                     Command="{Binding LogoutCommand}"
+                     Order="Secondary" />
     </ContentPage.ToolbarItems>
     <Grid RowDefinitions="Auto,Auto,Auto,*">
         <controls:OfflineBanner IsVisible="{Binding Screen.IsOffline}"
