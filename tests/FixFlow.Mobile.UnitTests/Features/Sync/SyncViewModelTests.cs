@@ -28,6 +28,7 @@ public sealed class SyncViewModelTests : IAsyncLifetime
     private readonly IDialogService _dialogs = Substitute.For<IDialogService>();
     private readonly WeakReferenceMessenger _messenger = new();
     private readonly WorkOrder _workOrder = TestWorkOrders.Create("ZL-2026-0042", Now.AddDays(1));
+    private readonly ImmediateUiDispatcher _ui = new();
     private readonly OutboxRepository _outbox;
     private readonly OutboxWriter _writer;
     private readonly SyncViewModel _viewModel;
@@ -48,6 +49,7 @@ public sealed class SyncViewModelTests : IAsyncLifetime
             _messenger);
         _viewModel = new SyncViewModel(
             new ScreenState(formatter),
+            _userDatabase.Database,
             _outbox,
             new WorkOrderRepository(_userDatabase.Database),
             new SyncStateRepository(_userDatabase.Database, _timeProvider),
@@ -58,7 +60,7 @@ public sealed class SyncViewModelTests : IAsyncLifetime
             _connectivity,
             _clipboard,
             _dialogs,
-            new ImmediateUiDispatcher(),
+            _ui,
             _messenger);
     }
 
@@ -182,6 +184,18 @@ public sealed class SyncViewModelTests : IAsyncLifetime
 
         _viewModel.Screen.IsOffline.ShouldBeTrue();
         _viewModel.IsRefreshing.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Should_Ignore_Synchronization_Messages_When_Technician_Signed_Out()
+    {
+        await _userDatabase.Database.DeleteAsync();
+
+        _messenger.Send(new SyncCompletedMessage(SyncResult.NoSession));
+        _messenger.Send(new ConnectivityChangedMessage(false));
+
+        await Task.WhenAll(_ui.Posted);
+        _viewModel.Screen.IsOffline.ShouldBeFalse();
     }
 
     public async ValueTask DisposeAsync() => await _userDatabase.DisposeAsync();

@@ -28,6 +28,7 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
     private readonly FakeTimeProvider _timeProvider = new(Now);
     private readonly TestUserDatabase _userDatabase = new();
     private readonly IConnectivityService _connectivity = Substitute.For<IConnectivityService>();
+    private readonly ImmediateUiDispatcher _ui = new();
     private readonly WeakReferenceMessenger _messenger = new();
     private readonly INavigationService _navigation = Substitute.For<INavigationService>();
     private readonly StubHttpMessageHandler _handler;
@@ -62,6 +63,7 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
             _messenger);
         _viewModel = new WorkOrderListViewModel(
             new ScreenState(formatter),
+            _userDatabase.Database,
             _workOrders,
             _outbox,
             sync,
@@ -69,7 +71,7 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
             new WorkOrderListPresenter(new WorkOrderSectionClassifier(clock), formatter),
             _connectivity,
             _navigation,
-            new ImmediateUiDispatcher(),
+            _ui,
             _messenger);
     }
 
@@ -229,6 +231,18 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
         await _viewModel.OpenSettingsCommand.ExecuteAsync(null);
 
         await _navigation.Received(1).NavigateToAsync<SettingsViewModel>();
+    }
+
+    [Fact]
+    public async Task Should_Ignore_Synchronization_Messages_When_Technician_Signed_Out()
+    {
+        await _userDatabase.Database.DeleteAsync();
+
+        _messenger.Send(new SyncCompletedMessage(SyncResult.NoSession));
+        _messenger.Send(new ConnectivityChangedMessage(false));
+
+        await Task.WhenAll(_ui.Posted);
+        _viewModel.Screen.IsOffline.ShouldBeFalse();
     }
 
     public async ValueTask DisposeAsync()

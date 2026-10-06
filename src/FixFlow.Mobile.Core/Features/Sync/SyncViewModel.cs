@@ -9,12 +9,14 @@ using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Formatting;
 using FixFlow.Mobile.Core.Resources;
 using FixFlow.Mobile.Core.Screens;
+using FixFlow.Mobile.Core.Storage;
 
 namespace FixFlow.Mobile.Core.Features.Sync;
 
 public sealed partial class SyncViewModel
     : ObservableObject, IRecipient<ConnectivityChangedMessage>, IRecipient<SyncCompletedMessage>, IRecipient<ServerStartingMessage>
 {
+    private readonly UserDatabase _userDatabase;
     private readonly OutboxRepository _outbox;
     private readonly WorkOrderRepository _workOrders;
     private readonly SyncStateRepository _syncStates;
@@ -30,6 +32,7 @@ public sealed partial class SyncViewModel
 
     public SyncViewModel(
         ScreenState screen,
+        UserDatabase userDatabase,
         OutboxRepository outbox,
         WorkOrderRepository workOrders,
         SyncStateRepository syncStates,
@@ -45,6 +48,7 @@ public sealed partial class SyncViewModel
     {
         ArgumentNullException.ThrowIfNull(messenger);
         Screen = screen;
+        _userDatabase = userDatabase;
         _outbox = outbox;
         _workOrders = workOrders;
         _syncStates = syncStates;
@@ -164,7 +168,7 @@ public sealed partial class SyncViewModel
         await ShowLocalAsync();
     }
 
-    public void Receive(SyncCompletedMessage message) => _ui.Post(LoadAsync);
+    public void Receive(SyncCompletedMessage message) => _ui.Post(() => IsSignedIn ? LoadAsync() : Task.CompletedTask);
 
     public void Receive(ServerStartingMessage message) =>
         _ui.Post(() =>
@@ -173,7 +177,9 @@ public sealed partial class SyncViewModel
             return Task.CompletedTask;
         });
 
-    public void Receive(ConnectivityChangedMessage message) => _ui.Post(ShowConnectivityAsync);
+    public void Receive(ConnectivityChangedMessage message) => _ui.Post(() => IsSignedIn ? ShowConnectivityAsync() : Task.CompletedTask);
+
+    private bool IsSignedIn => _userDatabase.UserId is not null;
 
     private async Task<bool> ShowConnectivityAsync()
     {
