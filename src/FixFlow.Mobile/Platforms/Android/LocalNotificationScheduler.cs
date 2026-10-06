@@ -7,6 +7,12 @@ namespace FixFlow.Mobile;
 
 public sealed class LocalNotificationScheduler(INotificationService notifications) : INotificationScheduler
 {
+    public bool IsSupported => true;
+
+    public Task<bool> AreNotificationsEnabledAsync() => notifications.AreNotificationsEnabled();
+
+    public Task<bool> RequestPermissionAsync() => notifications.RequestNotificationPermission();
+
     public async Task<IReadOnlyList<ScheduledReminder>> GetScheduledAsync()
     {
         var pending = await notifications.GetPendingNotificationList();

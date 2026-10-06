@@ -71,6 +71,7 @@ public static class CoreServiceCollectionExtensions
         services.AddSingleton<WorkOrderListPresenter>();
         services.AddSingleton<WorkOrderDetailsPresenter>();
         services.AddSingleton<DueDateReminderPlanner>();
+        services.AddTransient<NotificationConsent>();
         services.AddTransient<ReminderReconciler>();
         services.AddSingleton(provider => new ReminderCoordinator(
             provider.GetRequiredService<SessionStore>(),
