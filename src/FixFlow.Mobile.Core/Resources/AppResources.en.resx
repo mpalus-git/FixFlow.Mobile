@@ -633,4 +633,19 @@
   <data name="SettingsVersion" xml:space="preserve">
     <value>Version {0} ({1})</value>
   </data>
+  <data name="LogoutConfirmTitle" xml:space="preserve">
+    <value>Sign out?</value>
+  </data>
+  <data name="LogoutConfirmMessage" xml:space="preserve">
+    <value>Work order data will be removed from this device.</value>
+  </data>
+  <data name="LogoutUnsentConfirmMessage" xml:space="preserve">
+    <value>Changes that have not reached the server will be lost ({0}). Work order data will be removed from this device.</value>
+  </data>
+  <data name="LogoutPendingPart" xml:space="preserve">
+    <value>to send: {0}</value>
+  </data>
+  <data name="LogoutConflictPart" xml:space="preserve">
+    <value>to resolve: {0}</value>
+  </data>
 </root>

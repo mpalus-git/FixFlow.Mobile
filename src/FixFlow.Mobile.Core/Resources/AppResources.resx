@@ -633,4 +633,19 @@
   <data name="SettingsVersion" xml:space="preserve">
     <value>Wersja {0} ({1})</value>
   </data>
+  <data name="LogoutConfirmTitle" xml:space="preserve">
+    <value>Wylogować?</value>
+  </data>
+  <data name="LogoutConfirmMessage" xml:space="preserve">
+    <value>Dane zleceń zostaną usunięte z tego urządzenia.</value>
+  </data>
+  <data name="LogoutUnsentConfirmMessage" xml:space="preserve">
+    <value>Zmiany, które nie trafiły na serwer, przepadną ({0}). Dane zleceń zostaną usunięte z tego urządzenia.</value>
+  </data>
+  <data name="LogoutPendingPart" xml:space="preserve">
+    <value>do wysłania: {0}</value>
+  </data>
+  <data name="LogoutConflictPart" xml:space="preserve">
+    <value>do wyjaśnienia: {0}</value>
+  </data>
 </root>
