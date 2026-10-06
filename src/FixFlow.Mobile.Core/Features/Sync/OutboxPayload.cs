@@ -13,6 +13,16 @@ public static class OutboxPayload
 
     public static string Serialize(PendingStart start) => JsonSerializer.Serialize(start, Options);
 
+    public static string Serialize(PendingPhotoUpload upload) => JsonSerializer.Serialize(upload, Options);
+
+    public static Guid PhotoId(OutboxOperation operation)
+    {
+        ArgumentNullException.ThrowIfNull(operation);
+
+        return JsonSerializer.Deserialize<PendingPhotoUpload>(operation.Payload, Options)?.PhotoId
+            ?? throw new InvalidOperationException($"Operation {operation.Id} has no photo payload.");
+    }
+
     public static DateTimeOffset StartedAt(OutboxOperation operation)
     {
         ArgumentNullException.ThrowIfNull(operation);

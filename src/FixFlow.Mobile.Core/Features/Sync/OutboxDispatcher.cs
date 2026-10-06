@@ -11,9 +11,16 @@ public sealed class OutboxDispatcher(
     IFixFlowApi api,
     OutboxRepository outbox,
     ServiceEntryRepository serviceEntries,
+    PhotoUploadClient photoUploads,
+    PhotoStore photos,
     OutboxRetryPolicy retryPolicy,
     TimeProvider timeProvider)
 {
+    public const string MissingPhotoFileCode = "Local.PhotoFileMissing";
+
+    private static readonly ApiError MissingPhotoFile =
+        new(ApiErrorKind.Business, null, MissingPhotoFileCode, null, new Dictionary<string, IReadOnlyList<string>>(), null);
+
     public async Task<DispatchSummary> DispatchAsync(CancellationToken cancellationToken)
     {
         var blockedWorkOrders = (await outbox.GetConflictsAsync()).Select(conflict => conflict.WorkOrderId).ToHashSet();
@@ -38,6 +45,11 @@ public sealed class OutboxDispatcher(
                 if (error is null)
                 {
                     await outbox.RemoveAsync(operation.Id);
+                    if (operation.Kind == OutboxOperationKind.UploadPhoto)
+                    {
+                        photos.Delete(OutboxPayload.PhotoId(operation));
+                    }
+
                     sent++;
                     continue;
                 }
@@ -79,6 +91,14 @@ public sealed class OutboxDispatcher(
 
     private async Task<ApiError?> SendAsync(OutboxOperation operation, CancellationToken cancellationToken)
     {
+        if (operation.Kind == OutboxOperationKind.UploadPhoto)
+        {
+            var photoId = OutboxPayload.PhotoId(operation);
+            return await photos.ReadAsync(photoId) is { } jpeg
+                ? await photoUploads.UploadAsync(photoId, jpeg, cancellationToken)
+                : MissingPhotoFile;
+        }
+
         using var response = await CallAsync(operation, cancellationToken);
         if (response.IsSuccessful)
         {
@@ -127,7 +147,7 @@ public sealed class OutboxDispatcher(
         entry.Longitude,
         entry.Note,
         [.. entry.Parts.Select(part => new ServiceEntryPartRequest(part.PartId, part.Quantity))],
-        null,
+        entry.Photos.Count == 0 ? null : [.. entry.Photos.Select(photo => photo.Url)],
         entry.WorkFinishedAt,
         entry.WorkStartedAt);
 }

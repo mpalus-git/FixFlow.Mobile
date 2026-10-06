@@ -18,14 +18,20 @@ public sealed class OutboxWriter(OutboxRepository outbox, TimeProvider timeProvi
             connection => connection.InsertOrReplace(timer));
     }
 
-    public Task<OutboxOperation> AddServiceEntryAsync(Guid workOrderId, PendingServiceEntry entry)
+    public async Task<OutboxOperation> AddServiceEntryAsync(Guid workOrderId, PendingServiceEntry entry)
     {
         ArgumentNullException.ThrowIfNull(entry);
-        return EnqueueAsync(
-            workOrderId,
-            OutboxOperationKind.AddServiceEntry,
-            OutboxPayload.Serialize(entry),
+
+        var queuedAt = timeProvider.GetUtcNow();
+        var uploads = entry.Photos
+            .Select((photo, index) => Create(workOrderId, OutboxOperationKind.UploadPhoto, OutboxPayload.Serialize(new PendingPhotoUpload(photo.Id)), queuedAt.AddTicks(index)))
+            .ToList();
+        var operation = Create(workOrderId, OutboxOperationKind.AddServiceEntry, OutboxPayload.Serialize(entry), queuedAt.AddTicks(uploads.Count));
+        await outbox.EnqueueAsync(
+            [.. uploads, operation],
             entry.WorkFinishedAt is { } finishedAt ? connection => RestartTimer(connection, workOrderId, finishedAt) : null);
+        messenger.Send(new LocalChangeQueuedMessage(workOrderId));
+        return operation;
     }
 
     public Task<OutboxOperation> CompleteWorkOrderAsync(Guid workOrderId) =>
@@ -38,10 +44,13 @@ public sealed class OutboxWriter(OutboxRepository outbox, TimeProvider timeProvi
             nameof(WorkLocationStatus.NotRequired),
             workOrderId);
 
+    private static OutboxOperation Create(Guid workOrderId, OutboxOperationKind kind, string payload, DateTimeOffset createdAt) =>
+        new(Guid.CreateVersion7(), workOrderId, kind, payload, createdAt, 0, null, null);
+
     private async Task<OutboxOperation> EnqueueAsync(
         Guid workOrderId, OutboxOperationKind kind, string payload, Action<SQLiteConnection>? localChange = null)
     {
-        var operation = new OutboxOperation(Guid.CreateVersion7(), workOrderId, kind, payload, timeProvider.GetUtcNow(), 0, null, null);
+        var operation = Create(workOrderId, kind, payload, timeProvider.GetUtcNow());
         await outbox.EnqueueAsync(operation, localChange);
         messenger.Send(new LocalChangeQueuedMessage(workOrderId));
         return operation;
