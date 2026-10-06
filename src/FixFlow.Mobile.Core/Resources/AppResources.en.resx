@@ -303,6 +303,18 @@
   <data name="EntryRequiresWorkInProgress" xml:space="preserve">
     <value>An entry can only be added to a work order in progress.</value>
   </data>
+  <data name="EntryNoteRequired" xml:space="preserve">
+    <value>Describe the performed work in the note.</value>
+  </data>
+  <data name="EntryStartBeforeWorkOrder" xml:space="preserve">
+    <value>Work cannot start before the work order was started ({0}).</value>
+  </data>
+  <data name="EntryFinishBeforeStart" xml:space="preserve">
+    <value>Work must finish after it started.</value>
+  </data>
+  <data name="EntryFinishInFuture" xml:space="preserve">
+    <value>Work cannot finish in the future.</value>
+  </data>
   <data name="EntryLocationAttached" xml:space="preserve">
     <value>The position from the start of work will be attached to this entry.</value>
   </data>

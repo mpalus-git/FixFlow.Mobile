@@ -303,6 +303,18 @@
   <data name="EntryRequiresWorkInProgress" xml:space="preserve">
     <value>Wpis można dodać tylko do zlecenia w toku.</value>
   </data>
+  <data name="EntryNoteRequired" xml:space="preserve">
+    <value>Opisz wykonaną pracę w notatce.</value>
+  </data>
+  <data name="EntryStartBeforeWorkOrder" xml:space="preserve">
+    <value>Początek pracy nie może być wcześniejszy niż rozpoczęcie zlecenia ({0}).</value>
+  </data>
+  <data name="EntryFinishBeforeStart" xml:space="preserve">
+    <value>Koniec pracy musi być później niż jej początek.</value>
+  </data>
+  <data name="EntryFinishInFuture" xml:space="preserve">
+    <value>Koniec pracy nie może być w przyszłości.</value>
+  </data>
   <data name="EntryLocationAttached" xml:space="preserve">
     <value>Do wpisu zostanie dołączona pozycja z rozpoczęcia pracy.</value>
   </data>
