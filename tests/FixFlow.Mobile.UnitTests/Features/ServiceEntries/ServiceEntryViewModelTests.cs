@@ -40,6 +40,7 @@ public sealed class ServiceEntryViewModelTests : IAsyncLifetime
             new ScreenState(_formatter),
             new ServiceEntryPartsSelection(new PartRepository(database), _formatter),
             new WorkOrderRepository(database),
+            new ServiceEntryRepository(database),
             _outbox,
             _timers,
             new OutboxWriter(_outbox, _timeProvider, new WeakReferenceMessenger()),
@@ -68,6 +69,18 @@ public sealed class ServiceEntryViewModelTests : IAsyncLifetime
         _viewModel.FinishTime.ShouldBe(new TimeSpan(11, 30, 0));
         _viewModel.LocationText.ShouldBe(AppResources.EntryWithoutLocation);
         _viewModel.Parts.Results.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Should_Start_From_Last_Entry_Finish_When_Work_Was_Started_On_Other_Device()
+    {
+        await new OutboxWriter(_outbox, _timeProvider, new WeakReferenceMessenger()).AddServiceEntryAsync(
+            _workOrder.Id, new PendingServiceEntry(Guid.CreateVersion7(), "Pierwsza część", false, StartedAt, StartedAt.AddMinutes(46), null, null, []));
+        await _userDatabase.Database.Current.Connection.ExecuteAsync("DELETE FROM work_timers");
+
+        await _viewModel.OnNavigatedToAsync(_workOrder.Id);
+
+        _viewModel.StartTime.ShouldBe(new TimeSpan(10, 46, 0));
     }
 
     [Fact]

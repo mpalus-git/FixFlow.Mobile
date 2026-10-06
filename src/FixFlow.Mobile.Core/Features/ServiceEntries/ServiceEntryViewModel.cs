@@ -14,6 +14,7 @@ public sealed partial class ServiceEntryViewModel(
     ScreenState screen,
     ServiceEntryPartsSelection parts,
     WorkOrderRepository workOrders,
+    ServiceEntryRepository serviceEntries,
     OutboxRepository outbox,
     WorkTimerRepository timers,
     OutboxWriter outboxWriter,
@@ -66,8 +67,9 @@ public sealed partial class ServiceEntryViewModel(
         _workOrderId = parameter;
         Screen.StartLoading();
         var operations = await outbox.GetAllAsync();
+        var workOrderOperations = operations.Where(operation => operation.WorkOrderId == parameter).ToList();
         var workOrder = await workOrders.GetAsync(parameter) is { } stored
-            ? PendingOperationsOverlay.Apply(stored, operations.Where(operation => operation.WorkOrderId == parameter))
+            ? PendingOperationsOverlay.Apply(stored, workOrderOperations)
             : null;
         if (workOrder is not { Status: WorkOrderStatus.InProgress })
         {
@@ -78,7 +80,7 @@ public sealed partial class ServiceEntryViewModel(
         Number = workOrder.Number;
         _workOrderStartedAt = workOrder.StartedAt;
         _timer = await timers.GetAsync(parameter);
-        _initialStart = _timer?.StartedAt ?? workOrder.StartedAt ?? clock.Now;
+        _initialStart = _timer?.StartedAt ?? await LastFinishAsync(workOrderOperations) ?? workOrder.StartedAt ?? clock.Now;
         _initialFinish = clock.Now;
         (StartDate, StartTime) = ToPickers(_initialStart);
         (FinishDate, FinishTime) = ToPickers(_initialFinish);
@@ -119,6 +121,14 @@ public sealed partial class ServiceEntryViewModel(
                 hasPosition ? _timer!.Longitude : null,
                 Parts.ToPendingParts()));
         await navigation.GoBackAsync();
+    }
+
+    private async Task<DateTimeOffset?> LastFinishAsync(IReadOnlyList<OutboxOperation> workOrderOperations)
+    {
+        var stored = await serviceEntries.GetForWorkOrderAsync(_workOrderId);
+        return stored.Select(entry => entry.WorkFinishedAt)
+            .Concat(PendingOperationsOverlay.PendingEntries(workOrderOperations).Select(entry => entry.WorkFinishedAt))
+            .Max();
     }
 
     private string? Validate(DateTimeOffset start, DateTimeOffset finish)
