@@ -7,6 +7,8 @@ namespace FixFlow.Mobile;
 
 public sealed class LocalNotificationScheduler(INotificationService notifications) : INotificationScheduler
 {
+    private const string SmallIconName = "notification_icon";
+
     public bool IsSupported => true;
 
     public Task<bool> AreNotificationsEnabledAsync() => notifications.AreNotificationsEnabled();
@@ -39,6 +41,7 @@ public sealed class LocalNotificationScheduler(INotificationService notification
             Title = reminder.Title,
             Description = reminder.Message,
             ReturningData = reminder.WorkOrderId.ToString(),
+            Android = { IconSmallName = new AndroidIcon(SmallIconName) },
             Schedule =
             {
                 NotifyTime = reminder.NotifyAt,
