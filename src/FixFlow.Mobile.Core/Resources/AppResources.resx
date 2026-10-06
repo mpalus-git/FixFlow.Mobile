@@ -324,4 +324,22 @@
   <data name="AddEntryButton" xml:space="preserve">
     <value>Dodaj wpis</value>
   </data>
+  <data name="ServiceEntryTitle" xml:space="preserve">
+    <value>Nowy wpis</value>
+  </data>
+  <data name="EntryNoteLabel" xml:space="preserve">
+    <value>Notatka</value>
+  </data>
+  <data name="EntryNotePlaceholder" xml:space="preserve">
+    <value>Co zostało zrobione?</value>
+  </data>
+  <data name="EntryWorkStartLabel" xml:space="preserve">
+    <value>Początek pracy</value>
+  </data>
+  <data name="EntryWorkFinishLabel" xml:space="preserve">
+    <value>Koniec pracy</value>
+  </data>
+  <data name="EntrySaveButton" xml:space="preserve">
+    <value>Zapisz wpis</value>
+  </data>
 </root>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:FixFlow.Mobile.Controls"
+             xmlns:resources="clr-namespace:FixFlow.Mobile.Core.Resources;assembly=FixFlow.Mobile.Core"
+             xmlns:viewModels="clr-namespace:FixFlow.Mobile.Core.Features.ServiceEntries;assembly=FixFlow.Mobile.Core"
+             x:Class="FixFlow.Mobile.Features.ServiceEntries.ServiceEntryPage"
+             x:DataType="viewModels:ServiceEntryViewModel"
+             Title="{x:Static resources:AppResources.ServiceEntryTitle}">
+    <Grid>
+        <ScrollView>
+            <VerticalStackLayout Padding="16"
+                                 Spacing="8">
+                <Label Text="{Binding Number}"
+                       Style="{StaticResource HeadlineLabel}"
+                       HorizontalTextAlignment="Start"
+                       SemanticProperties.HeadingLevel="Level1" />
+
+                <Label Text="{x:Static resources:AppResources.EntryNoteLabel}"
+                       Style="{StaticResource SectionLabel}" />
+                <Border Style="{StaticResource InputBorder}">
+                    <Editor Text="{Binding Note}"
+                            Placeholder="{x:Static resources:AppResources.EntryNotePlaceholder}"
+                            SemanticProperties.Description="{x:Static resources:AppResources.EntryNoteLabel}"
+                            AutoSize="TextChanges"
+                            MaxLength="4000"
+                            MinimumHeightRequest="120" />
+                </Border>
+
+                <Label Text="{x:Static resources:AppResources.EntryWorkStartLabel}"
+                       Style="{StaticResource SectionLabel}" />
+                <Grid ColumnDefinitions="*,*"
+                      ColumnSpacing="8">
+                    <Border Style="{StaticResource InputBorder}">
+                        <DatePicker Date="{Binding StartDate}"
+                                    SemanticProperties.Description="{x:Static resources:AppResources.EntryWorkStartLabel}" />
+                    </Border>
+                    <Border Grid.Column="1"
+                            Style="{StaticResource InputBorder}">
+                        <TimePicker Time="{Binding StartTime}"
+                                    Format="HH:mm"
+                                    SemanticProperties.Description="{x:Static resources:AppResources.EntryWorkStartLabel}" />
+                    </Border>
+                </Grid>
+
+                <Label Text="{x:Static resources:AppResources.EntryWorkFinishLabel}"
+                       Style="{StaticResource SectionLabel}" />
+                <Grid ColumnDefinitions="*,*"
+                      ColumnSpacing="8">
+                    <Border Style="{StaticResource InputBorder}">
+                        <DatePicker Date="{Binding FinishDate}"
+                                    SemanticProperties.Description="{x:Static resources:AppResources.EntryWorkFinishLabel}" />
+                    </Border>
+                    <Border Grid.Column="1"
+                            Style="{StaticResource InputBorder}">
+                        <TimePicker Time="{Binding FinishTime}"
+                                    Format="HH:mm"
+                                    SemanticProperties.Description="{x:Static resources:AppResources.EntryWorkFinishLabel}" />
+                    </Border>
+                </Grid>
+                <Label Text="{Binding LocationText}"
+                       IsVisible="{Binding HasLocationText}"
+                       Style="{StaticResource SecondaryLabel}" />
+
+                <Label Text="{Binding ValidationMessage}"
+                       IsVisible="{Binding HasValidationMessage}"
+                       Style="{StaticResource ErrorLabel}"
+                       Margin="0,8,0,0" />
+                <Button Text="{x:Static resources:AppResources.EntrySaveButton}"
+                        Command="{Binding SaveCommand}"
+                        Margin="0,8,0,16" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <controls:LoadingView Style="{StaticResource ScreenOverlay}"
+                              IsVisible="{Binding Screen.IsLoading}" />
+        <controls:ErrorView Style="{StaticResource ScreenOverlay}"
+                            IsVisible="{Binding Screen.IsError}"
+                            Message="{Binding Screen.ErrorMessage}"
+                            RetryCommand="{Binding ReloadCommand}" />
+    </Grid>
+</ContentPage>
