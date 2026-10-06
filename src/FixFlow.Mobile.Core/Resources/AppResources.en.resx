@@ -405,4 +405,16 @@
   <data name="PhotoUnavailable" xml:space="preserve">
     <value>The photo could not be opened.</value>
   </data>
+  <data name="CorrectionNetUsed" xml:space="preserve">
+    <value>{0} · used: {1} pcs</value>
+  </data>
+  <data name="CorrectionReasonRequired" xml:space="preserve">
+    <value>Enter the reason for the correction.</value>
+  </data>
+  <data name="CorrectionNoPartsSelected" xml:space="preserve">
+    <value>Choose at least one part to return.</value>
+  </data>
+  <data name="CorrectionNothingToReturn" xml:space="preserve">
+    <value>No parts used on this work order can be returned.</value>
+  </data>
 </root>
