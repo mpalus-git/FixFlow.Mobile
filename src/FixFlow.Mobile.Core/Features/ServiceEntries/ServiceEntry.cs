@@ -12,4 +12,7 @@ public sealed record ServiceEntry(
     double? Latitude,
     double? Longitude,
     DateTimeOffset CreatedAt,
-    IReadOnlyList<ServiceEntryPart> Parts);
+    IReadOnlyList<ServiceEntryPart> Parts)
+{
+    public IReadOnlyList<string> PhotoUrls { get; init; } = [];
+}

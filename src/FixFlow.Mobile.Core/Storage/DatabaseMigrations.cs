@@ -155,5 +155,9 @@ public static class DatabaseMigrations
                 longitude REAL)
             """,
         ]),
+        new(9, "add_service_entry_photo_urls",
+        [
+            "ALTER TABLE service_entries ADD COLUMN photo_urls TEXT NOT NULL DEFAULT '[]'",
+        ]),
     ];
 }

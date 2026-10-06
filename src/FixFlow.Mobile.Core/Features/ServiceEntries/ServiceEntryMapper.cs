@@ -20,6 +20,9 @@ public static class ServiceEntryMapper
             entry.Latitude,
             entry.Longitude,
             entry.CreatedAt,
-            [.. entry.Parts.Select(part => new ServiceEntryPart(part.PartId, part.PartName, part.CatalogNumber, part.Quantity, part.UnitPrice))]);
+            [.. entry.Parts.Select(part => new ServiceEntryPart(part.PartId, part.PartName, part.CatalogNumber, part.Quantity, part.UnitPrice))])
+        {
+            PhotoUrls = [.. entry.PhotoUrls],
+        };
     }
 }

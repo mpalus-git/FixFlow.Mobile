@@ -68,6 +68,15 @@ public sealed class OutboxWriterTests : IAsyncLifetime
     }
 
     [Fact]
+    public void Should_Read_Entry_Without_Photos_When_It_Was_Queued_Before_Photos_Existed()
+    {
+        var operation = new OutboxOperation(Guid.CreateVersion7(), WorkOrderId, OutboxOperationKind.AddServiceEntry,
+            $$"""{"id":"{{Guid.CreateVersion7()}}","note":"Przegląd","isCorrection":false,"parts":[]}""", Now, 0, null, null);
+
+        OutboxPayload.ToServiceEntry(operation).Photos.ShouldBeEmpty();
+    }
+
+    [Fact]
     public async Task Should_Notify_About_Local_Change_When_Operation_Is_Queued()
     {
         LocalChangeQueuedMessage? received = null;

@@ -31,6 +31,16 @@ public sealed class ServiceEntryRepositoryTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Should_Keep_Photo_Addresses_When_Entry_Is_Stored()
+    {
+        var entry = CreateEntry(Now) with { PhotoUrls = ["https://api.test/api/v1/photos/1", "https://upload.wikimedia.org/a.jpg"] };
+
+        await _repository.UpsertAsync(entry);
+
+        (await _repository.GetForWorkOrderAsync(WorkOrderId)).ShouldHaveSingleItem().PhotoUrls.ShouldBe(entry.PhotoUrls);
+    }
+
+    [Fact]
     public async Task Should_Replace_Entries_Of_Work_Order_Only_When_Server_Returns_New_List()
     {
         var otherWorkOrderEntry = CreateEntry(Now) with { WorkOrderId = Guid.NewGuid() };
@@ -52,7 +62,8 @@ public sealed class ServiceEntryRepositoryTests : IAsyncLifetime
 
     private static void ShouldMatch(ServiceEntry actual, ServiceEntry expected)
     {
-        (actual with { Parts = [] }).ShouldBe(expected with { Parts = [] });
+        (actual with { Parts = [], PhotoUrls = [] }).ShouldBe(expected with { Parts = [], PhotoUrls = [] });
+        actual.PhotoUrls.ShouldBe(expected.PhotoUrls);
         actual.Parts.ShouldBe(expected.Parts);
     }
 
