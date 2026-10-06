@@ -9,6 +9,7 @@ using FixFlow.Mobile.Core.Dispatching;
 using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.Settings;
 using FixFlow.Mobile.Core.Features.Sync;
+using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Launching;
 using FixFlow.Mobile.Core.Location;
 using FixFlow.Mobile.Core.Navigation;
@@ -38,6 +39,7 @@ public static partial class MauiProgram
             .ConfigureMauiHandlers(ConfigurePlatformHandlers)
             .ConfigureImageSources(ConfigurePlatformImageSources);
 
+        ConfigurePlatformServices(builder);
         builder.Services.AddCore();
         builder.Services.AddFixFlowApi(new Uri(BuildConfiguration.ApiBaseUrl));
         builder.Services.AddSingleton(Preferences.Default);
@@ -76,9 +78,12 @@ public static partial class MauiProgram
         app.Services.GetRequiredService<ILanguageService>().ApplySavedLanguage();
         app.Services.GetRequiredService<SessionEndNavigator>().Start();
         app.Services.GetRequiredService<SyncCoordinator>().Start();
+        app.Services.GetRequiredService<ReminderCoordinator>().Start();
 
         return app;
     }
+
+    private static partial void ConfigurePlatformServices(MauiAppBuilder builder);
 
     private static partial void ConfigurePlatformHandlers(IMauiHandlersCollection handlers);
 
