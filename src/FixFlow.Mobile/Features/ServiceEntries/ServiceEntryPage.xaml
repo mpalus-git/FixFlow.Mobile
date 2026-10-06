@@ -158,6 +158,42 @@
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
 
+                <Label Text="{x:Static resources:AppResources.EntryPhotosSection}"
+                       Style="{StaticResource SectionLabel}" />
+                <FlexLayout Wrap="Wrap"
+                            IsVisible="{Binding HasPhotos}"
+                            BindableLayout.ItemsSource="{Binding Photos}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="viewModels:PhotoDraft">
+                            <Grid Padding="0,0,8,8">
+                                <VerticalStackLayout WidthRequest="112"
+                                                     Spacing="4">
+                                    <Border StrokeShape="RoundRectangle 8"
+                                            StrokeThickness="0"
+                                            HeightRequest="112">
+                                        <Image Source="{Binding LocalPath}"
+                                               Aspect="AspectFill"
+                                               SemanticProperties.Description="{x:Static resources:AppResources.EntryPhotoDescription}" />
+                                    </Border>
+                                    <Button Text="{x:Static resources:AppResources.EntryRemovePhotoButton}"
+                                            Command="{Binding RemovePhotoCommand, Source={RelativeSource AncestorType={x:Type viewModels:ServiceEntryViewModel}}, x:DataType=viewModels:ServiceEntryViewModel}"
+                                            CommandParameter="{Binding .}"
+                                            Style="{StaticResource OutlineButton}"
+                                            Padding="0" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+                <Button Text="{x:Static resources:AppResources.EntryTakePhotoButton}"
+                        Command="{Binding TakePhotoCommand}"
+                        IsVisible="{Binding CanTakePhoto}"
+                        Style="{StaticResource OutlineButton}" />
+                <Button Text="{x:Static resources:AppResources.EntryPickPhotosButton}"
+                        Command="{Binding PickPhotosCommand}"
+                        IsVisible="{Binding CanAddPhotos}"
+                        Style="{StaticResource OutlineButton}" />
+
                 <Label Text="{Binding ValidationMessage}"
                        IsVisible="{Binding HasValidationMessage}"
                        Style="{StaticResource ErrorLabel}"

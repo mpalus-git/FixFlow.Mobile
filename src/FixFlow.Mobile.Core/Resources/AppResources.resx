@@ -387,4 +387,19 @@
   <data name="PhotoTooLarge" xml:space="preserve">
     <value>Zdjęcie jest za duże, aby je wysłać. Wybierz mniejsze.</value>
   </data>
+  <data name="EntryPhotosSection" xml:space="preserve">
+    <value>Zdjęcia</value>
+  </data>
+  <data name="EntryTakePhotoButton" xml:space="preserve">
+    <value>Zrób zdjęcie</value>
+  </data>
+  <data name="EntryPickPhotosButton" xml:space="preserve">
+    <value>Wybierz zdjęcia</value>
+  </data>
+  <data name="EntryRemovePhotoButton" xml:space="preserve">
+    <value>Usuń</value>
+  </data>
+  <data name="EntryPhotoDescription" xml:space="preserve">
+    <value>Zdjęcie dołączone do wpisu</value>
+  </data>
 </root>
