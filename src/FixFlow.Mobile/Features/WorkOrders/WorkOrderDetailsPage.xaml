@@ -45,6 +45,17 @@
                         </VerticalStackLayout>
                     </Border>
 
+                    <Border Style="{StaticResource CardBorder}"
+                            IsVisible="{Binding HasRejectedChanges}">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="{x:Static resources:AppResources.DetailsRejectedChanges}"
+                                   Style="{StaticResource ErrorLabel}" />
+                            <Button Text="{x:Static resources:AppResources.OpenSyncButton}"
+                                    Command="{Binding OpenSyncCommand}"
+                                    Style="{StaticResource OutlineButton}" />
+                        </VerticalStackLayout>
+                    </Border>
+
                     <Button Text="{x:Static resources:AppResources.StartWorkButton}"
                             Command="{Binding StartWorkCommand}"
                             IsVisible="{Binding CanStartWork}" />

@@ -11,4 +11,7 @@ public sealed record SyncConflict(
     HttpStatusCode? StatusCode,
     string? ErrorCode,
     string? Detail,
-    DateTimeOffset RejectedAt);
+    DateTimeOffset RejectedAt)
+{
+    public OutboxOperation ToOperation() => new(OperationId, WorkOrderId, Kind, Payload, CreatedAt, 0, null, null);
+}

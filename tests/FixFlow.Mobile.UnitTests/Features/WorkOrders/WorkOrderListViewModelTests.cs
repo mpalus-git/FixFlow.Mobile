@@ -209,6 +209,14 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Should_Open_Sync_Screen_When_Technician_Asks_For_Sync_Status()
+    {
+        await _viewModel.OpenSyncCommand.ExecuteAsync(null);
+
+        await _navigation.Received(1).NavigateToAsync<SyncViewModel>();
+    }
+
+    [Fact]
     public async Task Should_Open_Details_When_Work_Order_Is_Selected()
     {
         await _viewModel.LoadCommand.ExecuteAsync(null);

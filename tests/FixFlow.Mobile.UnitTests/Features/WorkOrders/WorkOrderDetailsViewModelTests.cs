@@ -122,6 +122,22 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Should_Point_To_Sync_Screen_When_Change_Of_Work_Order_Was_Rejected()
+    {
+        await _sources.WorkOrders.ReplaceAllAsync([TestWorkOrders.Create("ZL-LOCAL", DetailsApiStub.Now) with { Id = _api.WorkOrderId }]);
+        var start = await new OutboxWriter(_sources.Outbox, TimeProvider.System, new WeakReferenceMessenger()).StartWorkAsync(_api.WorkOrderId);
+        await _sources.Outbox.MoveToConflictsAsync(new SyncConflict(
+            start.Id, start.WorkOrderId, start.Kind, start.Payload, start.CreatedAt, HttpStatusCode.Conflict, "WorkOrder.TechnicianAlreadyHasWorkInProgress", null, DetailsApiStub.Now));
+        _connectivity.IsOnline.Returns(false);
+        await _viewModel.OnNavigatedToAsync(_api.WorkOrderId);
+
+        await _viewModel.OpenSyncCommand.ExecuteAsync(null);
+
+        _viewModel.HasRejectedChanges.ShouldBeTrue();
+        await _navigation.Received(1).NavigateToAsync<SyncViewModel>();
+    }
+
+    [Fact]
     public async Task Should_Explain_And_Hide_Details_When_Work_Order_Was_Reassigned()
     {
         await _viewModel.OnNavigatedToAsync(_api.WorkOrderId);

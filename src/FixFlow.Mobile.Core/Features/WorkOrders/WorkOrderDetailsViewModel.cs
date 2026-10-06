@@ -89,6 +89,9 @@ public sealed partial class WorkOrderDetailsViewModel(
 
     public bool HasCompleteBlockedText => CompleteBlockedText is not null;
 
+    [ObservableProperty]
+    public partial bool HasRejectedChanges { get; private set; }
+
     public void Resume()
     {
         _clock ??= timeProvider.CreateTimer(_ => uiDispatcher.Post(ShowWorkTimerAsync), null, ClockInterval, ClockInterval);
@@ -215,6 +218,9 @@ public sealed partial class WorkOrderDetailsViewModel(
         await outboxWriter.CompleteWorkOrderAsync(_workOrderId);
         await ShowLocalAsync();
     }
+
+    [RelayCommand]
+    private Task OpenSyncAsync() => navigation.NavigateToAsync<SyncViewModel>();
 
     [RelayCommand]
     private Task AddEntryAsync() => navigation.NavigateToAsync<ServiceEntryViewModel, Guid>(_workOrderId);
@@ -348,6 +354,7 @@ public sealed partial class WorkOrderDetailsViewModel(
             await sources.DeviceHistory.GetForDeviceAsync(workOrder.DeviceId),
             pendingOperations,
             photos.ExistingPathFor);
+        var hasRejectedChanges = (await sources.Outbox.GetConflictsAsync()).Any(conflict => conflict.WorkOrderId == _workOrderId);
         if (version != _localVersion)
         {
             return;
@@ -358,6 +365,7 @@ public sealed partial class WorkOrderDetailsViewModel(
         _workTimer = workTimer;
         await ShowWorkTimerAsync();
         Details = details;
+        HasRejectedChanges = hasRejectedChanges;
         var inProgress = workOrder.Status == WorkOrderStatus.InProgress;
         var hasEntries = storedEntries.Count > 0 || pendingEntries.Count > 0;
         CanAddEntry = inProgress;

@@ -1,5 +1,7 @@
+using FixFlow.Mobile.Clipboard;
 using FixFlow.Mobile.Connectivity;
 using FixFlow.Mobile.Core;
+using FixFlow.Mobile.Core.Clipboard;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Connectivity;
 using FixFlow.Mobile.Core.Dialogs;
@@ -17,6 +19,7 @@ using FixFlow.Mobile.Dispatching;
 using FixFlow.Mobile.Features.Auth;
 using FixFlow.Mobile.Features.ServiceEntries;
 using FixFlow.Mobile.Features.Settings;
+using FixFlow.Mobile.Features.Sync;
 using FixFlow.Mobile.Features.WorkOrders;
 using FixFlow.Mobile.Launching;
 using FixFlow.Mobile.Location;
@@ -55,6 +58,8 @@ public static partial class MauiProgram
         builder.Services.AddSingleton(MediaPicker.Default);
         builder.Services.AddSingleton<IPhotoService, EssentialsPhotoService>();
         builder.Services.AddSingleton<IUiDispatcher, MainThreadUiDispatcher>();
+        builder.Services.AddSingleton(Microsoft.Maui.ApplicationModel.DataTransfer.Clipboard.Default);
+        builder.Services.AddSingleton<IClipboardService, EssentialsClipboardService>();
         builder.Services.AddSingleton(new DemoAccount(BuildConfiguration.DemoTechnicianEmail, BuildConfiguration.DemoTechnicianPassword));
         builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
         builder.Services.AddSingleton<IDialogService, PageDialogService>();
@@ -65,6 +70,7 @@ public static partial class MauiProgram
         builder.Services.AddTransient<WorkOrderDetailsPage>();
         builder.Services.AddTransient<ServiceEntryPage>();
         builder.Services.AddTransient<CorrectionEntryPage>();
+        builder.Services.AddTransient<SyncPage>();
 
         var app = builder.Build();
         app.Services.GetRequiredService<ILanguageService>().ApplySavedLanguage();

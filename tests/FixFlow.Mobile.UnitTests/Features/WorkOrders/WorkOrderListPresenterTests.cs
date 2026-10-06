@@ -32,7 +32,7 @@ public sealed class WorkOrderListPresenterTests : IDisposable
             Priority = WorkOrderPriority.Critical,
         };
 
-        var group = _presenter.Present([workOrder], new HashSet<Guid>()).ShouldHaveSingleItem();
+        var group = _presenter.Present([workOrder], new HashSet<Guid>(), new HashSet<Guid>()).ShouldHaveSingleItem();
 
         group.Title.ShouldBe("Dziś");
         var item = group.ShouldHaveSingleItem();
@@ -51,7 +51,7 @@ public sealed class WorkOrderListPresenterTests : IDisposable
             Priority = WorkOrderPriority.High,
         };
 
-        var item = _presenter.Present([workOrder], new HashSet<Guid>()).ShouldHaveSingleItem().ShouldHaveSingleItem();
+        var item = _presenter.Present([workOrder], new HashSet<Guid>(), new HashSet<Guid>()).ShouldHaveSingleItem().ShouldHaveSingleItem();
 
         item.DateText.ShouldBe("Zakończono: 04.10.2026 08:00");
         item.IsUrgent.ShouldBeFalse();
@@ -62,9 +62,21 @@ public sealed class WorkOrderListPresenterTests : IDisposable
     {
         var workOrder = TestWorkOrders.Create("ZL-2026-0042", Now.AddHours(2));
 
-        var item = _presenter.Present([workOrder], new HashSet<Guid> { workOrder.Id }).ShouldHaveSingleItem().ShouldHaveSingleItem();
+        var item = _presenter.Present([workOrder], new HashSet<Guid> { workOrder.Id }, new HashSet<Guid>()).ShouldHaveSingleItem().ShouldHaveSingleItem();
 
         item.IsPending.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Should_Mark_Rejected_Instead_Of_Pending_When_Work_Order_Has_Conflict()
+    {
+        var workOrder = TestWorkOrders.Create("ZL-2026-0042", Now.AddHours(2));
+        var ids = new HashSet<Guid> { workOrder.Id };
+
+        var item = _presenter.Present([workOrder], ids, ids).ShouldHaveSingleItem().ShouldHaveSingleItem();
+
+        item.HasRejectedChange.ShouldBeTrue();
+        item.IsPending.ShouldBeFalse();
     }
 
     [Theory]

@@ -23,5 +23,11 @@ public sealed class PhotoStore(LocalDatabaseOptions options, UserDatabase userDa
 
     public string? ExistingPathFor(Guid photoId) => File.Exists(PathFor(photoId)) ? PathFor(photoId) : null;
 
-    public void Delete(Guid photoId) => File.Delete(PathFor(photoId));
+    public void Delete(Guid photoId)
+    {
+        if (ExistingPathFor(photoId) is { } path)
+        {
+            File.Delete(path);
+        }
+    }
 }

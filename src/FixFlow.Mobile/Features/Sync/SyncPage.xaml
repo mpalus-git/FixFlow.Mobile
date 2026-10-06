@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:FixFlow.Mobile.Controls"
+             xmlns:resources="clr-namespace:FixFlow.Mobile.Core.Resources;assembly=FixFlow.Mobile.Core"
+             xmlns:viewModels="clr-namespace:FixFlow.Mobile.Core.Features.Sync;assembly=FixFlow.Mobile.Core"
+             x:Class="FixFlow.Mobile.Features.Sync.SyncPage"
+             x:DataType="viewModels:SyncViewModel"
+             Title="{x:Static resources:AppResources.SyncTitle}">
+    <Grid RowDefinitions="Auto,Auto,*">
+        <controls:OfflineBanner IsVisible="{Binding Screen.IsOffline}"
+                                Message="{Binding Screen.OfflineMessage}" />
+        <controls:OfflineBanner Grid.Row="1"
+                                IsVisible="{Binding HasNotice}"
+                                Message="{Binding Notice}" />
+
+        <RefreshView Grid.Row="2"
+                     Command="{Binding SynchronizeCommand}"
+                     IsRefreshing="{Binding IsRefreshing}">
+            <ScrollView>
+                <VerticalStackLayout Padding="16"
+                                     Spacing="12">
+                    <Label Text="{Binding LastSyncText}"
+                           Style="{StaticResource SecondaryLabel}" />
+                    <Button Text="{x:Static resources:AppResources.SyncNowButton}"
+                            Command="{Binding SynchronizeCommand}" />
+
+                    <controls:EmptyView IsVisible="{Binding Screen.IsEmpty}"
+                                        Message="{x:Static resources:AppResources.SyncEmpty}" />
+
+                    <Label Text="{x:Static resources:AppResources.SyncConflictsSection}"
+                           Style="{StaticResource SectionLabel}"
+                           IsVisible="{Binding HasConflicts}" />
+                    <Label Text="{x:Static resources:AppResources.SyncConflictsHint}"
+                           Style="{StaticResource SecondaryLabel}"
+                           IsVisible="{Binding HasConflicts}" />
+                    <VerticalStackLayout Spacing="8"
+                                         BindableLayout.ItemsSource="{Binding Conflicts}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="viewModels:ConflictView">
+                                <Border Style="{StaticResource CardBorder}">
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="{Binding Title}"
+                                               FontAttributes="Bold" />
+                                        <Label Text="{Binding Reason}"
+                                               Style="{StaticResource ErrorLabel}" />
+                                        <Label Text="{Binding Details}"
+                                               IsVisible="{Binding HasDetails}" />
+                                        <Label Text="{Binding RejectedAtText}"
+                                               Style="{StaticResource SecondaryLabel}" />
+                                        <Label Text="{Binding FollowingChangesText}"
+                                               IsVisible="{Binding HasFollowingChanges}"
+                                               Style="{StaticResource SecondaryLabel}" />
+                                        <Grid ColumnDefinitions="*,*,*"
+                                              ColumnSpacing="8"
+                                              Margin="0,8,0,0">
+                                            <Button Text="{x:Static resources:AppResources.CopyChangeButton}"
+                                                    Command="{Binding CopyCommand, Source={RelativeSource AncestorType={x:Type viewModels:SyncViewModel}}, x:DataType=viewModels:SyncViewModel}"
+                                                    CommandParameter="{Binding .}"
+                                                    Style="{StaticResource OutlineButton}"
+                                                    Padding="8,12" />
+                                            <Button Grid.Column="1"
+                                                    Text="{x:Static resources:AppResources.RetryChangeButton}"
+                                                    Command="{Binding RetryCommand, Source={RelativeSource AncestorType={x:Type viewModels:SyncViewModel}}, x:DataType=viewModels:SyncViewModel}"
+                                                    CommandParameter="{Binding .}"
+                                                    Style="{StaticResource OutlineButton}"
+                                                    Padding="8,12" />
+                                            <Button Grid.Column="2"
+                                                    Text="{x:Static resources:AppResources.DiscardChangeButton}"
+                                                    Command="{Binding DiscardCommand, Source={RelativeSource AncestorType={x:Type viewModels:SyncViewModel}}, x:DataType=viewModels:SyncViewModel}"
+                                                    CommandParameter="{Binding .}"
+                                                    Style="{StaticResource OutlineButton}"
+                                                    Padding="8,12" />
+                                        </Grid>
+                                        <Button Text="{x:Static resources:AppResources.DiscardAllChangesButton}"
+                                                Command="{Binding DiscardAllCommand, Source={RelativeSource AncestorType={x:Type viewModels:SyncViewModel}}, x:DataType=viewModels:SyncViewModel}"
+                                                CommandParameter="{Binding .}"
+                                                IsVisible="{Binding HasFollowingChanges}"
+                                                LineBreakMode="WordWrap"
+                                                Style="{StaticResource OutlineButton}" />
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                    <Label Text="{x:Static resources:AppResources.SyncPendingSection}"
+                           Style="{StaticResource SectionLabel}"
+                           IsVisible="{Binding HasPendingOperations}" />
+                    <VerticalStackLayout Spacing="8"
+                                         BindableLayout.ItemsSource="{Binding PendingOperations}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="viewModels:PendingOperationView">
+                                <Border Style="{StaticResource CardBorder}">
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="{Binding Title}"
+                                               FontAttributes="Bold" />
+                                        <Label Text="{Binding Details}"
+                                               IsVisible="{Binding HasDetails}" />
+                                        <Label Text="{Binding StatusText}"
+                                               Style="{StaticResource SecondaryLabel}"
+                                               FontAttributes="Italic" />
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </ScrollView>
+        </RefreshView>
+    </Grid>
+</ContentPage>

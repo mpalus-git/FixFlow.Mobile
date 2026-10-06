@@ -447,4 +447,172 @@
   <data name="AddCorrectionButton" xml:space="preserve">
     <value>Correction entry</value>
   </data>
+  <data name="ConflictReasonWorkOrderNotFound" xml:space="preserve">
+    <value>The work order is no longer assigned to you or was deleted.</value>
+  </data>
+  <data name="ConflictReasonWorkOrderNotAssignedToTechnician" xml:space="preserve">
+    <value>The work order is not assigned to you.</value>
+  </data>
+  <data name="ConflictReasonWorkOrderTechnicianAlreadyHasWorkInProgress" xml:space="preserve">
+    <value>You already have another work order in progress. Complete it before starting another one.</value>
+  </data>
+  <data name="ConflictReasonWorkOrderNotInProgress" xml:space="preserve">
+    <value>The work order is not in progress, so no entry can be added to it.</value>
+  </data>
+  <data name="ConflictReasonWorkOrderNoServiceEntries" xml:space="preserve">
+    <value>The work order cannot be completed without at least one service entry.</value>
+  </data>
+  <data name="ConflictReasonWorkOrderClosed" xml:space="preserve">
+    <value>The work order is already completed or invoiced and cannot be changed.</value>
+  </data>
+  <data name="ConflictReasonWorkOrderInvalidStatusTransition" xml:space="preserve">
+    <value>The work order status has changed in the meantime and this change is no longer possible.</value>
+  </data>
+  <data name="ConflictReasonPartNotFound" xml:space="preserve">
+    <value>The part does not exist in the catalog.</value>
+  </data>
+  <data name="ConflictReasonPartArchived" xml:space="preserve">
+    <value>The part was archived and cannot be used.</value>
+  </data>
+  <data name="ConflictReasonPartInsufficientStock" xml:space="preserve">
+    <value>There are not enough units of the part in stock.</value>
+  </data>
+  <data name="ConflictReasonServiceEntryIdConflict" xml:space="preserve">
+    <value>An entry with this identifier already exists on another work order.</value>
+  </data>
+  <data name="ConflictReasonServiceEntryReturnExceedsConsumption" xml:space="preserve">
+    <value>The returned quantity exceeds the quantity of the part used on this work order.</value>
+  </data>
+  <data name="ConflictReasonPhotoContentTooLarge" xml:space="preserve">
+    <value>The photo is too large.</value>
+  </data>
+  <data name="ConflictReasonPhotoIdConflict" xml:space="preserve">
+    <value>A photo with this identifier was already uploaded by another technician.</value>
+  </data>
+  <data name="ConflictReasonLocalPhotoFileMissing" xml:space="preserve">
+    <value>The photo file no longer exists on this device.</value>
+  </data>
+  <data name="ConflictReasonRejected" xml:space="preserve">
+    <value>The server rejected the change (code {0}).</value>
+  </data>
+  <data name="ConflictReasonUnknown" xml:space="preserve">
+    <value>The server rejected the change.</value>
+  </data>
+  <data name="ChangeKindStartWork" xml:space="preserve">
+    <value>Start of work</value>
+  </data>
+  <data name="ChangeKindServiceEntry" xml:space="preserve">
+    <value>Service entry</value>
+  </data>
+  <data name="ChangeKindCorrection" xml:space="preserve">
+    <value>Correction entry</value>
+  </data>
+  <data name="ChangeKindCompleteWorkOrder" xml:space="preserve">
+    <value>Work order completion</value>
+  </data>
+  <data name="ChangeKindUploadPhoto" xml:space="preserve">
+    <value>Entry photo</value>
+  </data>
+  <data name="ChangeHeader" xml:space="preserve">
+    <value>{0} · {1}</value>
+  </data>
+  <data name="ChangeStartedAt" xml:space="preserve">
+    <value>Started: {0}</value>
+  </data>
+  <data name="ChangeWorkTime" xml:space="preserve">
+    <value>Work time: {0} – {1}</value>
+  </data>
+  <data name="ChangeNote" xml:space="preserve">
+    <value>Note: {0}</value>
+  </data>
+  <data name="ChangeCorrectionReason" xml:space="preserve">
+    <value>Reason for correction: {0}</value>
+  </data>
+  <data name="ChangeUsedParts" xml:space="preserve">
+    <value>Used parts:</value>
+  </data>
+  <data name="ChangeReturnedParts" xml:space="preserve">
+    <value>Parts to return:</value>
+  </data>
+  <data name="ChangePartLine" xml:space="preserve">
+    <value>- {0} ({1}): {2} pcs</value>
+  </data>
+  <data name="ChangePhotoCount" xml:space="preserve">
+    <value>Photos: {0}</value>
+  </data>
+  <data name="SyncLastSync" xml:space="preserve">
+    <value>Last synchronization: {0}</value>
+  </data>
+  <data name="SyncNeverSynced" xml:space="preserve">
+    <value>Data has not been synchronized yet.</value>
+  </data>
+  <data name="SyncRejectedAt" xml:space="preserve">
+    <value>Rejected {0}</value>
+  </data>
+  <data name="SyncFollowingChanges" xml:space="preserve">
+    <value>Further changes of this work order on hold: {0}</value>
+  </data>
+  <data name="SyncPendingHeld" xml:space="preserve">
+    <value>On hold until the conflict is resolved</value>
+  </data>
+  <data name="SyncPendingRetry" xml:space="preserve">
+    <value>Failed attempts: {0}. Next attempt: {1}</value>
+  </data>
+  <data name="SyncFailedNotice" xml:space="preserve">
+    <value>Could not reach the server. Changes will be sent later.</value>
+  </data>
+  <data name="ChangeCopied" xml:space="preserve">
+    <value>The change content was copied.</value>
+  </data>
+  <data name="DiscardChangeTitle" xml:space="preserve">
+    <value>Discard the change?</value>
+  </data>
+  <data name="DiscardChangeMessage" xml:space="preserve">
+    <value>The change will be removed from this device and will not reach the server. Copy it first if you want to keep its content.</value>
+  </data>
+  <data name="DiscardAllChangesTitle" xml:space="preserve">
+    <value>Discard all changes of the work order?</value>
+  </data>
+  <data name="DiscardAllChangesMessage" xml:space="preserve">
+    <value>All unsent changes of this work order, including the rejected one, will be removed from this device and will not reach the server. Number of changes: {0}</value>
+  </data>
+  <data name="DiscardChangeButton" xml:space="preserve">
+    <value>Discard</value>
+  </data>
+  <data name="SyncTitle" xml:space="preserve">
+    <value>Synchronization</value>
+  </data>
+  <data name="SyncNowButton" xml:space="preserve">
+    <value>Sync now</value>
+  </data>
+  <data name="SyncEmpty" xml:space="preserve">
+    <value>All changes have been sent.</value>
+  </data>
+  <data name="SyncConflictsSection" xml:space="preserve">
+    <value>To resolve</value>
+  </data>
+  <data name="SyncConflictsHint" xml:space="preserve">
+    <value>The server rejected these changes. Copy the change content, send it again once the cause is gone, or discard the change.</value>
+  </data>
+  <data name="SyncPendingSection" xml:space="preserve">
+    <value>Waiting to be sent</value>
+  </data>
+  <data name="CopyChangeButton" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="RetryChangeButton" xml:space="preserve">
+    <value>Retry</value>
+  </data>
+  <data name="DiscardAllChangesButton" xml:space="preserve">
+    <value>Discard all work order changes</value>
+  </data>
+  <data name="DetailsRejectedChanges" xml:space="preserve">
+    <value>The server rejected a change in this work order. Further changes of the work order wait until you resolve it.</value>
+  </data>
+  <data name="OpenSyncButton" xml:space="preserve">
+    <value>Resolve</value>
+  </data>
+  <data name="WorkOrderRejectedChange" xml:space="preserve">
+    <value>Change rejected – needs resolving</value>
+  </data>
 </root>
