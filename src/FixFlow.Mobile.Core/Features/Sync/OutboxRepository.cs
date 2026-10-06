@@ -65,7 +65,48 @@ public sealed class OutboxRepository(UserDatabase userDatabase)
         return [.. rows.Select(row => row.ToConflict())];
     }
 
+    public async Task<SyncConflict?> RequeueConflictAsync(Guid operationId)
+    {
+        SyncConflict? conflict = null;
+        await Connection.RunInTransactionAsync(connection =>
+        {
+            conflict = TakeConflict(connection, operationId);
+            if (conflict is not null)
+            {
+                connection.Insert(OutboxOperationRow.From(conflict.ToOperation()));
+            }
+        });
+        return conflict;
+    }
+
+    public async Task<SyncConflict?> RemoveConflictAsync(Guid operationId, Action<SQLiteConnection, SyncConflict> localChange)
+    {
+        ArgumentNullException.ThrowIfNull(localChange);
+
+        SyncConflict? conflict = null;
+        await Connection.RunInTransactionAsync(connection =>
+        {
+            conflict = TakeConflict(connection, operationId);
+            if (conflict is not null)
+            {
+                localChange(connection, conflict);
+            }
+        });
+        return conflict;
+    }
+
     public async Task<int> CountPendingAsync() => await Connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM outbox_operations");
 
     public async Task<int> CountConflictsAsync() => await Connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM sync_conflicts");
+
+    private static SyncConflict? TakeConflict(SQLiteConnection connection, Guid operationId)
+    {
+        var row = connection.Query<SyncConflictRow>("SELECT * FROM sync_conflicts WHERE operation_id = ?", operationId).FirstOrDefault();
+        if (row is not null)
+        {
+            connection.Execute("DELETE FROM sync_conflicts WHERE operation_id = ?", operationId);
+        }
+
+        return row?.ToConflict();
+    }
 }
