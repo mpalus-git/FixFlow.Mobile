@@ -1,9 +1,17 @@
+using FixFlow.Mobile.Core.Notifications;
 using Microsoft.Maui.Handlers;
+using Plugin.LocalNotification;
 
 namespace FixFlow.Mobile;
 
 public static partial class MauiProgram
 {
+    private static partial void ConfigurePlatformServices(MauiAppBuilder builder)
+    {
+        builder.UseLocalNotification();
+        builder.Services.AddSingleton<INotificationScheduler, LocalNotificationScheduler>();
+    }
+
     private static partial void ConfigurePlatformHandlers(IMauiHandlersCollection handlers)
     {
         handlers.AddHandler<Shell, EdgeToEdgeShellRenderer>();

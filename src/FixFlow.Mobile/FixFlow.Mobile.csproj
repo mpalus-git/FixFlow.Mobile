@@ -38,6 +38,7 @@
   <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
     <AndroidResource Include="Platforms\Android\NetworkSecurity\$(Configuration)\network_security_config.xml"
                      Link="Platforms\Android\Resources\xml\network_security_config.xml" />
+    <PackageReference Include="Plugin.LocalNotification" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Maui.Controls" />

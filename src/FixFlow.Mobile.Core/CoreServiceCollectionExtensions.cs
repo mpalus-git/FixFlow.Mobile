@@ -8,6 +8,7 @@ using FixFlow.Mobile.Core.Features.Settings;
 using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Formatting;
+using FixFlow.Mobile.Core.Notifications;
 using FixFlow.Mobile.Core.Screens;
 using FixFlow.Mobile.Core.Storage;
 using Microsoft.Extensions.DependencyInjection;
@@ -69,6 +70,14 @@ public static class CoreServiceCollectionExtensions
         services.AddSingleton<WorkOrderSectionClassifier>();
         services.AddSingleton<WorkOrderListPresenter>();
         services.AddSingleton<WorkOrderDetailsPresenter>();
+        services.AddSingleton<DueDateReminderPlanner>();
+        services.AddTransient<NotificationConsent>();
+        services.AddTransient<ReminderReconciler>();
+        services.AddSingleton(provider => new ReminderCoordinator(
+            provider.GetRequiredService<SessionStore>(),
+            provider.GetRequiredService<IMessenger>(),
+            provider.GetRequiredService<ReminderReconciler>,
+            provider.GetRequiredService<INotificationScheduler>()));
         services.AddTransient<WorkOrderListViewModel>();
         services.AddTransient<WorkOrderDetailsSources>();
         services.AddTransient<WorkOrderDetailsViewModel>();

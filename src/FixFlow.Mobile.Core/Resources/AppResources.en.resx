@@ -615,4 +615,19 @@
   <data name="WorkOrderRejectedChange" xml:space="preserve">
     <value>Change rejected – needs resolving</value>
   </data>
+  <data name="ReminderTitle" xml:space="preserve">
+    <value>Work order due in one hour</value>
+  </data>
+  <data name="ReminderMessage" xml:space="preserve">
+    <value>{0} · {1} · due {2}</value>
+  </data>
+  <data name="NotificationExplanationTitle" xml:space="preserve">
+    <value>Due date reminders</value>
+  </data>
+  <data name="NotificationExplanationMessage" xml:space="preserve">
+    <value>FixFlow will remind you about a work order one hour before it is due. The system will ask you to allow notifications in a moment. You can change this later in the phone settings.</value>
+  </data>
+  <data name="NotNowButton" xml:space="preserve">
+    <value>Not now</value>
+  </data>
 </root>

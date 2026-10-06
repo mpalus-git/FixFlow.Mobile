@@ -1,9 +1,13 @@
+using FixFlow.Mobile.Core.Notifications;
 using Microsoft.Maui.Handlers;
 
 namespace FixFlow.Mobile;
 
 public static partial class MauiProgram
 {
+    private static partial void ConfigurePlatformServices(MauiAppBuilder builder) =>
+        builder.Services.AddSingleton<INotificationScheduler, DisabledNotificationScheduler>();
+
     private static partial void ConfigurePlatformHandlers(IMauiHandlersCollection handlers)
     {
         EntryHandler.Mapper.AppendToMapping("BorderlessEntry", (handler, _) => RemoveTextBoxChrome(handler.PlatformView));

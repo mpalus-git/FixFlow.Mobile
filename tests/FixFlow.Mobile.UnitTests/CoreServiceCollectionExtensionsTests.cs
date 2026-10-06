@@ -8,6 +8,7 @@ using FixFlow.Mobile.Core.Launching;
 using FixFlow.Mobile.Core.Location;
 using FixFlow.Mobile.Core.Photos;
 using FixFlow.Mobile.Core.Navigation;
+using FixFlow.Mobile.Core.Notifications;
 using FixFlow.Mobile.Core.Storage;
 using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.Settings;
@@ -34,6 +35,7 @@ public sealed class CoreServiceCollectionExtensionsTests
             .AddSingleton(Substitute.For<IPhotoService>())
             .AddSingleton(Substitute.For<IUiDispatcher>())
             .AddSingleton(Substitute.For<IClipboardService>())
+            .AddSingleton(Substitute.For<INotificationScheduler>())
             .AddSingleton(new DemoAccount(string.Empty, string.Empty))
             .AddSingleton(new LocalDatabaseOptions(Path.GetTempPath()))
             .AddCore();

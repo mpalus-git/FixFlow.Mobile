@@ -615,4 +615,19 @@
   <data name="WorkOrderRejectedChange" xml:space="preserve">
     <value>Zmiana odrzucona – do wyjaśnienia</value>
   </data>
+  <data name="ReminderTitle" xml:space="preserve">
+    <value>Za godzinę termin zlecenia</value>
+  </data>
+  <data name="ReminderMessage" xml:space="preserve">
+    <value>{0} · {1} · termin {2}</value>
+  </data>
+  <data name="NotificationExplanationTitle" xml:space="preserve">
+    <value>Przypomnienia o terminach</value>
+  </data>
+  <data name="NotificationExplanationMessage" xml:space="preserve">
+    <value>FixFlow przypomni Ci o zleceniu godzinę przed jego terminem. Za chwilę system zapyta o zgodę na powiadomienia. Możesz ją później zmienić w ustawieniach telefonu.</value>
+  </data>
+  <data name="NotNowButton" xml:space="preserve">
+    <value>Nie teraz</value>
+  </data>
 </root>
