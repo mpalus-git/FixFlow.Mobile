@@ -417,4 +417,16 @@
   <data name="CorrectionNothingToReturn" xml:space="preserve">
     <value>No parts used on this work order can be returned.</value>
   </data>
+  <data name="CompleteWorkOrderButton" xml:space="preserve">
+    <value>Complete work order</value>
+  </data>
+  <data name="CompleteConfirmTitle" xml:space="preserve">
+    <value>Complete work order?</value>
+  </data>
+  <data name="CompleteConfirmMessage" xml:space="preserve">
+    <value>Work order {0} will move to Completed. Entries cannot be added afterwards.</value>
+  </data>
+  <data name="CompleteRequiresEntry" xml:space="preserve">
+    <value>Add a service entry to complete the work order.</value>
+  </data>
 </root>

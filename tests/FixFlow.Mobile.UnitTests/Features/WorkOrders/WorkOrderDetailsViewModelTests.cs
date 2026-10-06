@@ -343,6 +343,53 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Should_Require_Entry_Before_Offering_Completion()
+    {
+        ConfirmStart();
+        await ShowOfflineAsync();
+
+        await _viewModel.StartWorkCommand.ExecuteAsync(null);
+
+        _viewModel.CanComplete.ShouldBeFalse();
+        _viewModel.CompleteBlockedText.ShouldBe(AppResources.CompleteRequiresEntry);
+        _viewModel.CanAddCorrection.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Should_Queue_Completion_And_Remove_Work_Timer_When_Technician_Confirms()
+    {
+        ConfirmStart();
+        _dialogs.ConfirmAsync(AppResources.CompleteConfirmTitle, Arg.Any<string>(), AppResources.CompleteWorkOrderButton, AppResources.CancelButton).Returns(true);
+        await ShowOfflineAsync();
+        await _viewModel.StartWorkCommand.ExecuteAsync(null);
+        await AddPendingEntryAsync(new PendingServiceEntryPart(Guid.NewGuid(), "Filtr", "FP-100", 1, 12m));
+        _viewModel.CanAddCorrection.ShouldBeTrue();
+
+        await _viewModel.CompleteCommand.ExecuteAsync(null);
+
+        (await _sources.Outbox.GetAllAsync())[^1].Kind.ShouldBe(OutboxOperationKind.CompleteWorkOrder);
+        (await _sources.WorkTimers.GetAsync(_api.WorkOrderId)).ShouldBeNull();
+        _viewModel.Details.ShouldNotBeNull().StatusText.ShouldBe(WorkOrderTexts.Status(WorkOrderStatus.Completed));
+        _viewModel.CanComplete.ShouldBeFalse();
+        _viewModel.CanAddEntry.ShouldBeFalse();
+        _viewModel.HasWorkTimer.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Should_Not_Queue_Completion_When_Technician_Cancels()
+    {
+        ConfirmStart();
+        await ShowOfflineAsync();
+        await _viewModel.StartWorkCommand.ExecuteAsync(null);
+        await AddPendingEntryAsync();
+
+        await _viewModel.CompleteCommand.ExecuteAsync(null);
+
+        (await _sources.Outbox.GetAllAsync()).ShouldNotContain(operation => operation.Kind == OutboxOperationKind.CompleteWorkOrder);
+        _viewModel.CanComplete.ShouldBeTrue();
+    }
+
+    [Fact]
     public async Task Should_Show_Entry_Saved_Elsewhere_When_Page_Is_Shown_Again()
     {
         ConfirmStart();
@@ -385,6 +432,13 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
         {
             await Task.Delay(10, TestContext.Current.CancellationToken);
         }
+    }
+
+    private async Task AddPendingEntryAsync(params PendingServiceEntryPart[] parts)
+    {
+        await new OutboxWriter(_sources.Outbox, _timeProvider, new WeakReferenceMessenger()).AddServiceEntryAsync(
+            _api.WorkOrderId, new PendingServiceEntry(Guid.CreateVersion7(), "Przegląd", false, null, null, null, null, parts));
+        await _viewModel.LoadCommand.ExecuteAsync(null);
     }
 
     private void ConfirmStart() =>

@@ -92,6 +92,17 @@ public sealed class OutboxWriterTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Should_Remove_Work_Timer_Together_With_Queued_Completion()
+    {
+        await _writer.StartWorkAsync(WorkOrderId);
+
+        await _writer.CompleteWorkOrderAsync(WorkOrderId);
+
+        (await new WorkTimerRepository(_userDatabase.Database).GetAsync(WorkOrderId)).ShouldBeNull();
+        (await _outbox.GetAllAsync()).Select(operation => operation.Kind).ShouldBe([OutboxOperationKind.StartWork, OutboxOperationKind.CompleteWorkOrder]);
+    }
+
+    [Fact]
     public async Task Should_Notify_About_Local_Change_When_Operation_Is_Queued()
     {
         LocalChangeQueuedMessage? received = null;

@@ -417,4 +417,16 @@
   <data name="CorrectionNothingToReturn" xml:space="preserve">
     <value>Na tym zleceniu nie zużyto części, które można zwrócić.</value>
   </data>
+  <data name="CompleteWorkOrderButton" xml:space="preserve">
+    <value>Zakończ zlecenie</value>
+  </data>
+  <data name="CompleteConfirmTitle" xml:space="preserve">
+    <value>Zakończyć zlecenie?</value>
+  </data>
+  <data name="CompleteConfirmMessage" xml:space="preserve">
+    <value>Zlecenie {0} przejdzie w status Zakończone. Po zakończeniu nie można dodawać wpisów.</value>
+  </data>
+  <data name="CompleteRequiresEntry" xml:space="preserve">
+    <value>Dodaj wpis serwisowy, aby zakończyć zlecenie.</value>
+  </data>
 </root>
