@@ -291,4 +291,13 @@
   <data name="OpenLocationSettingsButton" xml:space="preserve">
     <value>Otwórz ustawienia lokalizacji</value>
   </data>
+  <data name="EntryPartAvailable" xml:space="preserve">
+    <value>Dostępne: {0}</value>
+  </data>
+  <data name="EntryPartOutOfStock" xml:space="preserve">
+    <value>Brak na stanie</value>
+  </data>
+  <data name="EntryQuantityExceedsStock" xml:space="preserve">
+    <value>Ilość części {0} przekracza ostatnio znany stan ({1}).</value>
+  </data>
 </root>
