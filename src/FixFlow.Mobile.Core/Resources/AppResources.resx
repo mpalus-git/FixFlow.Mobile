@@ -540,4 +540,16 @@
   <data name="ChangePhotoCount" xml:space="preserve">
     <value>Zdjęcia: {0}</value>
   </data>
+  <data name="SyncRejectedAt" xml:space="preserve">
+    <value>Odrzucono {0}</value>
+  </data>
+  <data name="SyncFollowingChanges" xml:space="preserve">
+    <value>Kolejne zmiany tego zlecenia wstrzymane do wyjaśnienia: {0}</value>
+  </data>
+  <data name="SyncPendingHeld" xml:space="preserve">
+    <value>Wstrzymane do wyjaśnienia konfliktu</value>
+  </data>
+  <data name="SyncPendingRetry" xml:space="preserve">
+    <value>Nieudane próby: {0}. Następna próba: {1}</value>
+  </data>
 </root>

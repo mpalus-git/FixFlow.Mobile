@@ -540,4 +540,16 @@
   <data name="ChangePhotoCount" xml:space="preserve">
     <value>Photos: {0}</value>
   </data>
+  <data name="SyncRejectedAt" xml:space="preserve">
+    <value>Rejected {0}</value>
+  </data>
+  <data name="SyncFollowingChanges" xml:space="preserve">
+    <value>Further changes of this work order on hold: {0}</value>
+  </data>
+  <data name="SyncPendingHeld" xml:space="preserve">
+    <value>On hold until the conflict is resolved</value>
+  </data>
+  <data name="SyncPendingRetry" xml:space="preserve">
+    <value>Failed attempts: {0}. Next attempt: {1}</value>
+  </data>
 </root>

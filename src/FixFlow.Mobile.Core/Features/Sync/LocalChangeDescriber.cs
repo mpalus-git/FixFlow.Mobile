@@ -6,7 +6,10 @@ namespace FixFlow.Mobile.Core.Features.Sync;
 
 public sealed class LocalChangeDescriber(DisplayFormatter formatter)
 {
-    public string Describe(OutboxOperation operation, string? workOrderNumber)
+    public string Describe(OutboxOperation operation, string? workOrderNumber) =>
+        string.Join(Environment.NewLine, DescribeLines(operation, workOrderNumber));
+
+    public IReadOnlyList<string> DescribeLines(OutboxOperation operation, string? workOrderNumber)
     {
         ArgumentNullException.ThrowIfNull(operation);
 
@@ -21,7 +24,7 @@ public sealed class LocalChangeDescriber(DisplayFormatter formatter)
             AddServiceEntryLines(lines, operation);
         }
 
-        return string.Join(Environment.NewLine, lines);
+        return lines;
     }
 
     private void AddServiceEntryLines(List<string> lines, OutboxOperation operation)
