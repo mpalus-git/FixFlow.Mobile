@@ -10,8 +10,8 @@
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="{x:Static resources:AppResources.SyncTitle}"
                      Command="{Binding OpenSyncCommand}" />
-        <ToolbarItem Text="{x:Static resources:AppResources.LogoutButton}"
-                     Command="{Binding LogoutCommand}"
+        <ToolbarItem Text="{x:Static resources:AppResources.SettingsTitle}"
+                     Command="{Binding OpenSettingsCommand}"
                      Order="Secondary" />
     </ContentPage.ToolbarItems>
     <Grid RowDefinitions="Auto,Auto,Auto,*">

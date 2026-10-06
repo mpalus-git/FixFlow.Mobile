@@ -666,4 +666,34 @@
   <data name="OpenNotificationSettingsButton" xml:space="preserve">
     <value>Otwórz ustawienia systemu</value>
   </data>
+  <data name="SettingsTitle" xml:space="preserve">
+    <value>Ustawienia</value>
+  </data>
+  <data name="SettingsAccountHeader" xml:space="preserve">
+    <value>Konto</value>
+  </data>
+  <data name="SettingsLanguageHeader" xml:space="preserve">
+    <value>Język</value>
+  </data>
+  <data name="LanguagePolish" xml:space="preserve">
+    <value>Polski</value>
+  </data>
+  <data name="LanguageEnglish" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="SettingsThemeHeader" xml:space="preserve">
+    <value>Motyw</value>
+  </data>
+  <data name="ThemeSystem" xml:space="preserve">
+    <value>Systemowy</value>
+  </data>
+  <data name="ThemeLight" xml:space="preserve">
+    <value>Jasny</value>
+  </data>
+  <data name="ThemeDark" xml:space="preserve">
+    <value>Ciemny</value>
+  </data>
+  <data name="SettingsAboutHeader" xml:space="preserve">
+    <value>O aplikacji</value>
+  </data>
 </root>

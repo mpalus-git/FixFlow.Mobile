@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using FixFlow.Mobile.Core.Api.Errors;
 using FixFlow.Mobile.Core.Connectivity;
 using FixFlow.Mobile.Core.Dispatching;
-using FixFlow.Mobile.Core.Features.Auth;
+using FixFlow.Mobile.Core.Features.Settings;
 using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Navigation;
 using FixFlow.Mobile.Core.Resources;
@@ -15,7 +15,6 @@ namespace FixFlow.Mobile.Core.Features.WorkOrders;
 public sealed partial class WorkOrderListViewModel
     : ObservableObject, IRecipient<ConnectivityChangedMessage>, IRecipient<SyncCompletedMessage>, IRecipient<ServerStartingMessage>
 {
-    private readonly AuthService _authService;
     private readonly WorkOrderRepository _workOrders;
     private readonly OutboxRepository _outbox;
     private readonly WorkOrderSyncService _sync;
@@ -27,7 +26,6 @@ public sealed partial class WorkOrderListViewModel
 
     public WorkOrderListViewModel(
         ScreenState screen,
-        AuthService authService,
         WorkOrderRepository workOrders,
         OutboxRepository outbox,
         WorkOrderSyncService sync,
@@ -40,7 +38,6 @@ public sealed partial class WorkOrderListViewModel
     {
         ArgumentNullException.ThrowIfNull(messenger);
         Screen = screen;
-        _authService = authService;
         _workOrders = workOrders;
         _outbox = outbox;
         _sync = sync;
@@ -163,7 +160,7 @@ public sealed partial class WorkOrderListViewModel
     private Task OpenSyncAsync() => _navigation.NavigateToAsync<SyncViewModel>();
 
     [RelayCommand]
-    private Task LogoutAsync() => _authService.LogoutAsync();
+    private Task OpenSettingsAsync() => _navigation.NavigateToAsync<SettingsViewModel>();
 
     private async Task ShowLocalAsync(bool updateScreen)
     {
