@@ -240,4 +240,55 @@
   <data name="SyncConflictCount" xml:space="preserve">
     <value>Do wyjaśnienia: {0}</value>
   </data>
+  <data name="LocationExplanationTitle" xml:space="preserve">
+    <value>Pozycja przy rozpoczęciu pracy</value>
+  </data>
+  <data name="LocationExplanationMessage" xml:space="preserve">
+    <value>Aplikacja zapisze pozycję GPS z chwili rozpoczęcia pracy i dołączy ją do wpisu serwisowego. Bez zgody praca rozpocznie się bez pozycji.</value>
+  </data>
+  <data name="ContinueButton" xml:space="preserve">
+    <value>Dalej</value>
+  </data>
+  <data name="WorkTimerStartedAt" xml:space="preserve">
+    <value>Praca od {0}</value>
+  </data>
+  <data name="WorkTimerElapsed" xml:space="preserve">
+    <value>Trwa: {0}</value>
+  </data>
+  <data name="WorkLocationLocating" xml:space="preserve">
+    <value>Ustalanie pozycji…</value>
+  </data>
+  <data name="WorkLocationCaptured" xml:space="preserve">
+    <value>Pozycja zapisana</value>
+  </data>
+  <data name="WorkLocationDenied" xml:space="preserve">
+    <value>Bez pozycji: brak zgody na lokalizację</value>
+  </data>
+  <data name="WorkLocationUnavailable" xml:space="preserve">
+    <value>Bez pozycji: nie udało się ustalić lokalizacji</value>
+  </data>
+  <data name="StartWorkButton" xml:space="preserve">
+    <value>Rozpocznij pracę</value>
+  </data>
+  <data name="StartWorkConfirmTitle" xml:space="preserve">
+    <value>Rozpocząć pracę?</value>
+  </data>
+  <data name="StartWorkConfirmMessage" xml:space="preserve">
+    <value>Zlecenie {0} przejdzie w status W toku. Tej operacji nie można cofnąć.</value>
+  </data>
+  <data name="StartWorkBlocked" xml:space="preserve">
+    <value>Masz już zlecenie w toku: {0}. Zakończ je, zanim rozpoczniesz kolejne.</value>
+  </data>
+  <data name="CancelButton" xml:space="preserve">
+    <value>Anuluj</value>
+  </data>
+  <data name="WorkTimerSection" xml:space="preserve">
+    <value>Czas pracy</value>
+  </data>
+  <data name="RetryLocationButton" xml:space="preserve">
+    <value>Ustal pozycję ponownie</value>
+  </data>
+  <data name="OpenLocationSettingsButton" xml:space="preserve">
+    <value>Otwórz ustawienia lokalizacji</value>
+  </data>
 </root>

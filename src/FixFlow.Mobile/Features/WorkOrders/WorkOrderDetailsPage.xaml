@@ -45,6 +45,46 @@
                         </VerticalStackLayout>
                     </Border>
 
+                    <Button Text="{x:Static resources:AppResources.StartWorkButton}"
+                            Command="{Binding StartWorkCommand}"
+                            IsVisible="{Binding CanStartWork}" />
+                    <Label Text="{Binding StartBlockedText}"
+                           IsVisible="{Binding HasStartBlockedText}"
+                           Style="{StaticResource SecondaryLabel}" />
+
+                    <Label Text="{x:Static resources:AppResources.WorkTimerSection}"
+                           Style="{StaticResource SectionLabel}"
+                           IsVisible="{Binding HasWorkTimer}" />
+                    <Border Style="{StaticResource CardBorder}"
+                            IsVisible="{Binding HasWorkTimer}">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="{Binding WorkTimer.StartedText}"
+                                   FontAttributes="Bold" />
+                            <Label Text="{Binding WorkTimer.ElapsedText}" />
+                            <Grid ColumnDefinitions="Auto,*">
+                                <ActivityIndicator IsRunning="{Binding WorkTimer.IsLocating}"
+                                                   IsVisible="{Binding WorkTimer.IsLocating}"
+                                                   HeightRequest="20"
+                                                   WidthRequest="20"
+                                                   Margin="0,0,8,0" />
+                                <Label Grid.Column="1"
+                                       Text="{Binding WorkTimer.LocationText}"
+                                       Style="{StaticResource SecondaryLabel}" />
+                            </Grid>
+                            <VerticalStackLayout Spacing="8"
+                                                 Margin="0,8,0,0"
+                                                 IsVisible="{Binding WorkTimer.CanRetryLocation}">
+                                <Button Text="{x:Static resources:AppResources.RetryLocationButton}"
+                                        Command="{Binding RetryLocationCommand}"
+                                        Style="{StaticResource OutlineButton}" />
+                                <Button Text="{x:Static resources:AppResources.OpenLocationSettingsButton}"
+                                        Command="{Binding OpenLocationSettingsCommand}"
+                                        IsVisible="{Binding WorkTimer.CanOpenLocationSettings}"
+                                        Style="{StaticResource OutlineButton}" />
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
                     <Label Text="{x:Static resources:AppResources.DetailsClientSection}"
                            Style="{StaticResource SectionLabel}"
                            IsVisible="{Binding Details.HasClient}" />

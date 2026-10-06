@@ -240,4 +240,55 @@
   <data name="SyncConflictCount" xml:space="preserve">
     <value>To resolve: {0}</value>
   </data>
+  <data name="LocationExplanationTitle" xml:space="preserve">
+    <value>Location when starting work</value>
+  </data>
+  <data name="LocationExplanationMessage" xml:space="preserve">
+    <value>The app records the GPS position at the start of work and attaches it to the service entry. Without permission, work starts without a position.</value>
+  </data>
+  <data name="ContinueButton" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="WorkTimerStartedAt" xml:space="preserve">
+    <value>Working since {0}</value>
+  </data>
+  <data name="WorkTimerElapsed" xml:space="preserve">
+    <value>Elapsed: {0}</value>
+  </data>
+  <data name="WorkLocationLocating" xml:space="preserve">
+    <value>Getting position…</value>
+  </data>
+  <data name="WorkLocationCaptured" xml:space="preserve">
+    <value>Position recorded</value>
+  </data>
+  <data name="WorkLocationDenied" xml:space="preserve">
+    <value>No position: location permission denied</value>
+  </data>
+  <data name="WorkLocationUnavailable" xml:space="preserve">
+    <value>No position: location could not be determined</value>
+  </data>
+  <data name="StartWorkButton" xml:space="preserve">
+    <value>Start work</value>
+  </data>
+  <data name="StartWorkConfirmTitle" xml:space="preserve">
+    <value>Start work?</value>
+  </data>
+  <data name="StartWorkConfirmMessage" xml:space="preserve">
+    <value>Work order {0} will move to In progress. This cannot be undone.</value>
+  </data>
+  <data name="StartWorkBlocked" xml:space="preserve">
+    <value>You already have a work order in progress: {0}. Complete it before starting another one.</value>
+  </data>
+  <data name="CancelButton" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="WorkTimerSection" xml:space="preserve">
+    <value>Work time</value>
+  </data>
+  <data name="RetryLocationButton" xml:space="preserve">
+    <value>Get position again</value>
+  </data>
+  <data name="OpenLocationSettingsButton" xml:space="preserve">
+    <value>Open location settings</value>
+  </data>
 </root>

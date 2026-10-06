@@ -110,4 +110,50 @@ public sealed class WorkOrderDetailsPresenterTests : IDisposable
 
     private ServiceEntry CreateEntry(bool isCorrection, params ServiceEntryPart[] parts) =>
         new(Guid.NewGuid(), _workOrder.Id, Guid.NewGuid(), "Jan Kowalski", "Notatka", isCorrection, null, null, null, null, Now, parts);
+
+    [Fact]
+    public void Should_Show_Start_Time_And_Elapsed_Work_When_Timer_Is_Running()
+    {
+        var timer = new WorkTimer(_workOrder.Id, Now.AddMinutes(-75), WorkLocationStatus.Captured, 50.06, 19.94);
+
+        var view = _presenter.PresentWorkTimer(timer, Now, isLocating: false);
+
+        view.ShouldBe(new WorkTimerView("Praca od 05.10.2026 06:45", "Trwa: 1 h 15 min", "Pozycja zapisana", false, false, false));
+    }
+
+    [Fact]
+    public void Should_Offer_Settings_And_Retry_When_Location_Permission_Was_Denied()
+    {
+        var timer = new WorkTimer(_workOrder.Id, Now, WorkLocationStatus.Denied, null, null);
+
+        var view = _presenter.PresentWorkTimer(timer, Now, isLocating: false);
+
+        view.LocationText.ShouldBe("Bez pozycji: brak zgody na lokalizację");
+        view.CanRetryLocation.ShouldBeTrue();
+        view.CanOpenLocationSettings.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Should_Show_Locating_Without_Actions_When_Position_Is_Being_Determined()
+    {
+        var timer = new WorkTimer(_workOrder.Id, Now.AddMinutes(5), WorkLocationStatus.Pending, null, null);
+
+        var view = _presenter.PresentWorkTimer(timer, Now, isLocating: true);
+
+        view.ElapsedText.ShouldBe("Trwa: 0 h 0 min");
+        view.LocationText.ShouldBe("Ustalanie pozycji…");
+        view.CanRetryLocation.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Should_Offer_Retry_When_Position_Was_Left_Pending_By_Interrupted_Start()
+    {
+        var timer = new WorkTimer(_workOrder.Id, Now, WorkLocationStatus.Pending, null, null);
+
+        var view = _presenter.PresentWorkTimer(timer, Now, isLocating: false);
+
+        view.LocationText.ShouldBe("Bez pozycji: nie udało się ustalić lokalizacji");
+        view.CanRetryLocation.ShouldBeTrue();
+        view.CanOpenLocationSettings.ShouldBeFalse();
+    }
 }

@@ -144,5 +144,16 @@ public static class DatabaseMigrations
                 rejected_at INTEGER NOT NULL)
             """,
         ]),
+        new(8, "create_work_timers",
+        [
+            """
+            CREATE TABLE work_timers (
+                work_order_id TEXT NOT NULL PRIMARY KEY,
+                started_at INTEGER NOT NULL,
+                location_status TEXT NOT NULL,
+                latitude REAL,
+                longitude REAL)
+            """,
+        ]),
     ];
 }

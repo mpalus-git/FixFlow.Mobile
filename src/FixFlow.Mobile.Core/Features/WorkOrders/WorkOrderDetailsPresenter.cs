@@ -42,6 +42,25 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter)
             workOrder.Status is WorkOrderStatus.Completed or WorkOrderStatus.Invoiced);
     }
 
+    public WorkTimerView PresentWorkTimer(WorkTimer timer, DateTimeOffset now, bool isLocating)
+    {
+        ArgumentNullException.ThrowIfNull(timer);
+
+        var elapsed = now > timer.StartedAt ? now - timer.StartedAt : TimeSpan.Zero;
+        return new WorkTimerView(
+            WorkOrderTexts.Format(AppResources.WorkTimerStartedAt, formatter.FormatDateTime(timer.StartedAt)),
+            WorkOrderTexts.Format(AppResources.WorkTimerElapsed, WorkOrderTexts.Format(AppResources.DetailsDuration, (int)elapsed.TotalHours, elapsed.Minutes)),
+            isLocating ? AppResources.WorkLocationLocating : timer.LocationStatus switch
+            {
+                WorkLocationStatus.Captured => AppResources.WorkLocationCaptured,
+                WorkLocationStatus.Denied => AppResources.WorkLocationDenied,
+                _ => AppResources.WorkLocationUnavailable,
+            },
+            isLocating,
+            !isLocating && timer.LocationStatus != WorkLocationStatus.Captured,
+            !isLocating && timer.LocationStatus == WorkLocationStatus.Denied);
+    }
+
     private static ClientView ToClientView(Client client) => new(
         client.Name,
         WorkOrderTexts.Format(AppResources.DetailsContactPerson, client.ContactPerson),

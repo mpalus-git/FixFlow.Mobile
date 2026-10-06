@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Sync;
+using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.UnitTests.Storage;
 using Microsoft.Extensions.Time.Testing;
 
@@ -40,6 +41,17 @@ public sealed class OutboxWriterTests : IAsyncLifetime
         var payload = OutboxPayload.ToServiceEntry(stored);
         payload.Id.ShouldBe(entry.Id);
         payload.Parts.ShouldBe(entry.Parts);
+    }
+
+    [Fact]
+    public async Task Should_Store_Start_And_Work_Timer_Together_When_Work_Is_Started()
+    {
+        var operation = await _writer.StartWorkAsync(WorkOrderId);
+
+        (await _outbox.GetAllAsync()).ShouldHaveSingleItem().ShouldBe(operation);
+        OutboxPayload.StartedAt(operation).ShouldBe(Now);
+        var timer = (await new WorkTimerRepository(_userDatabase.Database).GetAsync(WorkOrderId)).ShouldNotBeNull();
+        timer.ShouldBe(new WorkTimer(WorkOrderId, Now, WorkLocationStatus.Pending, null, null));
     }
 
     [Fact]
