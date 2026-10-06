@@ -160,15 +160,20 @@ public sealed partial class WorkOrderListViewModel
     }
 
     [RelayCommand]
+    private Task OpenSyncAsync() => _navigation.NavigateToAsync<SyncViewModel>();
+
+    [RelayCommand]
     private Task LogoutAsync() => _authService.LogoutAsync();
 
     private async Task ShowLocalAsync(bool updateScreen)
     {
         var operations = await _outbox.GetAllAsync();
-        SyncStatus = DescribeQueue(operations.Count, await _outbox.CountConflictsAsync());
+        var conflicts = await _outbox.GetConflictsAsync();
+        SyncStatus = DescribeQueue(operations.Count, conflicts.Count);
         Groups = _presenter.Present(
             PendingOperationsOverlay.Apply(await _workOrders.GetAllAsync(), operations),
-            operations.Select(operation => operation.WorkOrderId).ToHashSet());
+            operations.Select(operation => operation.WorkOrderId).ToHashSet(),
+            conflicts.Select(conflict => conflict.WorkOrderId).ToHashSet());
         if (updateScreen)
         {
             Screen.ShowContent(hasItems: Groups.Count > 0);

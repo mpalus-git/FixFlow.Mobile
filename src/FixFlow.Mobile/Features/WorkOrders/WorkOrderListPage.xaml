@@ -8,6 +8,8 @@
              x:DataType="viewModels:WorkOrderListViewModel"
              Title="{x:Static resources:AppResources.WorkOrderListTitle}">
     <ContentPage.ToolbarItems>
+        <ToolbarItem Text="{x:Static resources:AppResources.SyncTitle}"
+                     Command="{Binding OpenSyncCommand}" />
         <ToolbarItem Text="{x:Static resources:AppResources.LogoutButton}"
                      Command="{Binding LogoutCommand}" />
     </ContentPage.ToolbarItems>
@@ -19,7 +21,11 @@
                                 Message="{Binding Notice}" />
         <controls:OfflineBanner Grid.Row="2"
                                 IsVisible="{Binding HasSyncStatus}"
-                                Message="{Binding SyncStatus}" />
+                                Message="{Binding SyncStatus}">
+            <controls:OfflineBanner.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding OpenSyncCommand}" />
+            </controls:OfflineBanner.GestureRecognizers>
+        </controls:OfflineBanner>
 
         <RefreshView Grid.Row="3"
                      Command="{Binding RefreshCommand}"
@@ -83,6 +89,11 @@
                                            IsVisible="{Binding IsPending}"
                                            Style="{StaticResource SecondaryLabel}"
                                            FontAttributes="Italic" />
+                                    <Label Grid.Row="5"
+                                           Grid.ColumnSpan="2"
+                                           Text="{x:Static resources:AppResources.WorkOrderRejectedChange}"
+                                           IsVisible="{Binding HasRejectedChange}"
+                                           Style="{StaticResource ErrorLabel}" />
                                     <Label Grid.Row="4"
                                            Grid.ColumnSpan="2"
                                            Text="{Binding PriorityText}"

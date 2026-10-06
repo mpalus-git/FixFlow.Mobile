@@ -606,4 +606,13 @@
   <data name="DiscardAllChangesButton" xml:space="preserve">
     <value>Discard all work order changes</value>
   </data>
+  <data name="DetailsRejectedChanges" xml:space="preserve">
+    <value>The server rejected a change in this work order. Further changes of the work order wait until you resolve it.</value>
+  </data>
+  <data name="OpenSyncButton" xml:space="preserve">
+    <value>Resolve</value>
+  </data>
+  <data name="WorkOrderRejectedChange" xml:space="preserve">
+    <value>Change rejected – needs resolving</value>
+  </data>
 </root>

@@ -606,4 +606,13 @@
   <data name="DiscardAllChangesButton" xml:space="preserve">
     <value>Odrzuć wszystkie zmiany zlecenia</value>
   </data>
+  <data name="DetailsRejectedChanges" xml:space="preserve">
+    <value>Serwer odrzucił zmianę w tym zleceniu. Kolejne zmiany zlecenia czekają, aż ją wyjaśnisz.</value>
+  </data>
+  <data name="OpenSyncButton" xml:space="preserve">
+    <value>Wyjaśnij</value>
+  </data>
+  <data name="WorkOrderRejectedChange" xml:space="preserve">
+    <value>Zmiana odrzucona – do wyjaśnienia</value>
+  </data>
 </root>

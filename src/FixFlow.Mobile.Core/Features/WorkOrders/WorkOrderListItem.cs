@@ -12,7 +12,8 @@ public sealed record WorkOrderListItem(
     string StatusText,
     WorkOrderPriority Priority,
     string PriorityText,
-    bool IsPending)
+    bool IsPending,
+    bool HasRejectedChange)
 {
     public bool IsInProgress => Status == WorkOrderStatus.InProgress;
 
