@@ -8,4 +8,7 @@ public sealed record PendingServiceEntry(
     DateTimeOffset? WorkFinishedAt,
     double? Latitude,
     double? Longitude,
-    IReadOnlyList<PendingServiceEntryPart> Parts);
+    IReadOnlyList<PendingServiceEntryPart> Parts)
+{
+    public IReadOnlyList<PendingPhoto> Photos { get; init; } = [];
+}

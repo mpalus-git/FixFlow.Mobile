@@ -12,4 +12,8 @@ public static partial class MauiProgram
         DatePickerHandler.Mapper.AppendToMapping("BorderlessDatePicker", (handler, _) => handler.PlatformView.Background = null);
         TimePickerHandler.Mapper.AppendToMapping("BorderlessTimePicker", (handler, _) => handler.PlatformView.Background = null);
     }
+
+    private static partial void ConfigurePlatformImageSources(IImageSourceServiceCollection services)
+    {
+    }
 }

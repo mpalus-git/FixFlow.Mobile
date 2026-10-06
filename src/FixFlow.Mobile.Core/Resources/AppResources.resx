@@ -369,4 +369,40 @@
   <data name="EntrySaveButton" xml:space="preserve">
     <value>Zapisz wpis</value>
   </data>
+  <data name="CameraExplanationTitle" xml:space="preserve">
+    <value>Aparat</value>
+  </data>
+  <data name="CameraExplanationMessage" xml:space="preserve">
+    <value>Aplikacja użyje aparatu, aby dołączyć zdjęcie do wpisu serwisowego.</value>
+  </data>
+  <data name="CameraDeniedMessage" xml:space="preserve">
+    <value>Brak zgody na aparat. Możesz ją włączyć w ustawieniach aplikacji.</value>
+  </data>
+  <data name="OpenSettingsButton" xml:space="preserve">
+    <value>Otwórz ustawienia</value>
+  </data>
+  <data name="PhotoUnsupportedFormat" xml:space="preserve">
+    <value>Tego pliku nie można dołączyć. Wybierz zdjęcie w formacie JPEG.</value>
+  </data>
+  <data name="PhotoTooLarge" xml:space="preserve">
+    <value>Zdjęcie jest za duże, aby je wysłać. Wybierz mniejsze.</value>
+  </data>
+  <data name="EntryPhotosSection" xml:space="preserve">
+    <value>Zdjęcia</value>
+  </data>
+  <data name="EntryTakePhotoButton" xml:space="preserve">
+    <value>Zrób zdjęcie</value>
+  </data>
+  <data name="EntryPickPhotosButton" xml:space="preserve">
+    <value>Wybierz zdjęcia</value>
+  </data>
+  <data name="EntryRemovePhotoButton" xml:space="preserve">
+    <value>Usuń</value>
+  </data>
+  <data name="EntryPhotoDescription" xml:space="preserve">
+    <value>Zdjęcie dołączone do wpisu</value>
+  </data>
+  <data name="PhotoUnavailable" xml:space="preserve">
+    <value>Nie udało się otworzyć zdjęcia.</value>
+  </data>
 </root>

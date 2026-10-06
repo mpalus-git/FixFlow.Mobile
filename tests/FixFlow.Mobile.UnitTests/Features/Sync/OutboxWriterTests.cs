@@ -68,6 +68,30 @@ public sealed class OutboxWriterTests : IAsyncLifetime
     }
 
     [Fact]
+    public void Should_Read_Entry_Without_Photos_When_It_Was_Queued_Before_Photos_Existed()
+    {
+        var operation = new OutboxOperation(Guid.CreateVersion7(), WorkOrderId, OutboxOperationKind.AddServiceEntry,
+            $$"""{"id":"{{Guid.CreateVersion7()}}","note":"Przegląd","isCorrection":false,"parts":[]}""", Now, 0, null, null);
+
+        OutboxPayload.ToServiceEntry(operation).Photos.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Should_Queue_Photo_Uploads_Before_Entry_When_Entry_Has_Photos()
+    {
+        var entry = new PendingServiceEntry(Guid.CreateVersion7(), "Zdjęcia", false, Now.AddHours(-1), Now, null, null, [])
+        {
+            Photos = [new PendingPhoto(Guid.CreateVersion7(), "https://api.test/a"), new PendingPhoto(Guid.CreateVersion7(), "https://api.test/b")],
+        };
+
+        await _writer.AddServiceEntryAsync(WorkOrderId, entry);
+
+        var queued = await _outbox.GetAllAsync();
+        queued.Select(operation => operation.Kind).ShouldBe([OutboxOperationKind.UploadPhoto, OutboxOperationKind.UploadPhoto, OutboxOperationKind.AddServiceEntry]);
+        queued.Take(2).Select(OutboxPayload.PhotoId).ShouldBe(entry.Photos.Select(photo => photo.Id));
+    }
+
+    [Fact]
     public async Task Should_Notify_About_Local_Change_When_Operation_Is_Queued()
     {
         LocalChangeQueuedMessage? received = null;

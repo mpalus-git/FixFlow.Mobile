@@ -5,4 +5,5 @@ public enum OutboxOperationKind
     StartWork,
     AddServiceEntry,
     CompleteWorkOrder,
+    UploadPhoto,
 }

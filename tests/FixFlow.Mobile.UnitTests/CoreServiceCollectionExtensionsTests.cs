@@ -5,6 +5,7 @@ using FixFlow.Mobile.Core.Dialogs;
 using FixFlow.Mobile.Core.Dispatching;
 using FixFlow.Mobile.Core.Launching;
 using FixFlow.Mobile.Core.Location;
+using FixFlow.Mobile.Core.Photos;
 using FixFlow.Mobile.Core.Navigation;
 using FixFlow.Mobile.Core.Storage;
 using FixFlow.Mobile.Core.Features.Auth;
@@ -29,6 +30,7 @@ public sealed class CoreServiceCollectionExtensionsTests
             .AddSingleton(Substitute.For<IMapLauncher>())
             .AddSingleton(Substitute.For<IDocumentLauncher>())
             .AddSingleton(Substitute.For<ILocationService>())
+            .AddSingleton(Substitute.For<IPhotoService>())
             .AddSingleton(Substitute.For<IUiDispatcher>())
             .AddSingleton(new DemoAccount(string.Empty, string.Empty))
             .AddSingleton(new LocalDatabaseOptions(Path.GetTempPath()))

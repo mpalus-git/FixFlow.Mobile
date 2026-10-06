@@ -158,6 +158,24 @@ public sealed class WorkOrderDetailsPresenterTests : IDisposable
     }
 
     [Fact]
+    public void Should_Show_Local_File_Until_Upload_And_Address_Afterwards_When_Entry_Has_Photos()
+    {
+        var waiting = new PendingPhoto(Guid.NewGuid(), "https://api.test/api/v1/photos/waiting");
+        var sent = new PendingPhoto(Guid.NewGuid(), "https://api.test/api/v1/photos/sent");
+        var pending = new PendingServiceEntry(Guid.CreateVersion7(), "Zdjęcia", false, Now.AddHours(-1), Now, null, null, []) { Photos = [waiting, sent] };
+        var operation = new OutboxOperation(Guid.CreateVersion7(), _workOrder.Id, OutboxOperationKind.AddServiceEntry, OutboxPayload.Serialize(pending), Now, 0, null, null);
+        var stored = new ServiceEntry(Guid.NewGuid(), _workOrder.Id, Guid.NewGuid(), "Jan", "Z serwera", false, null, null, null, null, Now, [])
+        {
+            PhotoUrls = ["https://upload.wikimedia.org/demo.jpg"],
+        };
+
+        var view = _presenter.Present(_workOrder, null, null, [stored], [], [operation], id => id == waiting.Id ? "/data/photos/waiting.jpg" : null);
+
+        view.Entries[0].Photos.ShouldBe([new EntryPhotoView("https://upload.wikimedia.org/demo.jpg", false)]);
+        view.Entries[1].Photos.ShouldBe([new EntryPhotoView("/data/photos/waiting.jpg", true), new EntryPhotoView(sent.Url, false)]);
+    }
+
+    [Fact]
     public void Should_Offer_Retry_When_Position_Was_Left_Pending_By_Interrupted_Start()
     {
         var timer = new WorkTimer(_workOrder.Id, Now, WorkLocationStatus.Pending, null, null);

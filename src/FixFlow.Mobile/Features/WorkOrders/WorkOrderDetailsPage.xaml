@@ -188,6 +188,25 @@
                                                 </DataTemplate>
                                             </BindableLayout.ItemTemplate>
                                         </VerticalStackLayout>
+                                        <FlexLayout Wrap="Wrap"
+                                                    Margin="0,8,0,0"
+                                                    IsVisible="{Binding HasPhotos}"
+                                                    BindableLayout.ItemsSource="{Binding Photos}">
+                                            <BindableLayout.ItemTemplate>
+                                                <DataTemplate x:DataType="serviceEntries:EntryPhotoView">
+                                                    <Grid Padding="0,0,8,8">
+                                                        <ImageButton Source="{Binding Source}"
+                                                                     Aspect="AspectFill"
+                                                                     WidthRequest="88"
+                                                                     HeightRequest="88"
+                                                                     CornerRadius="8"
+                                                                     Command="{Binding OpenPhotoCommand, Source={RelativeSource AncestorType={x:Type viewModels:WorkOrderDetailsViewModel}}, x:DataType=viewModels:WorkOrderDetailsViewModel}"
+                                                                     CommandParameter="{Binding .}"
+                                                                     SemanticProperties.Description="{x:Static resources:AppResources.EntryPhotoDescription}" />
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </BindableLayout.ItemTemplate>
+                                        </FlexLayout>
                                         <Button Text="{x:Static resources:AppResources.DetailsShowLocationButton}"
                                                 Command="{Binding OpenEntryLocationCommand, Source={RelativeSource AncestorType={x:Type viewModels:WorkOrderDetailsViewModel}}, x:DataType=viewModels:WorkOrderDetailsViewModel}"
                                                 CommandParameter="{Binding .}"

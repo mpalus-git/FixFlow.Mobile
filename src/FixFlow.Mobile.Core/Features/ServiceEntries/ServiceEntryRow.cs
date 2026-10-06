@@ -1,3 +1,4 @@
+using System.Text.Json;
 using SQLite;
 
 namespace FixFlow.Mobile.Core.Features.ServiceEntries;
@@ -39,6 +40,9 @@ internal sealed class ServiceEntryRow
     [Column("created_at")]
     public DateTimeOffset CreatedAt { get; set; }
 
+    [Column("photo_urls")]
+    public string PhotoUrls { get; set; } = "[]";
+
     public static ServiceEntryRow From(ServiceEntry entry) => new()
     {
         Id = entry.Id,
@@ -52,8 +56,12 @@ internal sealed class ServiceEntryRow
         Latitude = entry.Latitude,
         Longitude = entry.Longitude,
         CreatedAt = entry.CreatedAt,
+        PhotoUrls = JsonSerializer.Serialize(entry.PhotoUrls),
     };
 
     public ServiceEntry ToServiceEntry(IReadOnlyList<ServiceEntryPart> parts) => new(
-        Id, WorkOrderId, TechnicianId, TechnicianName, Note, IsCorrection, WorkStartedAt, WorkFinishedAt, Latitude, Longitude, CreatedAt, parts);
+        Id, WorkOrderId, TechnicianId, TechnicianName, Note, IsCorrection, WorkStartedAt, WorkFinishedAt, Latitude, Longitude, CreatedAt, parts)
+    {
+        PhotoUrls = JsonSerializer.Deserialize<string[]>(PhotoUrls) ?? [],
+    };
 }

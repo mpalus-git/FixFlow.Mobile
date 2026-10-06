@@ -13,6 +13,8 @@ public static class ApiServiceCollectionExtensions
 
     public static readonly TimeSpan TotalRequestTimeout = TimeSpan.FromSeconds(30);
 
+    public static readonly TimeSpan PhotoUploadTimeout = TimeSpan.FromSeconds(90);
+
     public static IHttpClientBuilder AddFixFlowApi(this IServiceCollection services, Uri baseAddress)
     {
         services.AddHttpClient<ServerReadinessProbe>(client =>
@@ -26,6 +28,17 @@ public static class ApiServiceCollectionExtensions
             .AddStandardResilienceHandler(ConfigureResilience);
         services.AddKeyedTransient(AnonymousClientKey, (provider, _) =>
             RestService.ForGenerated<IFixFlowApi>(provider.GetRequiredService<IHttpClientFactory>().CreateClient(AnonymousClientKey)));
+
+        services.AddSingleton(new ApiAddress(baseAddress));
+        var photoUpload = services.AddHttpClient<PhotoUploadClient>(client => client.BaseAddress = baseAddress);
+        photoUpload.AddStandardResilienceHandler(options =>
+        {
+            ConfigureResilience(options);
+            options.AttemptTimeout.Timeout = PhotoUploadTimeout;
+            options.TotalRequestTimeout.Timeout = PhotoUploadTimeout;
+            options.CircuitBreaker.SamplingDuration = PhotoUploadTimeout * 2;
+        });
+        photoUpload.AddHttpMessageHandler<AuthenticationHandler>();
 
         services.AddSingleton<TokenRefresher>();
         services.AddTransient<AuthenticationHandler>();

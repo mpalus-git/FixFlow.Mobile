@@ -42,7 +42,7 @@ public sealed class SyncCoordinatorTests : IAsyncLifetime
             _connectivity,
             warmup,
             () => new ServerReadinessProbe(httpClient, _timeProvider),
-            () => new OutboxDispatcher(client, _outbox, new ServiceEntryRepository(_userDatabase.Database), new OutboxRetryPolicy(() => 0.5), _timeProvider),
+            () => new OutboxDispatcher(client, _outbox, new ServiceEntryRepository(_userDatabase.Database), new PhotoUploadClient(httpClient), new PhotoStore(_userDatabase.Options, _userDatabase.Database), new OutboxRetryPolicy(() => 0.5), _timeProvider),
             () => new WorkOrderSyncService(client, new ServerReadinessProbe(httpClient, _timeProvider), warmup, new WorkOrderRepository(database), new SyncStateRepository(database, _timeProvider)),
             () => new PartSyncService(client, new PartRepository(database), new SyncStateRepository(database, _timeProvider)),
             _messenger);

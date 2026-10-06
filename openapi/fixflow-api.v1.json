@@ -3611,6 +3611,168 @@
         ]
       }
     },
+    "/api/v1/photos/{photoId}": {
+      "put": {
+        "tags": [
+          "Photos"
+        ],
+        "summary": "Upload a photo",
+        "description": "Stores a JPEG photo under an identifier chosen by the client, so the photo address /api/v1/photos/{photoId} is known before the upload and can be put in photoUrls of a service entry created offline. The body is the raw image/jpeg content of at most 1048576 bytes. Available to technicians only. When the identifier was already used by the same technician, the stored photo is kept and returned with status 200, so a queued upload can be safely sent again; the content is not compared. An identifier used by another technician is rejected with a conflict.",
+        "operationId": "UploadPhoto",
+        "parameters": [
+          {
+            "name": "photoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "image/jpeg": {
+              "schema": {
+                "$ref": "#/components/schemas/Stream"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhotoResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhotoResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Payload Too Large",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported Media Type",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Photos"
+        ],
+        "summary": "Get a photo",
+        "description": "Returns the stored JPEG photo. Available without authentication, so the photo address from photoUrls of a service entry can be used directly as an image source; anyone who knows the address can read the photo. A stored photo never changes, so the response can be cached for a year and carries the photo identifier as ETag; a request with a matching If-None-Match returns 304 without content.",
+        "operationId": "GetPhoto",
+        "parameters": [
+          {
+            "name": "photoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stream"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/dashboard/summary": {
       "get": {
         "tags": [
@@ -4669,6 +4831,31 @@
         },
         "description": "Spare part from the warehouse catalog."
       },
+      "PhotoResponse": {
+        "required": [
+          "id",
+          "sizeBytes",
+          "uploadedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier given by the client when uploading.",
+            "format": "uuid"
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "description": "Size of the photo in bytes.",
+            "format": "int32"
+          },
+          "uploadedAt": {
+            "type": "string",
+            "description": "Time of the first successful upload.",
+            "format": "date-time"
+          }
+        }
+      },
       "ProblemDetails": {
         "type": "object",
         "properties": {
@@ -5486,6 +5673,9 @@
     },
     {
       "name": "ServiceEntries"
+    },
+    {
+      "name": "Photos"
     },
     {
       "name": "Dashboard"

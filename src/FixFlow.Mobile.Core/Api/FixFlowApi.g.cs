@@ -100,6 +100,14 @@ namespace FixFlow.Mobile.Core.Api
         [Get("/api/v1/work-orders/{workOrderId}/service-entries")]
         Task<IApiResponse<ICollection<ServiceEntryResponse>>> ListServiceEntriesAsync(System.Guid workOrderId, CancellationToken cancellationToken = default);
 
+        [Headers("Accept: application/json, application/problem+json", "Content-Type: image/jpeg")]
+        [Put("/api/v1/photos/{photoId}")]
+        Task<IApiResponse<PhotoResponse>> UploadPhotoAsync(System.Guid photoId, [Body] StreamPart body, CancellationToken cancellationToken = default);
+
+        [Headers("Accept: image/jpeg, application/problem+json")]
+        [Get("/api/v1/photos/{photoId}")]
+        Task<IApiResponse<FileResponse>> GetPhotoAsync(System.Guid photoId, CancellationToken cancellationToken = default);
+
     }
 
 
@@ -761,6 +769,39 @@ public WorkOrderPriority Priority { get; init; }
 
         [JsonPropertyName("archivedAt")]
         public System.DateTimeOffset? ArchivedAt { get; init; }
+
+        private IDictionary<string, object>? _additionalProperties;
+
+        [JsonExtensionData]
+        public IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial record PhotoResponse
+    {
+        [JsonConstructor]
+        public PhotoResponse(System.Guid @id, int @sizeBytes, System.DateTimeOffset @uploadedAt)
+        {
+            this.Id = @id;
+            this.SizeBytes = @sizeBytes;
+            this.UploadedAt = @uploadedAt;
+        }
+
+        [JsonPropertyName("id")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public System.Guid Id { get; init; }
+
+        [JsonPropertyName("sizeBytes")]
+        public int SizeBytes { get; init; }
+
+        [JsonPropertyName("uploadedAt")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public System.DateTimeOffset UploadedAt { get; init; }
 
         private IDictionary<string, object>? _additionalProperties;
 
@@ -1492,6 +1533,33 @@ public WorkOrderStatus Status { get; init; }
         [System.Runtime.Serialization.EnumMember(Value = @"Desc")]
         Desc = 1,
 
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NSwag", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class FileParameter
+    {
+        public FileParameter(System.IO.Stream data)
+            : this (data, null, null)
+        {
+        }
+
+        public FileParameter(System.IO.Stream data, string? fileName)
+            : this (data, fileName, null)
+        {
+        }
+
+        public FileParameter(System.IO.Stream data, string? fileName, string? contentType)
+        {
+            Data = data;
+            FileName = fileName;
+            ContentType = contentType;
+        }
+
+        public System.IO.Stream Data { get; private set; }
+
+        public string? FileName { get; private set; }
+
+        public string? ContentType { get; private set; }
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]

@@ -12,6 +12,9 @@ public static partial class MauiProgram
         TimePickerHandler.Mapper.AppendToMapping("BorderlessTimePicker", (handler, _) => RemoveControlChrome(handler.PlatformView));
     }
 
+    private static partial void ConfigurePlatformImageSources(IImageSourceServiceCollection services) =>
+        services.AddService<UriImageSource, UserAgentUriImageSourceService>();
+
     private static void RemoveTextBoxChrome(Microsoft.UI.Xaml.Controls.TextBox textBox)
     {
         var transparent = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);

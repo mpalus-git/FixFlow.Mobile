@@ -17,7 +17,8 @@
     "^/api/v1/parts/[{]partId[}]$",
     "^/api/v1/clients/[{]clientId[}]$",
     "^/api/v1/devices/[{]deviceId[}]$",
-    "^/api/v1/devices/[{]deviceId[}]/work-orders$"
+    "^/api/v1/devices/[{]deviceId[}]/work-orders$",
+    "^/api/v1/photos/[{]photoId[}]$"
   ],
   "trimUnusedSchema": true,
   "keepSchemaPatterns": [

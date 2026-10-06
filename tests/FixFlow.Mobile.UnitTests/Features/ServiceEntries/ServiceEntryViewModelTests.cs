@@ -1,4 +1,6 @@
 using CommunityToolkit.Mvvm.Messaging;
+using FixFlow.Mobile.Core.Api;
+using FixFlow.Mobile.Core.Dialogs;
 using FixFlow.Mobile.Core.Features.Parts;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Settings;
@@ -6,6 +8,7 @@ using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Formatting;
 using FixFlow.Mobile.Core.Navigation;
+using FixFlow.Mobile.Core.Photos;
 using FixFlow.Mobile.Core.Resources;
 using FixFlow.Mobile.Core.Screens;
 using FixFlow.Mobile.UnitTests.Features.WorkOrders;
@@ -18,6 +21,7 @@ namespace FixFlow.Mobile.UnitTests.Features.ServiceEntries;
 public sealed class ServiceEntryViewModelTests : IAsyncLifetime
 {
     private static readonly DateTimeOffset StartedAt = new(2026, 10, 5, 8, 0, 30, TimeSpan.Zero);
+    private static readonly byte[] Jpeg = [0xFF, 0xD8, 0xFF, 0xE0, 1];
     private static readonly Part Filter = new(Guid.NewGuid(), "Filtr powietrza", "FP-100", 5, 12.34m, null);
 
     private readonly FakeTimeProvider _timeProvider = new(StartedAt);
@@ -27,6 +31,8 @@ public sealed class ServiceEntryViewModelTests : IAsyncLifetime
     private readonly OutboxRepository _outbox;
     private readonly WorkTimerRepository _timers;
     private readonly DisplayFormatter _formatter;
+    private readonly IPhotoService _photoService = Substitute.For<IPhotoService>();
+    private readonly PhotoStore _photos;
     private readonly ServiceEntryViewModel _viewModel;
 
     public ServiceEntryViewModelTests()
@@ -36,9 +42,13 @@ public sealed class ServiceEntryViewModelTests : IAsyncLifetime
         _formatter = new DisplayFormatter(new LanguageService(Substitute.For<ISettingsStore>()), clock);
         _outbox = new OutboxRepository(database);
         _timers = new WorkTimerRepository(database);
+        _photos = new PhotoStore(_userDatabase.Options, database);
+        _photoService.HasCameraPermissionAsync().Returns(true);
+        _photoService.IsCaptureSupported.Returns(true);
         _viewModel = new ServiceEntryViewModel(
             new ScreenState(_formatter),
             new ServiceEntryPartsSelection(new PartRepository(database), _formatter),
+            new PhotoAttacher(_photoService, _photos, new ApiAddress(new Uri("https://api.test")), Substitute.For<IDialogService>()),
             new WorkOrderRepository(database),
             new ServiceEntryRepository(database),
             _outbox,
@@ -183,6 +193,49 @@ public sealed class ServiceEntryViewModelTests : IAsyncLifetime
         var entry = OutboxPayload.ToServiceEntry((await _outbox.GetAllAsync()).Single(operation => operation.Kind == OutboxOperationKind.AddServiceEntry));
         entry.Latitude.ShouldBeNull();
         entry.Longitude.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task Should_Queue_Photo_Upload_Before_Entry_When_Photo_Is_Taken()
+    {
+        _photoService.CaptureAsync(Arg.Any<CancellationToken>()).Returns(Jpeg);
+        await _viewModel.OnNavigatedToAsync(_workOrder.Id);
+        _viewModel.Note = "Zdjęcie tabliczki znamionowej";
+
+        await _viewModel.TakePhotoCommand.ExecuteAsync(null);
+        await _viewModel.SaveCommand.ExecuteAsync(null);
+
+        var draft = _viewModel.Photos.ShouldHaveSingleItem();
+        File.Exists(draft.LocalPath).ShouldBeTrue();
+        var queued = await _outbox.GetAllAsync();
+        queued.Select(operation => operation.Kind).ShouldBe([OutboxOperationKind.StartWork, OutboxOperationKind.UploadPhoto, OutboxOperationKind.AddServiceEntry]);
+        OutboxPayload.ToServiceEntry(queued[2]).Photos.ShouldHaveSingleItem().ShouldBe(draft.Photo);
+    }
+
+    [Fact]
+    public async Task Should_Delete_Photo_File_When_Technician_Removes_It()
+    {
+        _photoService.CaptureAsync(Arg.Any<CancellationToken>()).Returns(Jpeg);
+        await _viewModel.OnNavigatedToAsync(_workOrder.Id);
+        await _viewModel.TakePhotoCommand.ExecuteAsync(null);
+        var draft = _viewModel.Photos[0];
+
+        _viewModel.RemovePhotoCommand.Execute(draft);
+
+        _viewModel.HasPhotos.ShouldBeFalse();
+        File.Exists(draft.LocalPath).ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Should_Let_Technician_Pick_Only_Remaining_Photos_When_Some_Are_Attached()
+    {
+        _photoService.CaptureAsync(Arg.Any<CancellationToken>()).Returns(Jpeg);
+        await _viewModel.OnNavigatedToAsync(_workOrder.Id);
+        await _viewModel.TakePhotoCommand.ExecuteAsync(null);
+
+        await _viewModel.PickPhotosCommand.ExecuteAsync(null);
+
+        await _photoService.Received(1).PickAsync(ServiceEntryViewModel.MaxPhotos - 1, Arg.Any<CancellationToken>());
     }
 
     public async ValueTask DisposeAsync() => await _userDatabase.DisposeAsync();

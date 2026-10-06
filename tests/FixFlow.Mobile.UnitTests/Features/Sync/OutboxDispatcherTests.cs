@@ -23,14 +23,23 @@ public sealed class OutboxDispatcherTests : IAsyncLifetime
     private readonly OutboxRepository _outbox;
     private readonly OutboxWriter _writer;
     private readonly OutboxDispatcher _dispatcher;
+    private readonly PhotoStore _photos;
 
     public OutboxDispatcherTests()
     {
         _handler = new StubHttpMessageHandler(_api.RouteAsync);
         _outbox = new OutboxRepository(_userDatabase.Database);
         _writer = new OutboxWriter(_outbox, _timeProvider, new WeakReferenceMessenger());
-        var client = RestService.ForGenerated<IFixFlowApi>(new HttpClient(_handler, disposeHandler: false) { BaseAddress = new Uri("https://api.test") });
-        _dispatcher = new OutboxDispatcher(client, _outbox, new ServiceEntryRepository(_userDatabase.Database), new OutboxRetryPolicy(() => 0.5), _timeProvider);
+        var httpClient = new HttpClient(_handler, disposeHandler: false) { BaseAddress = new Uri("https://api.test") };
+        _photos = new PhotoStore(_userDatabase.Options, _userDatabase.Database);
+        _dispatcher = new OutboxDispatcher(
+            RestService.ForGenerated<IFixFlowApi>(httpClient),
+            _outbox,
+            new ServiceEntryRepository(_userDatabase.Database),
+            new PhotoUploadClient(httpClient),
+            _photos,
+            new OutboxRetryPolicy(() => 0.5),
+            _timeProvider);
     }
 
     public async ValueTask InitializeAsync() => await _userDatabase.Database.OpenAsync(Guid.NewGuid());
@@ -63,6 +72,49 @@ public sealed class OutboxDispatcherTests : IAsyncLifetime
         stored.Id.ShouldBe(entry.Id);
         stored.TechnicianName.ShouldBe("Jan Kowalski");
         (await _outbox.GetAllAsync()).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Should_Upload_Photo_Before_Entry_And_Delete_File_When_Queue_Is_Sent()
+    {
+        var photo = await SavePhotoAsync();
+        await AddEntryAsync(WorkOrderId, photo);
+
+        var summary = await DispatchAsync();
+
+        summary.Sent.ShouldBe(2);
+        _api.Calls.ShouldBe([$"PUT /api/v1/photos/{photo.Id}", $"POST /api/v1/work-orders/{WorkOrderId}/service-entries"]);
+        _api.SentEntries.ShouldHaveSingleItem().RootElement.GetProperty("photoUrls")[0].GetString().ShouldBe(photo.Url);
+        (await _photos.ReadAsync(photo.Id)).ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task Should_Hold_Entry_Behind_Conflict_When_Photo_File_Is_Missing()
+    {
+        await AddEntryAsync(WorkOrderId, new PendingPhoto(Guid.CreateVersion7(), "https://api.test/api/v1/photos/missing"));
+
+        var summary = await DispatchAsync();
+
+        summary.Rejected.ShouldBe(1);
+        _api.Calls.ShouldBeEmpty();
+        var conflict = (await _outbox.GetConflictsAsync()).ShouldHaveSingleItem();
+        conflict.Kind.ShouldBe(OutboxOperationKind.UploadPhoto);
+        conflict.ErrorCode.ShouldBe(OutboxDispatcher.MissingPhotoFileCode);
+        (await _outbox.GetAllAsync()).ShouldHaveSingleItem().Kind.ShouldBe(OutboxOperationKind.AddServiceEntry);
+    }
+
+    [Fact]
+    public async Task Should_Keep_Photo_File_And_Entry_When_Upload_Fails_Transiently()
+    {
+        var photo = await SavePhotoAsync();
+        await AddEntryAsync(WorkOrderId, photo);
+        _api.Overrides[$"PUT /api/v1/photos/{photo.Id}"] = () => new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
+
+        var summary = await DispatchAsync();
+
+        summary.Remaining.ShouldBe(2);
+        _api.Calls.ShouldHaveSingleItem();
+        (await _photos.ReadAsync(photo.Id)).ShouldNotBeNull();
     }
 
     [Fact]
@@ -201,14 +253,21 @@ public sealed class OutboxDispatcherTests : IAsyncLifetime
         _timeProvider.Advance(TimeSpan.FromMilliseconds(1));
     }
 
-    private async Task<PendingServiceEntry> AddEntryAsync(Guid workOrderId)
+    private async Task<PendingServiceEntry> AddEntryAsync(Guid workOrderId, params PendingPhoto[] photos)
     {
         var entry = new PendingServiceEntry(
             Guid.CreateVersion7(), "Wymiana filtra", false, Now.AddHours(-1), Now, null, null,
-            [new PendingServiceEntryPart(Guid.NewGuid(), "Filtr", "FP-100", 2, 12.34m)]);
+            [new PendingServiceEntryPart(Guid.NewGuid(), "Filtr", "FP-100", 2, 12.34m)]) { Photos = photos };
         await _writer.AddServiceEntryAsync(workOrderId, entry);
         _timeProvider.Advance(TimeSpan.FromMilliseconds(1));
         return entry;
+    }
+
+    private async Task<PendingPhoto> SavePhotoAsync()
+    {
+        var photoId = Guid.CreateVersion7();
+        await _photos.SaveAsync(photoId, [0xFF, 0xD8, 0xFF, 0xE0]);
+        return new PendingPhoto(photoId, $"https://api.test/api/v1/photos/{photoId}");
     }
 
     private Task<DispatchSummary> DispatchAsync() => _dispatcher.DispatchAsync(TestContext.Current.CancellationToken);

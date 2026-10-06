@@ -369,4 +369,40 @@
   <data name="EntrySaveButton" xml:space="preserve">
     <value>Save entry</value>
   </data>
+  <data name="CameraExplanationTitle" xml:space="preserve">
+    <value>Camera</value>
+  </data>
+  <data name="CameraExplanationMessage" xml:space="preserve">
+    <value>The app uses the camera to attach a photo to the service entry.</value>
+  </data>
+  <data name="CameraDeniedMessage" xml:space="preserve">
+    <value>Camera permission was denied. You can allow it in the app settings.</value>
+  </data>
+  <data name="OpenSettingsButton" xml:space="preserve">
+    <value>Open settings</value>
+  </data>
+  <data name="PhotoUnsupportedFormat" xml:space="preserve">
+    <value>This file cannot be attached. Choose a JPEG photo.</value>
+  </data>
+  <data name="PhotoTooLarge" xml:space="preserve">
+    <value>The photo is too large to send. Choose a smaller one.</value>
+  </data>
+  <data name="EntryPhotosSection" xml:space="preserve">
+    <value>Photos</value>
+  </data>
+  <data name="EntryTakePhotoButton" xml:space="preserve">
+    <value>Take photo</value>
+  </data>
+  <data name="EntryPickPhotosButton" xml:space="preserve">
+    <value>Choose photos</value>
+  </data>
+  <data name="EntryRemovePhotoButton" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="EntryPhotoDescription" xml:space="preserve">
+    <value>Photo attached to the entry</value>
+  </data>
+  <data name="PhotoUnavailable" xml:space="preserve">
+    <value>The photo could not be opened.</value>
+  </data>
 </root>

@@ -8,8 +8,11 @@ internal sealed class TestUserDatabase : IAsyncDisposable
 
     public TestUserDatabase(TimeProvider? timeProvider = null)
     {
-        Database = new UserDatabase(new LocalDatabaseOptions(_file.Directory), timeProvider ?? TimeProvider.System);
+        Options = new LocalDatabaseOptions(_file.Directory);
+        Database = new UserDatabase(Options, timeProvider ?? TimeProvider.System);
     }
+
+    public LocalDatabaseOptions Options { get; }
 
     public UserDatabase Database { get; }
 
