@@ -1,3 +1,4 @@
+using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Notifications;
 using Plugin.LocalNotification;
 using Plugin.LocalNotification.Core.Models;
@@ -45,7 +46,11 @@ public sealed class LocalNotificationScheduler(INotificationService notification
             Schedule =
             {
                 NotifyTime = reminder.NotifyAt,
-                Android = { ScheduleMode = AndroidScheduleMode.InexactAllowWhileIdle },
+                Android =
+                {
+                    ScheduleMode = AndroidScheduleMode.InexactAllowWhileIdle,
+                    AllowedDelay = DueDateReminderPlanner.LeadTime,
+                },
             },
         });
     }
