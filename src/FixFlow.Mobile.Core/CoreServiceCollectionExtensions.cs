@@ -69,6 +69,7 @@ public static class CoreServiceCollectionExtensions
         services.AddSingleton<WorkOrderSectionClassifier>();
         services.AddSingleton<WorkOrderListPresenter>();
         services.AddSingleton<WorkOrderDetailsPresenter>();
+        services.AddSingleton<DueDateReminderPlanner>();
         services.AddTransient<WorkOrderListViewModel>();
         services.AddTransient<WorkOrderDetailsSources>();
         services.AddTransient<WorkOrderDetailsViewModel>();
