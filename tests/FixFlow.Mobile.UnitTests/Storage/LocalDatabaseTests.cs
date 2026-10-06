@@ -48,6 +48,31 @@ public sealed class LocalDatabaseTests : IDisposable
     }
 
     [Fact]
+    public async Task Should_Not_Crash_Running_Queries_When_Database_Is_Closed()
+    {
+        for (var round = 0; round < 30; round++)
+        {
+            var database = await LocalDatabase.OpenAsync(_file.Path, [CreateNotes], TimeProvider.System);
+            var queries = Enumerable.Range(0, 8)
+                .Select(_ => database.Connection.QueryAsync<Note>("SELECT id, text FROM notes"))
+                .ToList();
+
+            await database.DisposeAsync();
+
+            foreach (var query in queries)
+            {
+                try
+                {
+                    await query;
+                }
+                catch (Exception exception) when (exception is not AccessViolationException)
+                {
+                }
+            }
+        }
+    }
+
+    [Fact]
     public async Task Should_Roll_Back_Migration_When_One_Of_Its_Statements_Fails()
     {
         var broken = new DatabaseMigration(2, "broken", ["ALTER TABLE notes ADD COLUMN author TEXT", "NOT VALID SQL"]);
@@ -62,4 +87,11 @@ public sealed class LocalDatabaseTests : IDisposable
     }
 
     public void Dispose() => _file.Dispose();
+
+    private sealed class Note
+    {
+        public int Id { get; set; }
+
+        public string Text { get; set; } = string.Empty;
+    }
 }
