@@ -46,6 +46,21 @@ public sealed class PhotoStoreTests : IAsyncLifetime
         (await _store.ReadAsync(photoId)).ShouldBeNull();
     }
 
+    [Fact]
+    public async Task Should_Delete_Only_Current_Technician_Photos_When_All_Are_Deleted()
+    {
+        var otherPhotoId = Guid.NewGuid();
+        await _store.SaveAsync(otherPhotoId, Jpeg);
+        await _userDatabase.OpenAsync(Guid.NewGuid());
+        var photoId = Guid.NewGuid();
+        await _store.SaveAsync(photoId, Jpeg);
+
+        _store.DeleteAll();
+
+        _store.ExistingPathFor(photoId).ShouldBeNull();
+        Directory.GetFiles(_directory.Directory, $"{otherPhotoId:N}.jpg", SearchOption.AllDirectories).ShouldHaveSingleItem();
+    }
+
     public async ValueTask DisposeAsync()
     {
         await _userDatabase.DisposeAsync();

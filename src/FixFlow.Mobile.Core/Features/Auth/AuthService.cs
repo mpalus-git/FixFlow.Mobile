@@ -1,5 +1,6 @@
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Api.Errors;
+using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,6 +11,7 @@ public sealed class AuthService(
     IFixFlowApi api,
     SessionStore session,
     UserDatabase userDatabase,
+    PhotoStore photos,
     TimeProvider timeProvider)
 {
     public static readonly TimeSpan RevokeTimeout = TimeSpan.FromSeconds(5);
@@ -62,8 +64,19 @@ public sealed class AuthService(
             await RevokeAsync(refreshToken);
         }
 
-        await userDatabase.CloseAsync();
-        session.End(SessionEndReason.SignedOut);
+        try
+        {
+            if (userDatabase.UserId is not null)
+            {
+                photos.DeleteAll();
+            }
+
+            await userDatabase.DeleteAsync();
+        }
+        finally
+        {
+            session.End(SessionEndReason.SignedOut);
+        }
     }
 
     private async Task RevokeAsync(string refreshToken)

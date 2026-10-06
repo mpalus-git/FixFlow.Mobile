@@ -630,4 +630,70 @@
   <data name="NotNowButton" xml:space="preserve">
     <value>Nie teraz</value>
   </data>
+  <data name="SettingsVersion" xml:space="preserve">
+    <value>Wersja {0} ({1})</value>
+  </data>
+  <data name="LogoutConfirmTitle" xml:space="preserve">
+    <value>Wylogować?</value>
+  </data>
+  <data name="LogoutConfirmMessage" xml:space="preserve">
+    <value>Dane zleceń zostaną usunięte z tego urządzenia.</value>
+  </data>
+  <data name="LogoutUnsentConfirmMessage" xml:space="preserve">
+    <value>Zmiany, które nie trafiły na serwer, przepadną ({0}). Dane zleceń zostaną usunięte z tego urządzenia.</value>
+  </data>
+  <data name="LogoutPendingPart" xml:space="preserve">
+    <value>do wysłania: {0}</value>
+  </data>
+  <data name="LogoutConflictPart" xml:space="preserve">
+    <value>do wyjaśnienia: {0}</value>
+  </data>
+  <data name="SettingsNotificationsHeader" xml:space="preserve">
+    <value>Przypomnienia</value>
+  </data>
+  <data name="SettingsNotificationsDescription" xml:space="preserve">
+    <value>Powiadomienie godzinę przed terminem przypisanego zlecenia.</value>
+  </data>
+  <data name="NotificationsEnabledStatus" xml:space="preserve">
+    <value>Włączone</value>
+  </data>
+  <data name="NotificationsDisabledStatus" xml:space="preserve">
+    <value>Wyłączone</value>
+  </data>
+  <data name="EnableNotificationsButton" xml:space="preserve">
+    <value>Włącz przypomnienia</value>
+  </data>
+  <data name="OpenNotificationSettingsButton" xml:space="preserve">
+    <value>Otwórz ustawienia systemu</value>
+  </data>
+  <data name="SettingsTitle" xml:space="preserve">
+    <value>Ustawienia</value>
+  </data>
+  <data name="SettingsAccountHeader" xml:space="preserve">
+    <value>Konto</value>
+  </data>
+  <data name="SettingsLanguageHeader" xml:space="preserve">
+    <value>Język</value>
+  </data>
+  <data name="LanguagePolish" xml:space="preserve">
+    <value>Polski</value>
+  </data>
+  <data name="LanguageEnglish" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="SettingsThemeHeader" xml:space="preserve">
+    <value>Motyw</value>
+  </data>
+  <data name="ThemeSystem" xml:space="preserve">
+    <value>Systemowy</value>
+  </data>
+  <data name="ThemeLight" xml:space="preserve">
+    <value>Jasny</value>
+  </data>
+  <data name="ThemeDark" xml:space="preserve">
+    <value>Ciemny</value>
+  </data>
+  <data name="SettingsAboutHeader" xml:space="preserve">
+    <value>O aplikacji</value>
+  </data>
 </root>

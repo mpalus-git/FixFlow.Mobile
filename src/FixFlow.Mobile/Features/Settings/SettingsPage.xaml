@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:resources="clr-namespace:FixFlow.Mobile.Core.Resources;assembly=FixFlow.Mobile.Core"
+             xmlns:viewModels="clr-namespace:FixFlow.Mobile.Core.Features.Settings;assembly=FixFlow.Mobile.Core"
+             x:Class="FixFlow.Mobile.Features.Settings.SettingsPage"
+             x:DataType="viewModels:SettingsViewModel"
+             Title="{x:Static resources:AppResources.SettingsTitle}">
+    <ScrollView>
+        <VerticalStackLayout Padding="16"
+                             Spacing="12">
+            <Label Text="{x:Static resources:AppResources.SettingsAccountHeader}"
+                   Style="{StaticResource SectionLabel}" />
+            <Border Style="{StaticResource CardBorder}">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{Binding UserName}"
+                           FontAttributes="Bold" />
+                    <Label Text="{Binding UserEmail}"
+                           Style="{StaticResource SecondaryLabel}" />
+                    <Button Text="{x:Static resources:AppResources.LogoutButton}"
+                            Command="{Binding LogoutCommand}"
+                            Style="{StaticResource OutlineButton}"
+                            Margin="0,8,0,0" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Label Text="{x:Static resources:AppResources.SettingsLanguageHeader}"
+                   Style="{StaticResource SectionLabel}" />
+            <Border Style="{StaticResource CardBorder}">
+                <VerticalStackLayout RadioButtonGroup.GroupName="Language"
+                                     RadioButtonGroup.SelectedValue="{Binding SelectedLanguage, Mode=TwoWay}">
+                    <RadioButton Content="{x:Static resources:AppResources.LanguagePolish}"
+                                 Value="{x:Static viewModels:AppLanguage.Polish}" />
+                    <RadioButton Content="{x:Static resources:AppResources.LanguageEnglish}"
+                                 Value="{x:Static viewModels:AppLanguage.English}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Label Text="{x:Static resources:AppResources.SettingsThemeHeader}"
+                   Style="{StaticResource SectionLabel}" />
+            <Border Style="{StaticResource CardBorder}">
+                <VerticalStackLayout RadioButtonGroup.GroupName="Theme"
+                                     RadioButtonGroup.SelectedValue="{Binding SelectedTheme, Mode=TwoWay}">
+                    <RadioButton Content="{x:Static resources:AppResources.ThemeSystem}"
+                                 Value="{x:Static viewModels:AppThemePreference.System}" />
+                    <RadioButton Content="{x:Static resources:AppResources.ThemeLight}"
+                                 Value="{x:Static viewModels:AppThemePreference.Light}" />
+                    <RadioButton Content="{x:Static resources:AppResources.ThemeDark}"
+                                 Value="{x:Static viewModels:AppThemePreference.Dark}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Label Text="{x:Static resources:AppResources.SettingsNotificationsHeader}"
+                   Style="{StaticResource SectionLabel}"
+                   IsVisible="{Binding AreNotificationsSupported}" />
+            <Border Style="{StaticResource CardBorder}"
+                    IsVisible="{Binding AreNotificationsSupported}">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{x:Static resources:AppResources.SettingsNotificationsDescription}"
+                           Style="{StaticResource SecondaryLabel}" />
+                    <Label Text="{Binding NotificationStatus}"
+                           FontAttributes="Bold" />
+                    <Button Text="{Binding EnableNotificationsText}"
+                            Command="{Binding EnableNotificationsCommand}"
+                            IsVisible="{Binding CanEnableNotifications}"
+                            Style="{StaticResource OutlineButton}"
+                            Margin="0,8,0,0" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Label Text="{x:Static resources:AppResources.SettingsAboutHeader}"
+                   Style="{StaticResource SectionLabel}" />
+            <Label Text="{Binding Version}"
+                   Style="{StaticResource SecondaryLabel}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

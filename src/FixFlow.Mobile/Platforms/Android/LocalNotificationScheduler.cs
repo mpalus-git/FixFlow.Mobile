@@ -16,6 +16,12 @@ public sealed class LocalNotificationScheduler(INotificationService notification
 
     public Task<bool> RequestPermissionAsync() => notifications.RequestNotificationPermission();
 
+    public Task OpenSettingsAsync()
+    {
+        AppInfo.Current.ShowSettingsUI();
+        return Task.CompletedTask;
+    }
+
     public async Task<IReadOnlyList<ScheduledReminder>> GetScheduledAsync()
     {
         var pending = await notifications.GetPendingNotificationList();

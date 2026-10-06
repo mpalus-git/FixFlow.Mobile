@@ -4,18 +4,19 @@ using CommunityToolkit.Mvvm.Messaging;
 using FixFlow.Mobile.Core.Api.Errors;
 using FixFlow.Mobile.Core.Connectivity;
 using FixFlow.Mobile.Core.Dispatching;
-using FixFlow.Mobile.Core.Features.Auth;
+using FixFlow.Mobile.Core.Features.Settings;
 using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Navigation;
 using FixFlow.Mobile.Core.Resources;
 using FixFlow.Mobile.Core.Screens;
+using FixFlow.Mobile.Core.Storage;
 
 namespace FixFlow.Mobile.Core.Features.WorkOrders;
 
 public sealed partial class WorkOrderListViewModel
     : ObservableObject, IRecipient<ConnectivityChangedMessage>, IRecipient<SyncCompletedMessage>, IRecipient<ServerStartingMessage>
 {
-    private readonly AuthService _authService;
+    private readonly UserDatabase _userDatabase;
     private readonly WorkOrderRepository _workOrders;
     private readonly OutboxRepository _outbox;
     private readonly WorkOrderSyncService _sync;
@@ -27,7 +28,7 @@ public sealed partial class WorkOrderListViewModel
 
     public WorkOrderListViewModel(
         ScreenState screen,
-        AuthService authService,
+        UserDatabase userDatabase,
         WorkOrderRepository workOrders,
         OutboxRepository outbox,
         WorkOrderSyncService sync,
@@ -40,7 +41,7 @@ public sealed partial class WorkOrderListViewModel
     {
         ArgumentNullException.ThrowIfNull(messenger);
         Screen = screen;
-        _authService = authService;
+        _userDatabase = userDatabase;
         _workOrders = workOrders;
         _outbox = outbox;
         _sync = sync;
@@ -137,7 +138,7 @@ public sealed partial class WorkOrderListViewModel
     }
 
     public void Receive(SyncCompletedMessage message) =>
-        _ui.Post(() => ShowLocalAsync(updateScreen: Groups.Count > 0));
+        _ui.Post(() => IsSignedIn ? ShowLocalAsync(updateScreen: Groups.Count > 0) : Task.CompletedTask);
 
     public void Receive(ServerStartingMessage message) =>
         _ui.Post(() =>
@@ -149,6 +150,11 @@ public sealed partial class WorkOrderListViewModel
     public async void Receive(ConnectivityChangedMessage message)
     {
         ArgumentNullException.ThrowIfNull(message);
+        if (!IsSignedIn)
+        {
+            return;
+        }
+
         if (message.IsOnline)
         {
             Screen.SetOnline();
@@ -163,7 +169,9 @@ public sealed partial class WorkOrderListViewModel
     private Task OpenSyncAsync() => _navigation.NavigateToAsync<SyncViewModel>();
 
     [RelayCommand]
-    private Task LogoutAsync() => _authService.LogoutAsync();
+    private Task OpenSettingsAsync() => _navigation.NavigateToAsync<SettingsViewModel>();
+
+    private bool IsSignedIn => _userDatabase.UserId is not null;
 
     private async Task ShowLocalAsync(bool updateScreen)
     {

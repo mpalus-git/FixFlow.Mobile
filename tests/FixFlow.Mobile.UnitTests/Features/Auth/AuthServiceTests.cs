@@ -4,6 +4,7 @@ using System.Text.Json;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Api.Errors;
 using FixFlow.Mobile.Core.Features.Auth;
+using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.UnitTests.Api;
 using FixFlow.Mobile.UnitTests.Storage;
 using Microsoft.Extensions.Time.Testing;
@@ -40,7 +41,7 @@ public sealed class AuthServiceTests : IAsyncDisposable
         _refresher = new TokenRefresher(anonymousApi, _session, _timeProvider);
         _authenticationHandler = new AuthenticationHandler(_session, _refresher) { InnerHandler = _handler };
         var api = RestService.ForGenerated<IFixFlowApi>(new HttpClient(_authenticationHandler, disposeHandler: false) { BaseAddress = new Uri("https://api.test") });
-        _service = new AuthService(anonymousApi, api, _session, _userDatabase.Database, _timeProvider);
+        _service = new AuthService(anonymousApi, api, _session, _userDatabase.Database, new PhotoStore(_userDatabase.Options, _userDatabase.Database), _timeProvider);
     }
 
     [Fact]
@@ -111,6 +112,21 @@ public sealed class AuthServiceTests : IAsyncDisposable
         endReason.ShouldBe(SessionEndReason.SignedOut);
         _userDatabase.Database.UserId.ShouldBeNull();
         _secureStore.Values.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Should_Delete_Local_Database_And_Photos_When_User_Logs_Out()
+    {
+        await _service.LoginAsync("jan@fixflow.test", "secret", TestContext.Current.CancellationToken);
+        var photos = new PhotoStore(_userDatabase.Options, _userDatabase.Database);
+        var photoId = Guid.NewGuid();
+        await photos.SaveAsync(photoId, [0xFF, 0xD8, 0xFF]);
+        var photoPath = photos.PathFor(photoId);
+
+        await _service.LogoutAsync();
+
+        File.Exists(_userDatabase.Database.PathFor(UserId)).ShouldBeFalse();
+        File.Exists(photoPath).ShouldBeFalse();
     }
 
     [Fact]

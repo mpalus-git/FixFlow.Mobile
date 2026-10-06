@@ -8,6 +8,8 @@ public interface INotificationScheduler
 
     Task<bool> RequestPermissionAsync();
 
+    Task OpenSettingsAsync();
+
     Task<IReadOnlyList<ScheduledReminder>> GetScheduledAsync();
 
     Task ScheduleAsync(ScheduledReminder reminder);

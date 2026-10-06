@@ -44,6 +44,8 @@ public static partial class MauiProgram
         builder.Services.AddFixFlowApi(new Uri(BuildConfiguration.ApiBaseUrl));
         builder.Services.AddSingleton(Preferences.Default);
         builder.Services.AddSingleton<ISettingsStore, PreferencesSettingsStore>();
+        builder.Services.AddSingleton(AppInfo.Current);
+        builder.Services.AddSingleton<IAppVersion, EssentialsAppVersion>();
         builder.Services.AddSingleton(SecureStorage.Default);
         builder.Services.AddSingleton<ISecureStore, SecureStorageStore>();
         builder.Services.AddSingleton(new LocalDatabaseOptions(FileSystem.AppDataDirectory));
@@ -73,9 +75,11 @@ public static partial class MauiProgram
         builder.Services.AddTransient<ServiceEntryPage>();
         builder.Services.AddTransient<CorrectionEntryPage>();
         builder.Services.AddTransient<SyncPage>();
+        builder.Services.AddTransient<SettingsPage>();
 
         var app = builder.Build();
         app.Services.GetRequiredService<ILanguageService>().ApplySavedLanguage();
+        app.Services.GetRequiredService<ThemeService>().ApplySavedTheme();
         app.Services.GetRequiredService<SessionEndNavigator>().Start();
         app.Services.GetRequiredService<SyncCoordinator>().Start();
         app.Services.GetRequiredService<ReminderCoordinator>().Start();

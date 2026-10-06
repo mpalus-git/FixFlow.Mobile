@@ -16,6 +16,8 @@ internal sealed class FakeNotificationScheduler : INotificationScheduler
 
     public int ScheduleCalls { get; private set; }
 
+    public int SettingsOpenings { get; private set; }
+
     public IReadOnlyList<ScheduledReminder> Scheduled => [.. _scheduled.Values];
 
     public Task<bool> AreNotificationsEnabledAsync() => Task.FromResult(IsEnabled);
@@ -25,6 +27,12 @@ internal sealed class FakeNotificationScheduler : INotificationScheduler
         PermissionRequests++;
         IsEnabled = GrantsPermission;
         return Task.FromResult(GrantsPermission);
+    }
+
+    public Task OpenSettingsAsync()
+    {
+        SettingsOpenings++;
+        return Task.CompletedTask;
     }
 
     public Task<IReadOnlyList<ScheduledReminder>> GetScheduledAsync() => Task.FromResult(Scheduled);

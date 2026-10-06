@@ -19,7 +19,9 @@ public sealed class ReminderCoordinator(
         session.SessionEnded += OnSessionEnded;
     }
 
-    public async void Receive(SyncCompletedMessage message) => await RunExclusiveAsync(() => reconciler().ReconcileAsync());
+    public async void Receive(SyncCompletedMessage message) => await ReconcileAsync();
+
+    public Task ReconcileAsync() => RunExclusiveAsync(() => reconciler().ReconcileAsync());
 
     public void Dispose() => _gate.Dispose();
 
