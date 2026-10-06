@@ -36,6 +36,23 @@ public sealed class ConflictResolver(OutboxRepository outbox, PhotoStore photos,
         messenger.Send(new LocalChangeQueuedMessage(conflict.WorkOrderId));
     }
 
+    public async Task DiscardWorkOrderChangesAsync(Guid workOrderId)
+    {
+        var removed = await outbox.RemoveWorkOrderChangesAsync(workOrderId, (connection, operations) =>
+        {
+            if (operations.Any(operation => operation.Kind == OutboxOperationKind.StartWork))
+            {
+                RemoveWorkTimer(connection, workOrderId);
+            }
+        });
+        foreach (var operation in removed)
+        {
+            DeletePhotoFiles(operation);
+        }
+
+        messenger.Send(new LocalChangeQueuedMessage(workOrderId));
+    }
+
     private static void RemoveWorkTimer(SQLiteConnection connection, Guid workOrderId) =>
         connection.Execute("DELETE FROM work_timers WHERE work_order_id = ?", workOrderId);
 

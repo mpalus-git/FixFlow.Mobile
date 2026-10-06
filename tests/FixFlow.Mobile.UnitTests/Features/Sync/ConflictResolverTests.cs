@@ -110,6 +110,26 @@ public sealed class ConflictResolverTests : IAsyncLifetime
         (await _outbox.GetAllAsync()).ShouldBeEmpty();
     }
 
+    [Fact]
+    public async Task Should_Remove_Every_Change_Of_Work_Order_When_All_Its_Changes_Are_Discarded()
+    {
+        var otherWorkOrderId = Guid.NewGuid();
+        var start = await _writer.StartWorkAsync(WorkOrderId);
+        _timeProvider.Advance(TimeSpan.FromMinutes(1));
+        PendingPhoto photo = new(Guid.CreateVersion7(), "https://api.test/api/v1/photos/1");
+        await _photos.SaveAsync(photo.Id, Jpeg);
+        await QueueEntryAsync([photo]);
+        var other = await _writer.CompleteWorkOrderAsync(otherWorkOrderId);
+        await RejectAsync(start);
+
+        await _resolver.DiscardWorkOrderChangesAsync(WorkOrderId);
+
+        (await _outbox.GetConflictsAsync()).ShouldBeEmpty();
+        (await _outbox.GetAllAsync()).ShouldBe([other]);
+        (await _timers.GetAsync(WorkOrderId)).ShouldBeNull();
+        _photos.ExistingPathFor(photo.Id).ShouldBeNull();
+    }
+
     public async ValueTask DisposeAsync() => await _userDatabase.DisposeAsync();
 
     private async Task<OutboxOperation> QueueEntryAsync(IReadOnlyList<PendingPhoto> photos) =>

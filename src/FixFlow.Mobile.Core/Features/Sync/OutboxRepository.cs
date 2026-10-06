@@ -95,6 +95,27 @@ public sealed class OutboxRepository(UserDatabase userDatabase)
         return conflict;
     }
 
+    public async Task<IReadOnlyList<OutboxOperation>> RemoveWorkOrderChangesAsync(
+        Guid workOrderId, Action<SQLiteConnection, IReadOnlyList<OutboxOperation>> localChange)
+    {
+        ArgumentNullException.ThrowIfNull(localChange);
+
+        List<OutboxOperation> removed = [];
+        await Connection.RunInTransactionAsync(connection =>
+        {
+            removed.AddRange(connection
+                .Query<SyncConflictRow>("SELECT * FROM sync_conflicts WHERE work_order_id = ?", workOrderId)
+                .Select(row => row.ToConflict().ToOperation()));
+            removed.AddRange(connection
+                .Query<OutboxOperationRow>("SELECT * FROM outbox_operations WHERE work_order_id = ?", workOrderId)
+                .Select(row => row.ToOperation()));
+            connection.Execute("DELETE FROM sync_conflicts WHERE work_order_id = ?", workOrderId);
+            connection.Execute("DELETE FROM outbox_operations WHERE work_order_id = ?", workOrderId);
+            localChange(connection, removed);
+        });
+        return removed;
+    }
+
     public async Task<int> CountPendingAsync() => await Connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM outbox_operations");
 
     public async Task<int> CountConflictsAsync() => await Connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM sync_conflicts");
