@@ -561,4 +561,22 @@
   <data name="SyncFailedNotice" xml:space="preserve">
     <value>Could not reach the server. Changes will be sent later.</value>
   </data>
+  <data name="ChangeCopied" xml:space="preserve">
+    <value>The change content was copied.</value>
+  </data>
+  <data name="DiscardChangeTitle" xml:space="preserve">
+    <value>Discard the change?</value>
+  </data>
+  <data name="DiscardChangeMessage" xml:space="preserve">
+    <value>The change will be removed from this device and will not reach the server. Copy it first if you want to keep its content.</value>
+  </data>
+  <data name="DiscardAllChangesTitle" xml:space="preserve">
+    <value>Discard all changes of the work order?</value>
+  </data>
+  <data name="DiscardAllChangesMessage" xml:space="preserve">
+    <value>All unsent changes of this work order, including the rejected one, will be removed from this device and will not reach the server. Number of changes: {0}</value>
+  </data>
+  <data name="DiscardChangeButton" xml:space="preserve">
+    <value>Discard</value>
+  </data>
 </root>

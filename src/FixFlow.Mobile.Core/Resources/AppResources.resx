@@ -561,4 +561,22 @@
   <data name="SyncFailedNotice" xml:space="preserve">
     <value>Nie udało się połączyć z serwerem. Zmiany zostaną wysłane później.</value>
   </data>
+  <data name="ChangeCopied" xml:space="preserve">
+    <value>Skopiowano treść zmiany.</value>
+  </data>
+  <data name="DiscardChangeTitle" xml:space="preserve">
+    <value>Odrzucić zmianę?</value>
+  </data>
+  <data name="DiscardChangeMessage" xml:space="preserve">
+    <value>Zmiana zostanie usunięta z urządzenia i nie trafi na serwer. Jeśli chcesz zachować jej treść, najpierw ją skopiuj.</value>
+  </data>
+  <data name="DiscardAllChangesTitle" xml:space="preserve">
+    <value>Odrzucić wszystkie zmiany zlecenia?</value>
+  </data>
+  <data name="DiscardAllChangesMessage" xml:space="preserve">
+    <value>Wszystkie niewysłane zmiany tego zlecenia, łącznie z odrzuconą, zostaną usunięte z urządzenia i nie trafią na serwer. Liczba zmian: {0}</value>
+  </data>
+  <data name="DiscardChangeButton" xml:space="preserve">
+    <value>Odrzuć</value>
+  </data>
 </root>

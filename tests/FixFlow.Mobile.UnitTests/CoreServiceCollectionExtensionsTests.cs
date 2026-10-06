@@ -1,5 +1,6 @@
 using FixFlow.Mobile.Core;
 using FixFlow.Mobile.Core.Api;
+using FixFlow.Mobile.Core.Clipboard;
 using FixFlow.Mobile.Core.Connectivity;
 using FixFlow.Mobile.Core.Dialogs;
 using FixFlow.Mobile.Core.Dispatching;
@@ -32,6 +33,7 @@ public sealed class CoreServiceCollectionExtensionsTests
             .AddSingleton(Substitute.For<ILocationService>())
             .AddSingleton(Substitute.For<IPhotoService>())
             .AddSingleton(Substitute.For<IUiDispatcher>())
+            .AddSingleton(Substitute.For<IClipboardService>())
             .AddSingleton(new DemoAccount(string.Empty, string.Empty))
             .AddSingleton(new LocalDatabaseOptions(Path.GetTempPath()))
             .AddCore();

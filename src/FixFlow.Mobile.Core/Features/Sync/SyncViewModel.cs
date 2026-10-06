@@ -1,7 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using FixFlow.Mobile.Core.Clipboard;
 using FixFlow.Mobile.Core.Connectivity;
+using FixFlow.Mobile.Core.Dialogs;
 using FixFlow.Mobile.Core.Dispatching;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Formatting;
@@ -17,9 +19,12 @@ public sealed partial class SyncViewModel
     private readonly WorkOrderRepository _workOrders;
     private readonly SyncStateRepository _syncStates;
     private readonly SyncCoordinator _coordinator;
+    private readonly ConflictResolver _resolver;
     private readonly SyncPresenter _presenter;
     private readonly DisplayFormatter _formatter;
     private readonly IConnectivityService _connectivity;
+    private readonly IClipboardService _clipboard;
+    private readonly IDialogService _dialogs;
     private readonly IUiDispatcher _ui;
     private int _localVersion;
 
@@ -29,9 +34,12 @@ public sealed partial class SyncViewModel
         WorkOrderRepository workOrders,
         SyncStateRepository syncStates,
         SyncCoordinator coordinator,
+        ConflictResolver resolver,
         SyncPresenter presenter,
         DisplayFormatter formatter,
         IConnectivityService connectivity,
+        IClipboardService clipboard,
+        IDialogService dialogs,
         IUiDispatcher ui,
         IMessenger messenger)
     {
@@ -41,9 +49,12 @@ public sealed partial class SyncViewModel
         _workOrders = workOrders;
         _syncStates = syncStates;
         _coordinator = coordinator;
+        _resolver = resolver;
         _presenter = presenter;
         _formatter = formatter;
         _connectivity = connectivity;
+        _clipboard = clipboard;
+        _dialogs = dialogs;
         _ui = ui;
         messenger.RegisterAll(this);
     }
@@ -102,6 +113,55 @@ public sealed partial class SyncViewModel
         {
             IsRefreshing = false;
         }
+    }
+
+    [RelayCommand]
+    private async Task CopyAsync(ConflictView conflict)
+    {
+        await _clipboard.SetTextAsync(conflict.Content);
+        Notice = AppResources.ChangeCopied;
+    }
+
+    [RelayCommand]
+    private async Task RetryAsync(ConflictView conflict)
+    {
+        Notice = null;
+        await _resolver.RetryAsync(conflict.OperationId);
+        await ShowLocalAsync();
+    }
+
+    [RelayCommand]
+    private async Task DiscardAsync(ConflictView conflict)
+    {
+        if (!await _dialogs.ConfirmAsync(
+                AppResources.DiscardChangeTitle,
+                AppResources.DiscardChangeMessage,
+                AppResources.DiscardChangeButton,
+                AppResources.CancelButton))
+        {
+            return;
+        }
+
+        Notice = null;
+        await _resolver.DiscardAsync(conflict.OperationId);
+        await ShowLocalAsync();
+    }
+
+    [RelayCommand]
+    private async Task DiscardAllAsync(ConflictView conflict)
+    {
+        if (!await _dialogs.ConfirmAsync(
+                AppResources.DiscardAllChangesTitle,
+                WorkOrderTexts.Format(AppResources.DiscardAllChangesMessage, conflict.FollowingChangeCount + 1),
+                AppResources.DiscardChangeButton,
+                AppResources.CancelButton))
+        {
+            return;
+        }
+
+        Notice = null;
+        await _resolver.DiscardWorkOrderChangesAsync(conflict.WorkOrderId);
+        await ShowLocalAsync();
     }
 
     public void Receive(SyncCompletedMessage message) => _ui.Post(ShowLocalAsync);
