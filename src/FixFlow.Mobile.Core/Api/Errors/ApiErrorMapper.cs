@@ -26,6 +26,12 @@ public static class ApiErrorMapper
         };
     }
 
+    public static ApiError FromResponse(HttpResponseMessage response, string? content)
+    {
+        ArgumentNullException.ThrowIfNull(response);
+        return Map(response.StatusCode, response.Headers, response.Content.Headers, content);
+    }
+
     public static ApiError? FromException(Exception exception) => exception switch
     {
         ApiException apiException => FromApiException(apiException),

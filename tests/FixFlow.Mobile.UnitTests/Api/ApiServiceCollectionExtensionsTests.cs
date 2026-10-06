@@ -49,6 +49,7 @@ public sealed class ApiServiceCollectionExtensionsTests
 
         provider.GetService<ServerReadinessProbe>().ShouldNotBeNull();
         provider.GetService<AuthService>().ShouldNotBeNull();
+        provider.GetService<PhotoUploadClient>().ShouldNotBeNull();
     }
 
     private ServiceProvider BuildProvider(StubHttpMessageHandler handler)
