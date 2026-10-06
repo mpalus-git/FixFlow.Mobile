@@ -11,12 +11,18 @@ public partial class SettingsPage : ContentPage
     {
         InitializeComponent();
         BindingContext = _viewModel = viewModel;
+        Loaded += OnLoaded;
+        Unloaded += OnUnloaded;
     }
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
         _viewModel.RefreshNotificationsCommand.Execute(null);
+    }
+
+    private void OnLoaded(object? sender, EventArgs e)
+    {
         _window = Window;
         if (_window is not null)
         {
@@ -24,15 +30,13 @@ public partial class SettingsPage : ContentPage
         }
     }
 
-    protected override void OnDisappearing()
+    private void OnUnloaded(object? sender, EventArgs e)
     {
         if (_window is not null)
         {
             _window.Resumed -= OnWindowResumed;
             _window = null;
         }
-
-        base.OnDisappearing();
     }
 
     private void OnWindowResumed(object? sender, EventArgs e) => _viewModel.RefreshNotificationsCommand.Execute(null);
