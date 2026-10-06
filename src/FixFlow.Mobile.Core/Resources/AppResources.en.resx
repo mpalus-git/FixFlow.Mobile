@@ -429,4 +429,22 @@
   <data name="CompleteRequiresEntry" xml:space="preserve">
     <value>Add a service entry to complete the work order.</value>
   </data>
+  <data name="CorrectionTitle" xml:space="preserve">
+    <value>Correction entry</value>
+  </data>
+  <data name="CorrectionReasonLabel" xml:space="preserve">
+    <value>Reason for correction</value>
+  </data>
+  <data name="CorrectionReasonPlaceholder" xml:space="preserve">
+    <value>E.g. two filters too many were recorded</value>
+  </data>
+  <data name="CorrectionPartsSection" xml:space="preserve">
+    <value>Parts to return</value>
+  </data>
+  <data name="CorrectionSaveButton" xml:space="preserve">
+    <value>Save correction</value>
+  </data>
+  <data name="AddCorrectionButton" xml:space="preserve">
+    <value>Correction entry</value>
+  </data>
 </root>

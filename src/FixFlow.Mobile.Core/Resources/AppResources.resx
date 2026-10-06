@@ -429,4 +429,22 @@
   <data name="CompleteRequiresEntry" xml:space="preserve">
     <value>Dodaj wpis serwisowy, aby zakończyć zlecenie.</value>
   </data>
+  <data name="CorrectionTitle" xml:space="preserve">
+    <value>Wpis korygujący</value>
+  </data>
+  <data name="CorrectionReasonLabel" xml:space="preserve">
+    <value>Powód korekty</value>
+  </data>
+  <data name="CorrectionReasonPlaceholder" xml:space="preserve">
+    <value>Np. wpisano o dwa filtry za dużo</value>
+  </data>
+  <data name="CorrectionPartsSection" xml:space="preserve">
+    <value>Części do zwrotu</value>
+  </data>
+  <data name="CorrectionSaveButton" xml:space="preserve">
+    <value>Zapisz korektę</value>
+  </data>
+  <data name="AddCorrectionButton" xml:space="preserve">
+    <value>Wpis korygujący</value>
+  </data>
 </root>
