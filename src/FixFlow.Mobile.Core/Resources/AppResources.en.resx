@@ -300,4 +300,13 @@
   <data name="EntryQuantityExceedsStock" xml:space="preserve">
     <value>Quantity of {0} exceeds the last known stock ({1}).</value>
   </data>
+  <data name="EntryRequiresWorkInProgress" xml:space="preserve">
+    <value>An entry can only be added to a work order in progress.</value>
+  </data>
+  <data name="EntryLocationAttached" xml:space="preserve">
+    <value>The position from the start of work will be attached to this entry.</value>
+  </data>
+  <data name="EntryWithoutLocation" xml:space="preserve">
+    <value>The entry will be saved without a position.</value>
+  </data>
 </root>

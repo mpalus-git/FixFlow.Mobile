@@ -300,4 +300,13 @@
   <data name="EntryQuantityExceedsStock" xml:space="preserve">
     <value>Ilość części {0} przekracza ostatnio znany stan ({1}).</value>
   </data>
+  <data name="EntryRequiresWorkInProgress" xml:space="preserve">
+    <value>Wpis można dodać tylko do zlecenia w toku.</value>
+  </data>
+  <data name="EntryLocationAttached" xml:space="preserve">
+    <value>Do wpisu zostanie dołączona pozycja z rozpoczęcia pracy.</value>
+  </data>
+  <data name="EntryWithoutLocation" xml:space="preserve">
+    <value>Wpis zostanie zapisany bez pozycji.</value>
+  </data>
 </root>
