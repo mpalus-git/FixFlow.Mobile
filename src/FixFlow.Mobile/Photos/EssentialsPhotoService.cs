@@ -4,7 +4,6 @@ namespace FixFlow.Mobile.Photos;
 
 public sealed partial class EssentialsPhotoService(IMediaPicker mediaPicker) : IPhotoService
 {
-
     public bool IsCaptureSupported => mediaPicker.IsCaptureSupported;
 
     public async Task<bool> HasCameraPermissionAsync() =>
