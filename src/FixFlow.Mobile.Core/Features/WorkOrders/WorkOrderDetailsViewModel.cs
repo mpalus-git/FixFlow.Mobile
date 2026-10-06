@@ -1,11 +1,14 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FixFlow.Mobile.Core.Api.Errors;
+using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Connectivity;
 using FixFlow.Mobile.Core.Dialogs;
+using FixFlow.Mobile.Core.Dispatching;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Launching;
+using FixFlow.Mobile.Core.Location;
 using FixFlow.Mobile.Core.Navigation;
 using FixFlow.Mobile.Core.Resources;
 using FixFlow.Mobile.Core.Screens;
@@ -19,13 +22,23 @@ public sealed partial class WorkOrderDetailsViewModel(
     SyncStateRepository syncStates,
     WorkOrderDetailsPresenter presenter,
     ServiceProtocolService protocols,
+    OutboxWriter outboxWriter,
+    WorkLocationRecorder locationRecorder,
+    ILocationService location,
+    TimeProvider timeProvider,
+    IUiDispatcher uiDispatcher,
     IConnectivityService connectivity,
     IMapLauncher maps,
     IUriLauncher uris,
     IDialogService dialogs,
     INavigationService navigation) : ObservableObject, INavigatedTo<Guid>
 {
+    public static readonly TimeSpan ClockInterval = TimeSpan.FromSeconds(30);
+
     private Guid _workOrderId;
+    private WorkTimer? _workTimer;
+    private bool _isLocating;
+    private ITimer? _clock;
 
     public ScreenState Screen { get; } = screen;
 
@@ -40,6 +53,30 @@ public sealed partial class WorkOrderDetailsViewModel(
     public partial string? Notice { get; private set; }
 
     public bool HasNotice => Notice is not null;
+
+    [ObservableProperty]
+    public partial bool CanStartWork { get; private set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasStartBlockedText))]
+    public partial string? StartBlockedText { get; private set; }
+
+    public bool HasStartBlockedText => StartBlockedText is not null;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasWorkTimer))]
+    public partial WorkTimerView? WorkTimer { get; private set; }
+
+    public bool HasWorkTimer => WorkTimer is not null;
+
+    public void StartClock() =>
+        _clock ??= timeProvider.CreateTimer(_ => uiDispatcher.Post(ShowWorkTimerAsync), null, ClockInterval, ClockInterval);
+
+    public void StopClock()
+    {
+        _clock?.Dispose();
+        _clock = null;
+    }
 
     public async Task OnNavigatedToAsync(Guid parameter)
     {
@@ -85,6 +122,9 @@ public sealed partial class WorkOrderDetailsViewModel(
                     break;
                 case PullOutcome.NotFound:
                     Details = null;
+                    CanStartWork = false;
+                    StartBlockedText = null;
+                    WorkTimer = null;
                     Screen.ShowError(AppResources.WorkOrderNoLongerAssigned);
                     break;
                 default:
@@ -98,6 +138,36 @@ public sealed partial class WorkOrderDetailsViewModel(
             IsRefreshing = false;
         }
     }
+
+    [RelayCommand]
+    private async Task StartWorkAsync(CancellationToken cancellationToken)
+    {
+        if (Details is not { } details || !CanStartWork
+            || !await dialogs.ConfirmAsync(
+                AppResources.StartWorkConfirmTitle,
+                WorkOrderTexts.Format(AppResources.StartWorkConfirmMessage, details.Number),
+                AppResources.StartWorkButton,
+                AppResources.CancelButton))
+        {
+            return;
+        }
+
+        await ShowLocalAsync();
+        if (!CanStartWork)
+        {
+            return;
+        }
+
+        await outboxWriter.StartWorkAsync(_workOrderId);
+        await ShowLocalAsync();
+        await RecordLocationAsync(cancellationToken);
+    }
+
+    [RelayCommand]
+    private Task RetryLocationAsync(CancellationToken cancellationToken) => RecordLocationAsync(cancellationToken);
+
+    [RelayCommand]
+    private Task OpenLocationSettingsAsync() => location.OpenSettingsAsync();
 
     [RelayCommand]
     private async Task CallClientAsync()
@@ -152,6 +222,28 @@ public sealed partial class WorkOrderDetailsViewModel(
     private Task OpenHistoryItemAsync(DeviceHistoryView item) =>
         navigation.NavigateToAsync<WorkOrderDetailsViewModel, Guid>(item.WorkOrderId);
 
+    private async Task RecordLocationAsync(CancellationToken cancellationToken)
+    {
+        _isLocating = true;
+        await ShowWorkTimerAsync();
+        try
+        {
+            await locationRecorder.RecordAsync(_workOrderId, cancellationToken);
+        }
+        finally
+        {
+            _isLocating = false;
+            _workTimer = await sources.WorkTimers.GetAsync(_workOrderId);
+            await ShowWorkTimerAsync();
+        }
+    }
+
+    private Task ShowWorkTimerAsync()
+    {
+        WorkTimer = _workTimer is null ? null : presenter.PresentWorkTimer(_workTimer, timeProvider.GetUtcNow(), _isLocating);
+        return Task.CompletedTask;
+    }
+
     private Task ShowErrorAsync(string message) =>
         dialogs.ShowAlertAsync(AppResources.ErrorTitle, message, AppResources.CloseButton);
 
@@ -162,8 +254,14 @@ public sealed partial class WorkOrderDetailsViewModel(
             return;
         }
 
-        var pendingOperations = await sources.Outbox.GetForWorkOrderAsync(_workOrderId);
+        var allOperations = await sources.Outbox.GetAllAsync();
+        var pendingOperations = allOperations.Where(operation => operation.WorkOrderId == _workOrderId).ToList();
         var workOrder = PendingOperationsOverlay.Apply(storedWorkOrder, pendingOperations);
+        var availability = WorkOrderStartPolicy.Evaluate(workOrder, PendingOperationsOverlay.Apply(await sources.WorkOrders.GetAllAsync(), allOperations));
+        CanStartWork = availability.CanStart;
+        StartBlockedText = availability.BlockingWorkOrderNumber is { } number ? WorkOrderTexts.Format(AppResources.StartWorkBlocked, number) : null;
+        _workTimer = workOrder.Status == WorkOrderStatus.InProgress ? await sources.WorkTimers.GetAsync(_workOrderId) : null;
+        await ShowWorkTimerAsync();
         Details = presenter.Present(
             workOrder,
             await sources.Clients.GetAsync(workOrder.ClientId),

@@ -9,6 +9,7 @@ using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Formatting;
 using FixFlow.Mobile.Core.Launching;
+using FixFlow.Mobile.Core.Location;
 using FixFlow.Mobile.Core.Navigation;
 using FixFlow.Mobile.Core.Resources;
 using FixFlow.Mobile.Core.Screens;
@@ -31,6 +32,8 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
     private readonly IDialogService _dialogs = Substitute.For<IDialogService>();
     private readonly INavigationService _navigation = Substitute.For<INavigationService>();
     private readonly IDocumentLauncher _documents = Substitute.For<IDocumentLauncher>();
+    private readonly ILocationService _location = Substitute.For<ILocationService>();
+    private readonly FakeTimeProvider _timeProvider = new(DetailsApiStub.Now);
     private readonly StubHttpMessageHandler _handler;
     private readonly WorkOrderDetailsSources _sources;
     private readonly WorkOrderDetailsViewModel _viewModel;
@@ -39,7 +42,7 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
     {
         _connectivity.IsOnline.Returns(true);
         _handler = new StubHttpMessageHandler(request => _api.Route(request));
-        var timeProvider = new FakeTimeProvider(DetailsApiStub.Now);
+        var timeProvider = _timeProvider;
         var database = _userDatabase.Database;
         _sources = new WorkOrderDetailsSources(
             new WorkOrderRepository(database),
@@ -47,7 +50,8 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
             new DeviceRepository(database),
             new ServiceEntryRepository(database),
             new DeviceHistoryRepository(database),
-            new OutboxRepository(database));
+            new OutboxRepository(database),
+            new WorkTimerRepository(database));
         var api = RestService.ForGenerated<IFixFlowApi>(new HttpClient(_handler, disposeHandler: false) { BaseAddress = new Uri("https://api.test") });
         var formatter = new DisplayFormatter(new LanguageService(Substitute.For<ISettingsStore>()), BusinessClock.CreateForWarsaw(timeProvider));
         _viewModel = new WorkOrderDetailsViewModel(
@@ -57,6 +61,11 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
             new SyncStateRepository(database, timeProvider),
             new WorkOrderDetailsPresenter(formatter),
             new ServiceProtocolService(api, _documents),
+            new OutboxWriter(_sources.Outbox, timeProvider, new WeakReferenceMessenger()),
+            new WorkLocationRecorder(_location, _dialogs, _sources.WorkTimers),
+            _location,
+            timeProvider,
+            new ImmediateUiDispatcher(),
             _connectivity,
             _maps,
             _uris,
@@ -213,9 +222,112 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
         await _navigation.Received(1).NavigateToAsync<WorkOrderDetailsViewModel, Guid>(item.WorkOrderId);
     }
 
+    [Fact]
+    public async Task Should_Offer_Start_When_Work_Order_Is_Assigned_And_No_Other_Is_In_Progress()
+    {
+        await ShowOfflineAsync(TestWorkOrders.Create("ZL-2", DetailsApiStub.Now, WorkOrderStatus.Completed, DetailsApiStub.Now));
+
+        _viewModel.CanStartWork.ShouldBeTrue();
+        _viewModel.HasStartBlockedText.ShouldBeFalse();
+        _viewModel.HasWorkTimer.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Should_Explain_Block_When_Other_Work_Order_Is_In_Progress()
+    {
+        await ShowOfflineAsync(TestWorkOrders.Create("ZL-2", DetailsApiStub.Now, WorkOrderStatus.InProgress));
+
+        _viewModel.CanStartWork.ShouldBeFalse();
+        _viewModel.StartBlockedText.ShouldBe(WorkOrderTexts.Format(AppResources.StartWorkBlocked, "ZL-2"));
+    }
+
+    [Fact]
+    public async Task Should_Not_Queue_Start_When_Technician_Cancels_Confirmation()
+    {
+        await ShowOfflineAsync();
+
+        await _viewModel.StartWorkCommand.ExecuteAsync(null);
+
+        (await _sources.Outbox.GetAllAsync()).ShouldBeEmpty();
+        _viewModel.CanStartWork.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task Should_Queue_Start_And_Show_Timer_With_Position_When_Technician_Confirms()
+    {
+        ConfirmStart();
+        _location.HasPermissionAsync().Returns(true);
+        _location.GetCurrentPositionAsync(Arg.Any<TimeSpan>(), Arg.Any<CancellationToken>()).Returns(new GeoPosition(50.06, 19.94));
+        await ShowOfflineAsync();
+
+        await _viewModel.StartWorkCommand.ExecuteAsync(null);
+
+        (await _sources.Outbox.GetAllAsync()).ShouldHaveSingleItem().Kind.ShouldBe(OutboxOperationKind.StartWork);
+        _viewModel.Details.ShouldNotBeNull().StatusText.ShouldBe(WorkOrderTexts.Status(WorkOrderStatus.InProgress));
+        _viewModel.CanStartWork.ShouldBeFalse();
+        var timer = _viewModel.WorkTimer.ShouldNotBeNull();
+        timer.LocationText.ShouldBe(AppResources.WorkLocationCaptured);
+        timer.CanRetryLocation.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Should_Start_Work_Without_Position_And_Offer_Settings_When_Location_Is_Denied()
+    {
+        ConfirmStart();
+        await ShowOfflineAsync();
+
+        await _viewModel.StartWorkCommand.ExecuteAsync(null);
+        await _viewModel.OpenLocationSettingsCommand.ExecuteAsync(null);
+
+        (await _sources.Outbox.GetAllAsync()).ShouldHaveSingleItem();
+        var timer = _viewModel.WorkTimer.ShouldNotBeNull();
+        timer.LocationText.ShouldBe(AppResources.WorkLocationDenied);
+        timer.CanOpenLocationSettings.ShouldBeTrue();
+        await _location.Received(1).OpenSettingsAsync();
+    }
+
+    [Fact]
+    public async Task Should_Record_Position_When_Technician_Retries_After_Failure()
+    {
+        ConfirmStart();
+        _location.HasPermissionAsync().Returns(true);
+        await ShowOfflineAsync();
+        await _viewModel.StartWorkCommand.ExecuteAsync(null);
+        _location.GetCurrentPositionAsync(Arg.Any<TimeSpan>(), Arg.Any<CancellationToken>()).Returns(new GeoPosition(50.06, 19.94));
+
+        await _viewModel.RetryLocationCommand.ExecuteAsync(null);
+
+        _viewModel.WorkTimer.ShouldNotBeNull().LocationText.ShouldBe(AppResources.WorkLocationCaptured);
+    }
+
+    [Fact]
+    public async Task Should_Update_Elapsed_Time_When_Clock_Ticks()
+    {
+        ConfirmStart();
+        await ShowOfflineAsync();
+        await _viewModel.StartWorkCommand.ExecuteAsync(null);
+        _viewModel.StartClock();
+
+        _timeProvider.Advance(TimeSpan.FromMinutes(90));
+
+        _viewModel.WorkTimer.ShouldNotBeNull().ElapsedText.ShouldBe(
+            WorkOrderTexts.Format(AppResources.WorkTimerElapsed, WorkOrderTexts.Format(AppResources.DetailsDuration, 1, 30)));
+        _viewModel.StopClock();
+    }
+
     public async ValueTask DisposeAsync()
     {
         _handler.Dispose();
         await _userDatabase.DisposeAsync();
+    }
+
+    private void ConfirmStart() =>
+        _dialogs.ConfirmAsync(AppResources.StartWorkConfirmTitle, Arg.Any<string>(), AppResources.StartWorkButton, AppResources.CancelButton).Returns(true);
+
+    private async Task ShowOfflineAsync(params WorkOrder[] otherWorkOrders)
+    {
+        await _sources.WorkOrders.ReplaceAllAsync([TestWorkOrders.Create("ZL-LOCAL", DetailsApiStub.Now) with { Id = _api.WorkOrderId }, .. otherWorkOrders]);
+        _connectivity.IsOnline.Returns(false);
+        await _viewModel.OnNavigatedToAsync(_api.WorkOrderId);
     }
 }

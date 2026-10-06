@@ -9,4 +9,5 @@ public sealed record WorkOrderDetailsSources(
     DeviceRepository Devices,
     ServiceEntryRepository ServiceEntries,
     DeviceHistoryRepository DeviceHistory,
-    OutboxRepository Outbox);
+    OutboxRepository Outbox,
+    WorkTimerRepository WorkTimers);

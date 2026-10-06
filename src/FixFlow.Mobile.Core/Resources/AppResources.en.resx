@@ -267,4 +267,19 @@
   <data name="WorkLocationUnavailable" xml:space="preserve">
     <value>No position: location could not be determined</value>
   </data>
+  <data name="StartWorkButton" xml:space="preserve">
+    <value>Start work</value>
+  </data>
+  <data name="StartWorkConfirmTitle" xml:space="preserve">
+    <value>Start work?</value>
+  </data>
+  <data name="StartWorkConfirmMessage" xml:space="preserve">
+    <value>Work order {0} will move to In progress. This cannot be undone.</value>
+  </data>
+  <data name="StartWorkBlocked" xml:space="preserve">
+    <value>You already have a work order in progress: {0}. Complete it before starting another one.</value>
+  </data>
+  <data name="CancelButton" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
 </root>
