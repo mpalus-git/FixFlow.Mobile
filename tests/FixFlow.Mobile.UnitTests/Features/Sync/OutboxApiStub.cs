@@ -45,7 +45,7 @@ internal sealed class OutboxApiStub
             return await respondAsync();
         }
 
-        if (call == "GET /api/v1/work-orders")
+        if (call is "GET /api/v1/work-orders" or "GET /api/v1/parts")
         {
             return Json(HttpStatusCode.OK, """{"items":[],"page":1,"pageSize":100,"totalCount":0}""");
         }

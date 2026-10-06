@@ -2,6 +2,7 @@ using System.Net;
 using CommunityToolkit.Mvvm.Messaging;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Connectivity;
+using FixFlow.Mobile.Core.Features.Parts;
 using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.UnitTests.Api;
@@ -42,6 +43,7 @@ public sealed class SyncCoordinatorTests : IAsyncLifetime
             () => new ServerReadinessProbe(httpClient, _timeProvider),
             () => new OutboxDispatcher(client, _outbox, new OutboxRetryPolicy(() => 0.5), _timeProvider),
             () => new WorkOrderSyncService(client, new ServerReadinessProbe(httpClient, _timeProvider), warmup, new WorkOrderRepository(database), new SyncStateRepository(database, _timeProvider)),
+            () => new PartSyncService(client, new PartRepository(database), new SyncStateRepository(database, _timeProvider)),
             _messenger);
     }
 
@@ -56,7 +58,7 @@ public sealed class SyncCoordinatorTests : IAsyncLifetime
 
         result.Dispatch!.Sent.ShouldBe(1);
         result.Pull.ShouldBe(PullResult.Succeeded);
-        _api.Calls.ShouldBe(["GET /api/v1/system/ready", $"POST /api/v1/work-orders/{WorkOrderId}/start", ListCall]);
+        _api.Calls.ShouldBe(["GET /api/v1/system/ready", $"POST /api/v1/work-orders/{WorkOrderId}/start", ListCall, "GET /api/v1/parts"]);
     }
 
     [Fact]
