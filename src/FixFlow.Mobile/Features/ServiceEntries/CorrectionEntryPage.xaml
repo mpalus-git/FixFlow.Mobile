@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:FixFlow.Mobile.Controls"
+             xmlns:resources="clr-namespace:FixFlow.Mobile.Core.Resources;assembly=FixFlow.Mobile.Core"
+             xmlns:viewModels="clr-namespace:FixFlow.Mobile.Core.Features.ServiceEntries;assembly=FixFlow.Mobile.Core"
+             x:Class="FixFlow.Mobile.Features.ServiceEntries.CorrectionEntryPage"
+             x:DataType="viewModels:CorrectionEntryViewModel"
+             Title="{x:Static resources:AppResources.CorrectionTitle}">
+    <Grid>
+        <ScrollView>
+            <VerticalStackLayout Padding="16"
+                                 Spacing="8">
+                <Label Text="{Binding Number}"
+                       Style="{StaticResource HeadlineLabel}"
+                       HorizontalTextAlignment="Start"
+                       SemanticProperties.HeadingLevel="Level1" />
+
+                <Label Text="{x:Static resources:AppResources.CorrectionReasonLabel}"
+                       Style="{StaticResource SectionLabel}" />
+                <Border Style="{StaticResource InputBorder}">
+                    <Editor Text="{Binding Reason}"
+                            Placeholder="{x:Static resources:AppResources.CorrectionReasonPlaceholder}"
+                            SemanticProperties.Description="{x:Static resources:AppResources.CorrectionReasonLabel}"
+                            AutoSize="TextChanges"
+                            MaxLength="4000"
+                            MinimumHeightRequest="96" />
+                </Border>
+
+                <Label Text="{x:Static resources:AppResources.CorrectionPartsSection}"
+                       Style="{StaticResource SectionLabel}" />
+                <VerticalStackLayout Spacing="8"
+                                     BindableLayout.ItemsSource="{Binding Parts}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="viewModels:ReturnedPartDraft">
+                            <Border Style="{StaticResource CardBorder}">
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="{Binding Usage.PartName}"
+                                           FontAttributes="Bold" />
+                                    <Label Text="{Binding DetailsText}"
+                                           Style="{StaticResource SecondaryLabel}" />
+                                    <HorizontalStackLayout Spacing="8"
+                                                           HorizontalOptions="End"
+                                                           Margin="0,8,0,0">
+                                        <Button Text="{x:Static resources:AppResources.EntryDecreaseQuantity}"
+                                                SemanticProperties.Description="{x:Static resources:AppResources.EntryDecreaseQuantityDescription}"
+                                                Command="{Binding DecreaseCommand}"
+                                                Style="{StaticResource OutlineButton}"
+                                                Padding="0"
+                                                WidthRequest="48" />
+                                        <Label Text="{Binding Quantity}"
+                                               FontAttributes="Bold"
+                                               MinimumWidthRequest="32"
+                                               HorizontalTextAlignment="Center"
+                                               VerticalOptions="Center" />
+                                        <Button Text="{x:Static resources:AppResources.EntryIncreaseQuantity}"
+                                                SemanticProperties.Description="{x:Static resources:AppResources.EntryIncreaseQuantityDescription}"
+                                                Command="{Binding IncreaseCommand}"
+                                                Style="{StaticResource OutlineButton}"
+                                                Padding="0"
+                                                WidthRequest="48" />
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <Label Text="{Binding ValidationMessage}"
+                       IsVisible="{Binding HasValidationMessage}"
+                       Style="{StaticResource ErrorLabel}"
+                       Margin="0,8,0,0" />
+                <Button Text="{x:Static resources:AppResources.CorrectionSaveButton}"
+                        Command="{Binding SaveCommand}"
+                        Margin="0,8,0,16" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <controls:LoadingView Style="{StaticResource ScreenOverlay}"
+                              IsVisible="{Binding Screen.IsLoading}" />
+        <controls:ErrorView Style="{StaticResource ScreenOverlay}"
+                            IsVisible="{Binding Screen.IsError}"
+                            Message="{Binding Screen.ErrorMessage}"
+                            RetryCommand="{Binding ReloadCommand}" />
+    </Grid>
+</ContentPage>

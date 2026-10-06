@@ -59,6 +59,7 @@ public static class CoreServiceCollectionExtensions
         services.AddTransient<PhotoAttacher>();
         services.AddTransient<ServiceEntryPartsSelection>();
         services.AddTransient<ServiceEntryViewModel>();
+        services.AddTransient<CorrectionEntryViewModel>();
         services.AddTransient<WorkTimerRepository>();
         services.AddTransient<WorkLocationRecorder>();
         services.AddSingleton<WorkOrderSectionClassifier>();

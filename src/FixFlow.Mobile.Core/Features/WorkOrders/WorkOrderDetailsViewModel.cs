@@ -77,6 +77,18 @@ public sealed partial class WorkOrderDetailsViewModel(
     [ObservableProperty]
     public partial bool CanAddEntry { get; private set; }
 
+    [ObservableProperty]
+    public partial bool CanAddCorrection { get; private set; }
+
+    [ObservableProperty]
+    public partial bool CanComplete { get; private set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasCompleteBlockedText))]
+    public partial string? CompleteBlockedText { get; private set; }
+
+    public bool HasCompleteBlockedText => CompleteBlockedText is not null;
+
     public void Resume()
     {
         _clock ??= timeProvider.CreateTimer(_ => uiDispatcher.Post(ShowWorkTimerAsync), null, ClockInterval, ClockInterval);
@@ -141,6 +153,9 @@ public sealed partial class WorkOrderDetailsViewModel(
                     Details = null;
                     CanStartWork = false;
                     CanAddEntry = false;
+                    CanAddCorrection = false;
+                    CanComplete = false;
+                    CompleteBlockedText = null;
                     StartBlockedText = null;
                     WorkTimer = null;
                     Screen.ShowError(AppResources.WorkOrderNoLongerAssigned);
@@ -179,6 +194,26 @@ public sealed partial class WorkOrderDetailsViewModel(
         await outboxWriter.StartWorkAsync(_workOrderId);
         await ShowLocalAsync();
         await RecordLocationAsync(cancellationToken);
+    }
+
+    [RelayCommand]
+    private Task AddCorrectionAsync() => navigation.NavigateToAsync<CorrectionEntryViewModel, Guid>(_workOrderId);
+
+    [RelayCommand]
+    private async Task CompleteAsync()
+    {
+        if (Details is not { } details || !CanComplete
+            || !await dialogs.ConfirmAsync(
+                AppResources.CompleteConfirmTitle,
+                WorkOrderTexts.Format(AppResources.CompleteConfirmMessage, details.Number),
+                AppResources.CompleteWorkOrderButton,
+                AppResources.CancelButton))
+        {
+            return;
+        }
+
+        await outboxWriter.CompleteWorkOrderAsync(_workOrderId);
+        await ShowLocalAsync();
     }
 
     [RelayCommand]
@@ -303,11 +338,13 @@ public sealed partial class WorkOrderDetailsViewModel(
         var workOrder = PendingOperationsOverlay.Apply(storedWorkOrder, pendingOperations);
         var availability = WorkOrderStartPolicy.Evaluate(workOrder, PendingOperationsOverlay.Apply(await sources.WorkOrders.GetAllAsync(), allOperations));
         var workTimer = workOrder.Status == WorkOrderStatus.InProgress ? await sources.WorkTimers.GetAsync(_workOrderId) : null;
+        var storedEntries = await sources.ServiceEntries.GetForWorkOrderAsync(workOrder.Id);
+        var pendingEntries = PendingOperationsOverlay.PendingEntries(pendingOperations);
         var details = presenter.Present(
             workOrder,
             await sources.Clients.GetAsync(workOrder.ClientId),
             await sources.Devices.GetAsync(workOrder.DeviceId),
-            await sources.ServiceEntries.GetForWorkOrderAsync(workOrder.Id),
+            storedEntries,
             await sources.DeviceHistory.GetForDeviceAsync(workOrder.DeviceId),
             pendingOperations,
             photos.ExistingPathFor);
@@ -321,7 +358,12 @@ public sealed partial class WorkOrderDetailsViewModel(
         _workTimer = workTimer;
         await ShowWorkTimerAsync();
         Details = details;
-        CanAddEntry = workOrder.Status == WorkOrderStatus.InProgress;
+        var inProgress = workOrder.Status == WorkOrderStatus.InProgress;
+        var hasEntries = storedEntries.Count > 0 || pendingEntries.Count > 0;
+        CanAddEntry = inProgress;
+        CanAddCorrection = inProgress && NetPartUsage.Calculate(storedEntries, pendingEntries).Count > 0;
+        CanComplete = inProgress && hasEntries;
+        CompleteBlockedText = inProgress && !hasEntries ? AppResources.CompleteRequiresEntry : null;
         Screen.ShowContent(hasItems: true);
     }
 

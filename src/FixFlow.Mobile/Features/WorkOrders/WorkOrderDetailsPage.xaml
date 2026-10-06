@@ -88,6 +88,17 @@
                     <Button Text="{x:Static resources:AppResources.AddEntryButton}"
                             Command="{Binding AddEntryCommand}"
                             IsVisible="{Binding CanAddEntry}" />
+                    <Button Text="{x:Static resources:AppResources.AddCorrectionButton}"
+                            Command="{Binding AddCorrectionCommand}"
+                            IsVisible="{Binding CanAddCorrection}"
+                            Style="{StaticResource OutlineButton}" />
+                    <Button Text="{x:Static resources:AppResources.CompleteWorkOrderButton}"
+                            Command="{Binding CompleteCommand}"
+                            IsVisible="{Binding CanComplete}"
+                            Style="{StaticResource OutlineButton}" />
+                    <Label Text="{Binding CompleteBlockedText}"
+                           IsVisible="{Binding HasCompleteBlockedText}"
+                           Style="{StaticResource SecondaryLabel}" />
 
                     <Label Text="{x:Static resources:AppResources.DetailsClientSection}"
                            Style="{StaticResource SectionLabel}"
