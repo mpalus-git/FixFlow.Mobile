@@ -164,7 +164,7 @@ public sealed partial class SyncViewModel
         await ShowLocalAsync();
     }
 
-    public void Receive(SyncCompletedMessage message) => _ui.Post(ShowLocalAsync);
+    public void Receive(SyncCompletedMessage message) => _ui.Post(LoadAsync);
 
     public void Receive(ServerStartingMessage message) =>
         _ui.Post(() =>

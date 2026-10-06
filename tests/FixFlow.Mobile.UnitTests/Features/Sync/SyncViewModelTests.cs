@@ -154,6 +154,26 @@ public sealed class SyncViewModelTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Should_Refresh_Last_Synchronization_When_Background_Sync_Completes()
+    {
+        await _viewModel.LoadCommand.ExecuteAsync(null);
+        _timeProvider.Advance(TimeSpan.FromMinutes(5));
+        await new SyncStateRepository(_userDatabase.Database, _timeProvider).SetAsync(WorkOrderSyncService.SyncStateKey, "pulled");
+        var shown = new TaskCompletionSource();
+        _viewModel.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(SyncViewModel.LastSyncText) && _viewModel.LastSyncText!.Contains("10:05", StringComparison.Ordinal))
+            {
+                shown.TrySetResult();
+            }
+        };
+
+        _messenger.Send(new SyncCompletedMessage(SyncResult.Offline));
+
+        await shown.Task.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
     public async Task Should_Show_Offline_State_When_Synchronization_Is_Requested_Without_Network()
     {
         _connectivity.IsOnline.Returns(false);
