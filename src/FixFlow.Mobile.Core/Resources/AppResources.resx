@@ -240,4 +240,13 @@
   <data name="SyncConflictCount" xml:space="preserve">
     <value>Do wyjaśnienia: {0}</value>
   </data>
+  <data name="LocationExplanationTitle" xml:space="preserve">
+    <value>Pozycja przy rozpoczęciu pracy</value>
+  </data>
+  <data name="LocationExplanationMessage" xml:space="preserve">
+    <value>Aplikacja zapisze pozycję GPS z chwili rozpoczęcia pracy i dołączy ją do wpisu serwisowego. Bez zgody praca rozpocznie się bez pozycji.</value>
+  </data>
+  <data name="ContinueButton" xml:space="preserve">
+    <value>Dalej</value>
+  </data>
 </root>

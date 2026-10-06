@@ -240,4 +240,13 @@
   <data name="SyncConflictCount" xml:space="preserve">
     <value>To resolve: {0}</value>
   </data>
+  <data name="LocationExplanationTitle" xml:space="preserve">
+    <value>Location when starting work</value>
+  </data>
+  <data name="LocationExplanationMessage" xml:space="preserve">
+    <value>The app records the GPS position at the start of work and attaches it to the service entry. Without permission, work starts without a position.</value>
+  </data>
+  <data name="ContinueButton" xml:space="preserve">
+    <value>Continue</value>
+  </data>
 </root>
