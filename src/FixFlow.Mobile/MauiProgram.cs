@@ -76,6 +76,7 @@ public static partial class MauiProgram
 
         var app = builder.Build();
         app.Services.GetRequiredService<ILanguageService>().ApplySavedLanguage();
+        app.Services.GetRequiredService<ThemeService>().ApplySavedTheme();
         app.Services.GetRequiredService<SessionEndNavigator>().Start();
         app.Services.GetRequiredService<SyncCoordinator>().Start();
         app.Services.GetRequiredService<ReminderCoordinator>().Start();

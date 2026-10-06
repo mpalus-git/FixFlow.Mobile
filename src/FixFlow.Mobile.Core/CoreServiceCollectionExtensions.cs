@@ -23,6 +23,7 @@ public static class CoreServiceCollectionExtensions
         services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
         services.AddSingleton(provider => BusinessClock.CreateForWarsaw(provider.GetRequiredService<TimeProvider>()));
         services.AddSingleton<ILanguageService, LanguageService>();
+        services.AddSingleton<ThemeService>();
         services.AddSingleton<SessionStore>();
         services.AddSingleton<UserDatabase>();
         services.AddSingleton<ServerWarmup>();

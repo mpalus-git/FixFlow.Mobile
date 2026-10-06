@@ -6,12 +6,16 @@ namespace FixFlow.Mobile;
 public partial class App : Application
 {
     private readonly IServiceProvider _services;
+    private readonly ThemeService _themeService;
 
-    public App(IServiceProvider services, ILanguageService languageService)
+    public App(IServiceProvider services, ILanguageService languageService, ThemeService themeService)
     {
         InitializeComponent();
         _services = services;
+        _themeService = themeService;
+        UserAppTheme = ToAppTheme(themeService.CurrentTheme);
         languageService.LanguageChanged += OnLanguageChanged;
+        themeService.ThemeChanged += OnThemeChanged;
         RequestedThemeChanged += OnRequestedThemeChanged;
     }
 
@@ -37,6 +41,15 @@ public partial class App : Application
             window.Page = CreateShell();
         }
     }
+
+    private void OnThemeChanged(object? sender, EventArgs e) => UserAppTheme = ToAppTheme(_themeService.CurrentTheme);
+
+    private static AppTheme ToAppTheme(AppThemePreference theme) => theme switch
+    {
+        AppThemePreference.Light => AppTheme.Light,
+        AppThemePreference.Dark => AppTheme.Dark,
+        _ => AppTheme.Unspecified,
+    };
 
     private void OnRequestedThemeChanged(object? sender, AppThemeChangedEventArgs e)
     {
