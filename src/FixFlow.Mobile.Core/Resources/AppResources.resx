@@ -249,4 +249,22 @@
   <data name="ContinueButton" xml:space="preserve">
     <value>Dalej</value>
   </data>
+  <data name="WorkTimerStartedAt" xml:space="preserve">
+    <value>Praca od {0}</value>
+  </data>
+  <data name="WorkTimerElapsed" xml:space="preserve">
+    <value>Trwa: {0}</value>
+  </data>
+  <data name="WorkLocationLocating" xml:space="preserve">
+    <value>Ustalanie pozycji…</value>
+  </data>
+  <data name="WorkLocationCaptured" xml:space="preserve">
+    <value>Pozycja zapisana</value>
+  </data>
+  <data name="WorkLocationDenied" xml:space="preserve">
+    <value>Bez pozycji: brak zgody na lokalizację</value>
+  </data>
+  <data name="WorkLocationUnavailable" xml:space="preserve">
+    <value>Bez pozycji: nie udało się ustalić lokalizacji</value>
+  </data>
 </root>

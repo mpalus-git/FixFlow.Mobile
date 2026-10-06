@@ -249,4 +249,22 @@
   <data name="ContinueButton" xml:space="preserve">
     <value>Continue</value>
   </data>
+  <data name="WorkTimerStartedAt" xml:space="preserve">
+    <value>Working since {0}</value>
+  </data>
+  <data name="WorkTimerElapsed" xml:space="preserve">
+    <value>Elapsed: {0}</value>
+  </data>
+  <data name="WorkLocationLocating" xml:space="preserve">
+    <value>Getting position…</value>
+  </data>
+  <data name="WorkLocationCaptured" xml:space="preserve">
+    <value>Position recorded</value>
+  </data>
+  <data name="WorkLocationDenied" xml:space="preserve">
+    <value>No position: location permission denied</value>
+  </data>
+  <data name="WorkLocationUnavailable" xml:space="preserve">
+    <value>No position: location could not be determined</value>
+  </data>
 </root>
