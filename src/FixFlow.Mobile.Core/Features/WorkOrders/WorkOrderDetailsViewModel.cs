@@ -41,6 +41,7 @@ public sealed partial class WorkOrderDetailsViewModel(
     private WorkTimer? _workTimer;
     private bool _isLocating;
     private ITimer? _clock;
+    private int _localVersion;
 
     public ScreenState Screen { get; } = screen;
 
@@ -275,6 +276,7 @@ public sealed partial class WorkOrderDetailsViewModel(
 
     private async Task ShowLocalAsync()
     {
+        var version = ++_localVersion;
         if (await sources.WorkOrders.GetAsync(_workOrderId) is not { } storedWorkOrder)
         {
             return;
@@ -284,18 +286,25 @@ public sealed partial class WorkOrderDetailsViewModel(
         var pendingOperations = allOperations.Where(operation => operation.WorkOrderId == _workOrderId).ToList();
         var workOrder = PendingOperationsOverlay.Apply(storedWorkOrder, pendingOperations);
         var availability = WorkOrderStartPolicy.Evaluate(workOrder, PendingOperationsOverlay.Apply(await sources.WorkOrders.GetAllAsync(), allOperations));
-        CanStartWork = availability.CanStart;
-        CanAddEntry = workOrder.Status == WorkOrderStatus.InProgress;
-        StartBlockedText = availability.BlockingWorkOrderNumber is { } number ? WorkOrderTexts.Format(AppResources.StartWorkBlocked, number) : null;
-        _workTimer = workOrder.Status == WorkOrderStatus.InProgress ? await sources.WorkTimers.GetAsync(_workOrderId) : null;
-        await ShowWorkTimerAsync();
-        Details = presenter.Present(
+        var workTimer = workOrder.Status == WorkOrderStatus.InProgress ? await sources.WorkTimers.GetAsync(_workOrderId) : null;
+        var details = presenter.Present(
             workOrder,
             await sources.Clients.GetAsync(workOrder.ClientId),
             await sources.Devices.GetAsync(workOrder.DeviceId),
             await sources.ServiceEntries.GetForWorkOrderAsync(workOrder.Id),
             await sources.DeviceHistory.GetForDeviceAsync(workOrder.DeviceId),
             pendingOperations);
+        if (version != _localVersion)
+        {
+            return;
+        }
+
+        CanStartWork = availability.CanStart;
+        StartBlockedText = availability.BlockingWorkOrderNumber is { } number ? WorkOrderTexts.Format(AppResources.StartWorkBlocked, number) : null;
+        _workTimer = workTimer;
+        await ShowWorkTimerAsync();
+        Details = details;
+        CanAddEntry = workOrder.Status == WorkOrderStatus.InProgress;
         Screen.ShowContent(hasItems: true);
     }
 
