@@ -25,9 +25,11 @@ internal sealed class OutboxApiStub
         {
             Calls.Add(call);
         }
+        JsonDocument? sentEntry = null;
         if (request.Content is not null && call.EndsWith("/service-entries", StringComparison.Ordinal))
         {
-            SentEntries.Add(JsonDocument.Parse(await request.Content.ReadAsStringAsync(cancellationToken)));
+            sentEntry = JsonDocument.Parse(await request.Content.ReadAsStringAsync(cancellationToken));
+            SentEntries.Add(sentEntry);
         }
 
         if (request.Content is not null && call.EndsWith("/start", StringComparison.Ordinal))
@@ -45,6 +47,13 @@ internal sealed class OutboxApiStub
             return await respondAsync();
         }
 
+        if (sentEntry is not null)
+        {
+            var root = sentEntry.RootElement;
+            var workOrderId = request.RequestUri.Segments[^2].TrimEnd('/');
+            return Json(HttpStatusCode.Created, $$"""{"id":"{{root.GetProperty("id").GetGuid()}}","workOrderId":"{{workOrderId}}","technicianId":"{{Guid.Empty}}","technicianName":"Jan Kowalski","note":{{root.GetProperty("note").GetRawText()}},"isCorrection":false,"photoUrls":[],"parts":[],"createdAt":"2026-10-05T08:00:00Z"}""");
+        }
+
         if (call is "GET /api/v1/work-orders" or "GET /api/v1/parts")
         {
             return Json(HttpStatusCode.OK, """{"items":[],"page":1,"pageSize":100,"totalCount":0}""");
@@ -59,5 +68,5 @@ internal sealed class OutboxApiStub
     }
 
     public static HttpResponseMessage Json(HttpStatusCode statusCode, string json) =>
-        new(statusCode) { Content = new StringContent(json, Encoding.UTF8, statusCode == HttpStatusCode.OK ? "application/json" : "application/problem+json") };
+        new(statusCode) { Content = new StringContent(json, Encoding.UTF8, (int)statusCode < 300 ? "application/json" : "application/problem+json") };
 }

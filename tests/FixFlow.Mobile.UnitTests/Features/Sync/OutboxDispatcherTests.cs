@@ -30,7 +30,7 @@ public sealed class OutboxDispatcherTests : IAsyncLifetime
         _outbox = new OutboxRepository(_userDatabase.Database);
         _writer = new OutboxWriter(_outbox, _timeProvider, new WeakReferenceMessenger());
         var client = RestService.ForGenerated<IFixFlowApi>(new HttpClient(_handler, disposeHandler: false) { BaseAddress = new Uri("https://api.test") });
-        _dispatcher = new OutboxDispatcher(client, _outbox, new OutboxRetryPolicy(() => 0.5), _timeProvider);
+        _dispatcher = new OutboxDispatcher(client, _outbox, new ServiceEntryRepository(_userDatabase.Database), new OutboxRetryPolicy(() => 0.5), _timeProvider);
     }
 
     public async ValueTask InitializeAsync() => await _userDatabase.Database.OpenAsync(Guid.NewGuid());
@@ -49,6 +49,19 @@ public sealed class OutboxDispatcherTests : IAsyncLifetime
         var sent = _api.SentEntries.ShouldHaveSingleItem().RootElement;
         sent.GetProperty("id").GetGuid().ShouldBe(entry.Id);
         sent.GetProperty("parts")[0].GetProperty("quantity").GetInt32().ShouldBe(2);
+        (await _outbox.GetAllAsync()).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Should_Keep_Sent_Entry_Visible_Locally_When_Api_Accepts_It()
+    {
+        var entry = await AddEntryAsync(WorkOrderId);
+
+        await DispatchAsync();
+
+        var stored = (await new ServiceEntryRepository(_userDatabase.Database).GetForWorkOrderAsync(WorkOrderId)).ShouldHaveSingleItem();
+        stored.Id.ShouldBe(entry.Id);
+        stored.TechnicianName.ShouldBe("Jan Kowalski");
         (await _outbox.GetAllAsync()).ShouldBeEmpty();
     }
 

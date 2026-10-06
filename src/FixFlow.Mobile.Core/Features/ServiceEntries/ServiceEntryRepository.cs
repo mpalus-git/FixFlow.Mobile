@@ -27,6 +27,20 @@ public sealed class ServiceEntryRepository(UserDatabase userDatabase)
         });
     }
 
+    public async Task UpsertAsync(ServiceEntry entry)
+    {
+        ArgumentNullException.ThrowIfNull(entry);
+
+        var entryRow = ServiceEntryRow.From(entry);
+        var partRows = entry.Parts.Select((part, position) => ServiceEntryPartRow.From(entry.Id, position, part)).ToList();
+        await Connection.RunInTransactionAsync(connection =>
+        {
+            connection.Execute("DELETE FROM service_entry_parts WHERE service_entry_id = ?", entry.Id);
+            connection.InsertOrReplace(entryRow);
+            connection.InsertAll(partRows, runInTransaction: false);
+        });
+    }
+
     public async Task<IReadOnlyList<ServiceEntry>> GetForWorkOrderAsync(Guid workOrderId)
     {
         var entryRows = await Connection.QueryAsync<ServiceEntryRow>(
