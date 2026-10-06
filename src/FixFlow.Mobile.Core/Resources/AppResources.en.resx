@@ -579,4 +579,31 @@
   <data name="DiscardChangeButton" xml:space="preserve">
     <value>Discard</value>
   </data>
+  <data name="SyncTitle" xml:space="preserve">
+    <value>Synchronization</value>
+  </data>
+  <data name="SyncNowButton" xml:space="preserve">
+    <value>Sync now</value>
+  </data>
+  <data name="SyncEmpty" xml:space="preserve">
+    <value>All changes have been sent.</value>
+  </data>
+  <data name="SyncConflictsSection" xml:space="preserve">
+    <value>To resolve</value>
+  </data>
+  <data name="SyncConflictsHint" xml:space="preserve">
+    <value>The server rejected these changes. Copy the change content, send it again once the cause is gone, or discard the change.</value>
+  </data>
+  <data name="SyncPendingSection" xml:space="preserve">
+    <value>Waiting to be sent</value>
+  </data>
+  <data name="CopyChangeButton" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="RetryChangeButton" xml:space="preserve">
+    <value>Retry</value>
+  </data>
+  <data name="DiscardAllChangesButton" xml:space="preserve">
+    <value>Discard all work order changes</value>
+  </data>
 </root>

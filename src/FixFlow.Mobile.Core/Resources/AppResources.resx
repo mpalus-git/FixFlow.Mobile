@@ -579,4 +579,31 @@
   <data name="DiscardChangeButton" xml:space="preserve">
     <value>Odrzuć</value>
   </data>
+  <data name="SyncTitle" xml:space="preserve">
+    <value>Synchronizacja</value>
+  </data>
+  <data name="SyncNowButton" xml:space="preserve">
+    <value>Synchronizuj teraz</value>
+  </data>
+  <data name="SyncEmpty" xml:space="preserve">
+    <value>Wszystkie zmiany zostały wysłane.</value>
+  </data>
+  <data name="SyncConflictsSection" xml:space="preserve">
+    <value>Do wyjaśnienia</value>
+  </data>
+  <data name="SyncConflictsHint" xml:space="preserve">
+    <value>Serwer odrzucił te zmiany. Skopiuj treść zmiany, ponów wysłanie, gdy przyczyna zniknie, albo odrzuć zmianę.</value>
+  </data>
+  <data name="SyncPendingSection" xml:space="preserve">
+    <value>Oczekujące na wysłanie</value>
+  </data>
+  <data name="CopyChangeButton" xml:space="preserve">
+    <value>Kopiuj</value>
+  </data>
+  <data name="RetryChangeButton" xml:space="preserve">
+    <value>Ponów</value>
+  </data>
+  <data name="DiscardAllChangesButton" xml:space="preserve">
+    <value>Odrzuć wszystkie zmiany zlecenia</value>
+  </data>
 </root>
