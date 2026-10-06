@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FixFlow.Mobile.Core.Api;
@@ -13,6 +14,7 @@ namespace FixFlow.Mobile.Core.Features.ServiceEntries;
 public sealed partial class ServiceEntryViewModel(
     ScreenState screen,
     ServiceEntryPartsSelection parts,
+    PhotoAttacher photoAttacher,
     WorkOrderRepository workOrders,
     ServiceEntryRepository serviceEntries,
     OutboxRepository outbox,
@@ -22,6 +24,8 @@ public sealed partial class ServiceEntryViewModel(
     DisplayFormatter formatter,
     INavigationService navigation) : ObservableObject, INavigatedTo<Guid>
 {
+    public const int MaxPhotos = 10;
+
     private Guid _workOrderId;
     private DateTimeOffset? _workOrderStartedAt;
     private DateTimeOffset _initialStart;
@@ -31,6 +35,14 @@ public sealed partial class ServiceEntryViewModel(
     public ScreenState Screen { get; } = screen;
 
     public ServiceEntryPartsSelection Parts { get; } = parts;
+
+    public ObservableCollection<PhotoDraft> Photos { get; } = [];
+
+    public bool HasPhotos => Photos.Count > 0;
+
+    public bool CanAddPhotos => Photos.Count < MaxPhotos;
+
+    public bool CanTakePhoto => CanAddPhotos && photoAttacher.IsCaptureSupported;
 
     [ObservableProperty]
     public partial string Number { get; private set; } = string.Empty;
@@ -98,6 +110,51 @@ public sealed partial class ServiceEntryViewModel(
     private Task ReloadAsync() => OnNavigatedToAsync(_workOrderId);
 
     [RelayCommand]
+    private async Task TakePhotoAsync(CancellationToken cancellationToken)
+    {
+        if (CanTakePhoto && await photoAttacher.CaptureAsync(cancellationToken) is { } photo)
+        {
+            AddPhotos([photo]);
+        }
+    }
+
+    [RelayCommand]
+    private async Task PickPhotosAsync(CancellationToken cancellationToken)
+    {
+        if (CanAddPhotos)
+        {
+            AddPhotos(await photoAttacher.PickAsync(MaxPhotos - Photos.Count, cancellationToken));
+        }
+    }
+
+    [RelayCommand]
+    private void RemovePhoto(PhotoDraft draft)
+    {
+        if (Photos.Remove(draft))
+        {
+            photoAttacher.Discard(draft.Photo);
+            OnPhotosChanged();
+        }
+    }
+
+    private void AddPhotos(IEnumerable<PendingPhoto> photos)
+    {
+        foreach (var photo in photos)
+        {
+            Photos.Add(new PhotoDraft(photo, photoAttacher.LocalPathFor(photo)));
+        }
+
+        OnPhotosChanged();
+    }
+
+    private void OnPhotosChanged()
+    {
+        OnPropertyChanged(nameof(HasPhotos));
+        OnPropertyChanged(nameof(CanAddPhotos));
+        OnPropertyChanged(nameof(CanTakePhoto));
+    }
+
+    [RelayCommand]
     private async Task SaveAsync()
     {
         var start = ComposeStart();
@@ -119,7 +176,10 @@ public sealed partial class ServiceEntryViewModel(
                 finish,
                 hasPosition ? _timer!.Latitude : null,
                 hasPosition ? _timer!.Longitude : null,
-                Parts.ToPendingParts()));
+                Parts.ToPendingParts())
+            {
+                Photos = [.. Photos.Select(draft => draft.Photo)],
+            });
         await navigation.GoBackAsync();
     }
 
