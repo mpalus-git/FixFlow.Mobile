@@ -146,6 +146,18 @@ public sealed class WorkOrderDetailsPresenterTests : IDisposable
     }
 
     [Fact]
+    public void Should_Hide_Location_When_Position_Was_Already_Attached_To_Entry()
+    {
+        var timer = new WorkTimer(_workOrder.Id, Now, WorkLocationStatus.NotRequired, null, null);
+
+        var view = _presenter.PresentWorkTimer(timer, Now, isLocating: false);
+
+        view.HasLocationText.ShouldBeFalse();
+        view.CanRetryLocation.ShouldBeFalse();
+        view.CanOpenLocationSettings.ShouldBeFalse();
+    }
+
+    [Fact]
     public void Should_Offer_Retry_When_Position_Was_Left_Pending_By_Interrupted_Start()
     {
         var timer = new WorkTimer(_workOrder.Id, Now, WorkLocationStatus.Pending, null, null);

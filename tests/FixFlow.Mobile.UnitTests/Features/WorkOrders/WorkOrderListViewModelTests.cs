@@ -5,6 +5,8 @@ using CommunityToolkit.Mvvm.Messaging;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Connectivity;
 using FixFlow.Mobile.Core.Features.Auth;
+using FixFlow.Mobile.Core.Features.Parts;
+using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Settings;
 using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Features.WorkOrders;
@@ -59,8 +61,9 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
             _connectivity,
             warmup,
             () => new ServerReadinessProbe(httpClient, _timeProvider),
-            () => new OutboxDispatcher(api, _outbox, new OutboxRetryPolicy(() => 0.5), _timeProvider),
+            () => new OutboxDispatcher(api, _outbox, new ServiceEntryRepository(_userDatabase.Database), new OutboxRetryPolicy(() => 0.5), _timeProvider),
             () => sync,
+            () => new PartSyncService(api, new PartRepository(_userDatabase.Database), syncStates),
             _messenger);
         _viewModel = new WorkOrderListViewModel(
             new ScreenState(formatter),

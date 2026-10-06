@@ -14,6 +14,7 @@ using FixFlow.Mobile.Core.Storage;
 using FixFlow.Mobile.Dialogs;
 using FixFlow.Mobile.Dispatching;
 using FixFlow.Mobile.Features.Auth;
+using FixFlow.Mobile.Features.ServiceEntries;
 using FixFlow.Mobile.Features.Settings;
 using FixFlow.Mobile.Features.WorkOrders;
 using FixFlow.Mobile.Launching;
@@ -57,6 +58,7 @@ public static partial class MauiProgram
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<WorkOrderListPage>();
         builder.Services.AddTransient<WorkOrderDetailsPage>();
+        builder.Services.AddTransient<ServiceEntryPage>();
 
         var app = builder.Build();
         app.Services.GetRequiredService<ILanguageService>().ApplySavedLanguage();

@@ -55,6 +55,19 @@ public sealed class OutboxWriterTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Should_Restart_Timer_From_Entry_Finish_Without_Position_When_Work_Entry_Is_Queued()
+    {
+        var timers = new WorkTimerRepository(_userDatabase.Database);
+        await _writer.StartWorkAsync(WorkOrderId);
+        await timers.SetLocationAsync(WorkOrderId, WorkLocationStatus.Captured, 50.06, 19.94);
+        var finishedAt = Now.AddMinutes(45);
+
+        await _writer.AddServiceEntryAsync(WorkOrderId, new PendingServiceEntry(Guid.CreateVersion7(), "Przegląd", false, Now, finishedAt, 50.06, 19.94, []));
+
+        (await timers.GetAsync(WorkOrderId)).ShouldBe(new WorkTimer(WorkOrderId, finishedAt, WorkLocationStatus.NotRequired, null, null));
+    }
+
+    [Fact]
     public async Task Should_Notify_About_Local_Change_When_Operation_Is_Queued()
     {
         LocalChangeQueuedMessage? received = null;

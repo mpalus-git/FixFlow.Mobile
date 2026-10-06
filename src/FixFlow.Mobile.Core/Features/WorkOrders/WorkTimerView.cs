@@ -3,7 +3,10 @@ namespace FixFlow.Mobile.Core.Features.WorkOrders;
 public sealed record WorkTimerView(
     string StartedText,
     string ElapsedText,
-    string LocationText,
+    string? LocationText,
     bool IsLocating,
     bool CanRetryLocation,
-    bool CanOpenLocationSettings);
+    bool CanOpenLocationSettings)
+{
+    public bool HasLocationText => LocationText is not null;
+}

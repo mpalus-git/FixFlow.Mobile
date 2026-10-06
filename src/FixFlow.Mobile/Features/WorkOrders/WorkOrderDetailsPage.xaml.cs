@@ -15,12 +15,12 @@ public partial class WorkOrderDetailsPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        _viewModel.StartClock();
+        _viewModel.Resume();
     }
 
     protected override void OnDisappearing()
     {
-        _viewModel.StopClock();
+        _viewModel.Pause();
         base.OnDisappearing();
     }
 }

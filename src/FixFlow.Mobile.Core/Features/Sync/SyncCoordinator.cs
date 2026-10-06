@@ -14,6 +14,7 @@ public sealed class SyncCoordinator : IRecipient<ConnectivityChangedMessage>, IR
     private readonly Func<ServerReadinessProbe> _readinessProbe;
     private readonly Func<OutboxDispatcher> _dispatcher;
     private readonly Func<WorkOrderSyncService> _workOrderSync;
+    private readonly Func<PartSyncService> _partSync;
     private readonly IMessenger _messenger;
     private Task<SyncResult>? _running;
     private bool _rerunRequested;
@@ -25,6 +26,7 @@ public sealed class SyncCoordinator : IRecipient<ConnectivityChangedMessage>, IR
         Func<ServerReadinessProbe> readinessProbe,
         Func<OutboxDispatcher> dispatcher,
         Func<WorkOrderSyncService> workOrderSync,
+        Func<PartSyncService> partSync,
         IMessenger messenger)
     {
         _userDatabase = userDatabase;
@@ -33,6 +35,7 @@ public sealed class SyncCoordinator : IRecipient<ConnectivityChangedMessage>, IR
         _readinessProbe = readinessProbe;
         _dispatcher = dispatcher;
         _workOrderSync = workOrderSync;
+        _partSync = partSync;
         _messenger = messenger;
     }
 
@@ -129,6 +132,11 @@ public sealed class SyncCoordinator : IRecipient<ConnectivityChangedMessage>, IR
         }
 
         var pull = await _workOrderSync().PullAsync(() => _messenger.Send(new ServerStartingMessage()), CancellationToken.None);
+        if (pull.Outcome == PullOutcome.Succeeded)
+        {
+            await _partSync().PullAsync(CancellationToken.None);
+        }
+
         return new SyncResult(false, false, dispatch, pull);
     }
 }

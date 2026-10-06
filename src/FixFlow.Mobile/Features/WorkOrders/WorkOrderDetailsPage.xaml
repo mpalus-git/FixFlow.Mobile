@@ -61,7 +61,8 @@
                             <Label Text="{Binding WorkTimer.StartedText}"
                                    FontAttributes="Bold" />
                             <Label Text="{Binding WorkTimer.ElapsedText}" />
-                            <Grid ColumnDefinitions="Auto,*">
+                            <Grid ColumnDefinitions="Auto,*"
+                                  IsVisible="{Binding WorkTimer.HasLocationText}">
                                 <ActivityIndicator IsRunning="{Binding WorkTimer.IsLocating}"
                                                    IsVisible="{Binding WorkTimer.IsLocating}"
                                                    HeightRequest="20"
@@ -84,6 +85,9 @@
                             </VerticalStackLayout>
                         </VerticalStackLayout>
                     </Border>
+                    <Button Text="{x:Static resources:AppResources.AddEntryButton}"
+                            Command="{Binding AddEntryCommand}"
+                            IsVisible="{Binding CanAddEntry}" />
 
                     <Label Text="{x:Static resources:AppResources.DetailsClientSection}"
                            Style="{StaticResource SectionLabel}"

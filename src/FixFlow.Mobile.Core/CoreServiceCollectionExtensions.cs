@@ -44,8 +44,10 @@ public static class CoreServiceCollectionExtensions
             provider.GetRequiredService<ServerReadinessProbe>,
             provider.GetRequiredService<OutboxDispatcher>,
             provider.GetRequiredService<WorkOrderSyncService>,
+            provider.GetRequiredService<PartSyncService>,
             provider.GetRequiredService<IMessenger>()));
         services.AddTransient<WorkOrderSyncService>();
+        services.AddTransient<PartSyncService>();
         services.AddTransient<WorkOrderDetailsSyncService>();
         services.AddTransient<WorkOrderRepository>();
         services.AddTransient<ClientRepository>();
@@ -53,6 +55,8 @@ public static class CoreServiceCollectionExtensions
         services.AddTransient<DeviceHistoryRepository>();
         services.AddTransient<ServiceProtocolService>();
         services.AddTransient<ServiceEntryRepository>();
+        services.AddTransient<ServiceEntryPartsSelection>();
+        services.AddTransient<ServiceEntryViewModel>();
         services.AddTransient<WorkTimerRepository>();
         services.AddTransient<WorkLocationRecorder>();
         services.AddSingleton<WorkOrderSectionClassifier>();

@@ -10,6 +10,7 @@ namespace FixFlow.Mobile.Core.Features.Sync;
 public sealed class OutboxDispatcher(
     IFixFlowApi api,
     OutboxRepository outbox,
+    ServiceEntryRepository serviceEntries,
     OutboxRetryPolicy retryPolicy,
     TimeProvider timeProvider)
 {
@@ -81,6 +82,11 @@ public sealed class OutboxDispatcher(
         using var response = await CallAsync(operation, cancellationToken);
         if (response.IsSuccessful)
         {
+            if (response is IApiResponse<ServiceEntryResponse> { Content: { } entry })
+            {
+                await serviceEntries.UpsertAsync(ServiceEntryMapper.FromResponse(entry));
+            }
+
             return null;
         }
 

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="FixFlow.PickerDialog" parent="android:Theme.Material.Dialog.Alert">
+        <item name="android:colorAccent">@color/pickerAccent</item>
+        <item name="android:buttonBarPositiveButtonStyle">@style/FixFlow.PickerDialogButton</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/FixFlow.PickerDialogButton</item>
+    </style>
+</resources>

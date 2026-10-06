@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:FixFlow.Mobile.Controls"
+             xmlns:resources="clr-namespace:FixFlow.Mobile.Core.Resources;assembly=FixFlow.Mobile.Core"
+             xmlns:viewModels="clr-namespace:FixFlow.Mobile.Core.Features.ServiceEntries;assembly=FixFlow.Mobile.Core"
+             x:Class="FixFlow.Mobile.Features.ServiceEntries.ServiceEntryPage"
+             x:DataType="viewModels:ServiceEntryViewModel"
+             Title="{x:Static resources:AppResources.ServiceEntryTitle}">
+    <Grid>
+        <ScrollView>
+            <VerticalStackLayout Padding="16"
+                                 Spacing="8">
+                <Label Text="{Binding Number}"
+                       Style="{StaticResource HeadlineLabel}"
+                       HorizontalTextAlignment="Start"
+                       SemanticProperties.HeadingLevel="Level1" />
+
+                <Label Text="{x:Static resources:AppResources.EntryNoteLabel}"
+                       Style="{StaticResource SectionLabel}" />
+                <Border Style="{StaticResource InputBorder}">
+                    <Editor Text="{Binding Note}"
+                            Placeholder="{x:Static resources:AppResources.EntryNotePlaceholder}"
+                            SemanticProperties.Description="{x:Static resources:AppResources.EntryNoteLabel}"
+                            AutoSize="TextChanges"
+                            MaxLength="4000"
+                            MinimumHeightRequest="120" />
+                </Border>
+
+                <Label Text="{x:Static resources:AppResources.EntryWorkStartLabel}"
+                       Style="{StaticResource SectionLabel}" />
+                <Grid ColumnDefinitions="*,*"
+                      ColumnSpacing="8">
+                    <Border Style="{StaticResource InputBorder}">
+                        <DatePicker Date="{Binding StartDate}"
+                                    SemanticProperties.Description="{x:Static resources:AppResources.EntryWorkStartLabel}" />
+                    </Border>
+                    <Border Grid.Column="1"
+                            Style="{StaticResource InputBorder}">
+                        <TimePicker Time="{Binding StartTime}"
+                                    Format="HH:mm"
+                                    SemanticProperties.Description="{x:Static resources:AppResources.EntryWorkStartLabel}" />
+                    </Border>
+                </Grid>
+
+                <Label Text="{x:Static resources:AppResources.EntryWorkFinishLabel}"
+                       Style="{StaticResource SectionLabel}" />
+                <Grid ColumnDefinitions="*,*"
+                      ColumnSpacing="8">
+                    <Border Style="{StaticResource InputBorder}">
+                        <DatePicker Date="{Binding FinishDate}"
+                                    SemanticProperties.Description="{x:Static resources:AppResources.EntryWorkFinishLabel}" />
+                    </Border>
+                    <Border Grid.Column="1"
+                            Style="{StaticResource InputBorder}">
+                        <TimePicker Time="{Binding FinishTime}"
+                                    Format="HH:mm"
+                                    SemanticProperties.Description="{x:Static resources:AppResources.EntryWorkFinishLabel}" />
+                    </Border>
+                </Grid>
+                <Label Text="{Binding LocationText}"
+                       IsVisible="{Binding HasLocationText}"
+                       Style="{StaticResource SecondaryLabel}" />
+
+                <Label Text="{x:Static resources:AppResources.EntryPartsSection}"
+                       Style="{StaticResource SectionLabel}" />
+                <VerticalStackLayout Spacing="8"
+                                     BindableLayout.ItemsSource="{Binding Parts.Selected}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="viewModels:ServiceEntryPartDraft">
+                            <Border Style="{StaticResource CardBorder}">
+                                <Grid ColumnDefinitions="*,Auto,Auto,Auto"
+                                      RowDefinitions="Auto,Auto,Auto"
+                                      ColumnSpacing="8">
+                                    <Label Grid.ColumnSpan="4"
+                                           Text="{Binding Name}"
+                                           FontAttributes="Bold" />
+                                    <Label Grid.Row="1"
+                                           Grid.ColumnSpan="4"
+                                           Text="{Binding DetailsText}"
+                                           Style="{StaticResource SecondaryLabel}" />
+                                    <Button Grid.Row="2"
+                                            Text="{x:Static resources:AppResources.EntryRemovePartButton}"
+                                            Command="{Binding Parts.RemoveCommand, Source={RelativeSource AncestorType={x:Type viewModels:ServiceEntryViewModel}}, x:DataType=viewModels:ServiceEntryViewModel}"
+                                            CommandParameter="{Binding .}"
+                                            Style="{StaticResource OutlineButton}"
+                                            HorizontalOptions="Start"
+                                            Margin="0,8,0,0" />
+                                    <Button Grid.Row="2"
+                                            Grid.Column="1"
+                                            Text="{x:Static resources:AppResources.EntryDecreaseQuantity}"
+                                            SemanticProperties.Description="{x:Static resources:AppResources.EntryDecreaseQuantityDescription}"
+                                            Command="{Binding DecreaseCommand}"
+                                            Style="{StaticResource OutlineButton}"
+                                            Padding="0"
+                                            WidthRequest="48"
+                                            Margin="0,8,0,0" />
+                                    <Label Grid.Row="2"
+                                           Grid.Column="2"
+                                           Text="{Binding Quantity}"
+                                           FontAttributes="Bold"
+                                           MinimumWidthRequest="32"
+                                           HorizontalTextAlignment="Center"
+                                           VerticalOptions="Center"
+                                           Margin="0,8,0,0" />
+                                    <Button Grid.Row="2"
+                                            Grid.Column="3"
+                                            Text="{x:Static resources:AppResources.EntryIncreaseQuantity}"
+                                            SemanticProperties.Description="{x:Static resources:AppResources.EntryIncreaseQuantityDescription}"
+                                            Command="{Binding IncreaseCommand}"
+                                            Style="{StaticResource OutlineButton}"
+                                            Padding="0"
+                                            WidthRequest="48"
+                                            Margin="0,8,0,0" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <Border Style="{StaticResource InputBorder}"
+                        IsVisible="{Binding Parts.HasRoom}">
+                    <Entry Text="{Binding Parts.SearchText}"
+                           Placeholder="{x:Static resources:AppResources.EntryPartSearchPlaceholder}"
+                           SemanticProperties.Description="{x:Static resources:AppResources.EntryPartSearchPlaceholder}" />
+                </Border>
+                <Label Text="{x:Static resources:AppResources.EntryNoPartsFound}"
+                       IsVisible="{Binding Parts.HasNoResults}"
+                       Style="{StaticResource SecondaryLabel}" />
+                <VerticalStackLayout Spacing="8"
+                                     IsVisible="{Binding Parts.HasRoom}"
+                                     BindableLayout.ItemsSource="{Binding Parts.Results}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="viewModels:PartSearchResult">
+                            <Border Style="{StaticResource CardBorder}">
+                                <Grid ColumnDefinitions="*,Auto"
+                                      RowDefinitions="Auto,Auto,Auto"
+                                      ColumnSpacing="8">
+                                    <Label Text="{Binding Part.Name}"
+                                           FontAttributes="Bold" />
+                                    <Label Grid.Row="1"
+                                           Text="{Binding DetailsText}"
+                                           Style="{StaticResource SecondaryLabel}" />
+                                    <Label Grid.Row="2"
+                                           Text="{Binding AvailabilityText}"
+                                           Style="{StaticResource SecondaryLabel}" />
+                                    <Button Grid.Column="1"
+                                            Grid.RowSpan="3"
+                                            Text="{x:Static resources:AppResources.EntryAddPartButton}"
+                                            Command="{Binding Parts.AddCommand, Source={RelativeSource AncestorType={x:Type viewModels:ServiceEntryViewModel}}, x:DataType=viewModels:ServiceEntryViewModel}"
+                                            CommandParameter="{Binding .}"
+                                            IsEnabled="{Binding CanAdd}"
+                                            Style="{StaticResource OutlineButton}"
+                                            VerticalOptions="Center" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <Label Text="{Binding ValidationMessage}"
+                       IsVisible="{Binding HasValidationMessage}"
+                       Style="{StaticResource ErrorLabel}"
+                       Margin="0,8,0,0" />
+                <Button Text="{x:Static resources:AppResources.EntrySaveButton}"
+                        Command="{Binding SaveCommand}"
+                        Margin="0,8,0,16" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <controls:LoadingView Style="{StaticResource ScreenOverlay}"
+                              IsVisible="{Binding Screen.IsLoading}" />
+        <controls:ErrorView Style="{StaticResource ScreenOverlay}"
+                            IsVisible="{Binding Screen.IsError}"
+                            Message="{Binding Screen.ErrorMessage}"
+                            RetryCommand="{Binding ReloadCommand}" />
+    </Grid>
+</ContentPage>

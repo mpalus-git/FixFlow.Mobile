@@ -25,7 +25,8 @@ public sealed class LocalDatabase : IAsyncDisposable
 
         var connection = new SQLiteAsyncConnection(
             path,
-            SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create | SQLiteOpenFlags.FullMutex);
+            SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create);
+        await connection.CloseAsync();
         try
         {
             await MigrateAsync(connection, migrations, timeProvider);
@@ -41,7 +42,17 @@ public sealed class LocalDatabase : IAsyncDisposable
     public async Task<IReadOnlyList<int>> GetAppliedMigrationsAsync() =>
         await Connection.QueryScalarsAsync<int>("SELECT version FROM schema_migrations ORDER BY version");
 
-    public async ValueTask DisposeAsync() => await Connection.CloseAsync();
+    public async ValueTask DisposeAsync()
+    {
+        var connection = Connection.GetConnection();
+        await Task.Run(() =>
+        {
+            using (connection.Lock())
+            {
+                connection.Close();
+            }
+        });
+    }
 
     private static async Task MigrateAsync(
         SQLiteAsyncConnection connection,
