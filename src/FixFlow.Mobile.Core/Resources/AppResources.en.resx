@@ -321,4 +321,7 @@
   <data name="EntryWithoutLocation" xml:space="preserve">
     <value>The entry will be saved without a position.</value>
   </data>
+  <data name="AddEntryButton" xml:space="preserve">
+    <value>Add entry</value>
+  </data>
 </root>

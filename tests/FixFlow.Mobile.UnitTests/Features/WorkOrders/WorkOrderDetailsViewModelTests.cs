@@ -34,6 +34,7 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
     private readonly IDocumentLauncher _documents = Substitute.For<IDocumentLauncher>();
     private readonly ILocationService _location = Substitute.For<ILocationService>();
     private readonly FakeTimeProvider _timeProvider = new(DetailsApiStub.Now);
+    private readonly WeakReferenceMessenger _messenger = new();
     private readonly StubHttpMessageHandler _handler;
     private readonly WorkOrderDetailsSources _sources;
     private readonly WorkOrderDetailsViewModel _viewModel;
@@ -66,6 +67,7 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
             _location,
             timeProvider,
             new ImmediateUiDispatcher(),
+            _messenger,
             _connectivity,
             _maps,
             _uris,
@@ -306,19 +308,72 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
         ConfirmStart();
         await ShowOfflineAsync();
         await _viewModel.StartWorkCommand.ExecuteAsync(null);
-        _viewModel.StartClock();
+        _viewModel.Resume();
 
         _timeProvider.Advance(TimeSpan.FromMinutes(90));
 
         _viewModel.WorkTimer.ShouldNotBeNull().ElapsedText.ShouldBe(
             WorkOrderTexts.Format(AppResources.WorkTimerElapsed, WorkOrderTexts.Format(AppResources.DetailsDuration, 1, 30)));
-        _viewModel.StopClock();
+        _viewModel.Pause();
+    }
+
+    [Fact]
+    public async Task Should_Offer_Entry_Form_When_Work_Order_Is_In_Progress()
+    {
+        ConfirmStart();
+        await ShowOfflineAsync();
+        _viewModel.CanAddEntry.ShouldBeFalse();
+        await _viewModel.StartWorkCommand.ExecuteAsync(null);
+
+        await _viewModel.AddEntryCommand.ExecuteAsync(null);
+
+        _viewModel.CanAddEntry.ShouldBeTrue();
+        await _navigation.Received(1).NavigateToAsync<ServiceEntryViewModel, Guid>(_api.WorkOrderId);
+    }
+
+    [Fact]
+    public async Task Should_Show_Entry_Saved_Elsewhere_When_Page_Is_Shown_Again()
+    {
+        ConfirmStart();
+        await ShowOfflineAsync();
+        await _viewModel.StartWorkCommand.ExecuteAsync(null);
+        _viewModel.Pause();
+        await new OutboxWriter(_sources.Outbox, _timeProvider, new WeakReferenceMessenger()).AddServiceEntryAsync(
+            _api.WorkOrderId, new PendingServiceEntry(Guid.CreateVersion7(), "Z formularza", false, null, null, null, null, []));
+
+        _viewModel.Resume();
+        await WaitUntilAsync(() => _viewModel.Details?.HasEntries == true);
+
+        _viewModel.Details!.Entries.ShouldHaveSingleItem().Note.ShouldBe("Z formularza");
+        _viewModel.Pause();
+    }
+
+    [Fact]
+    public async Task Should_Reload_Local_Details_When_Synchronization_Completes_While_Page_Is_Visible()
+    {
+        await ShowOfflineAsync();
+        _viewModel.Resume();
+        await new OutboxWriter(_sources.Outbox, _timeProvider, new WeakReferenceMessenger()).StartWorkAsync(_api.WorkOrderId);
+
+        _messenger.Send(new SyncCompletedMessage(SyncResult.Offline));
+        await WaitUntilAsync(() => _viewModel.CanAddEntry);
+
+        _viewModel.Details!.StatusText.ShouldBe(WorkOrderTexts.Status(WorkOrderStatus.InProgress));
+        _viewModel.Pause();
     }
 
     public async ValueTask DisposeAsync()
     {
         _handler.Dispose();
         await _userDatabase.DisposeAsync();
+    }
+
+    private static async Task WaitUntilAsync(Func<bool> condition)
+    {
+        for (var attempt = 0; attempt < 200 && !condition(); attempt++)
+        {
+            await Task.Delay(10, TestContext.Current.CancellationToken);
+        }
     }
 
     private void ConfirmStart() =>

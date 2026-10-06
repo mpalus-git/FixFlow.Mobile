@@ -85,6 +85,9 @@
                             </VerticalStackLayout>
                         </VerticalStackLayout>
                     </Border>
+                    <Button Text="{x:Static resources:AppResources.AddEntryButton}"
+                            Command="{Binding AddEntryCommand}"
+                            IsVisible="{Binding CanAddEntry}" />
 
                     <Label Text="{x:Static resources:AppResources.DetailsClientSection}"
                            Style="{StaticResource SectionLabel}"
