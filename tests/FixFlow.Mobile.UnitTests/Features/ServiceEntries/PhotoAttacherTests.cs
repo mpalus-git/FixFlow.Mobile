@@ -54,21 +54,22 @@ public sealed class PhotoAttacherTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Should_Return_Nothing_When_Technician_Cancels_Picker()
+    public async Task Should_Store_Each_Picked_Photo_When_Several_Are_Chosen()
     {
-        _photoService.PickAsync(Arg.Any<CancellationToken>()).Returns((byte[]?)null);
+        _photoService.PickAsync(3, Arg.Any<CancellationToken>()).Returns([Jpeg, Jpeg]);
 
-        (await _attacher.PickAsync(TestContext.Current.CancellationToken)).ShouldBeNull();
+        var photos = await _attacher.PickAsync(3, TestContext.Current.CancellationToken);
 
-        await _dialogs.DidNotReceiveWithAnyArgs().ShowAlertAsync(default!, default!, default!);
+        photos.Count.ShouldBe(2);
+        photos.Select(photo => photo.Id).Distinct().Count().ShouldBe(2);
     }
 
     [Fact]
-    public async Task Should_Reject_Picked_File_When_It_Is_Not_Jpeg()
+    public async Task Should_Keep_Valid_Photos_And_Reject_File_When_It_Is_Not_Jpeg()
     {
-        _photoService.PickAsync(Arg.Any<CancellationToken>()).Returns([0x89, 0x50, 0x4E, 0x47]);
+        _photoService.PickAsync(Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns([[0x89, 0x50, 0x4E, 0x47], Jpeg]);
 
-        (await _attacher.PickAsync(TestContext.Current.CancellationToken)).ShouldBeNull();
+        (await _attacher.PickAsync(10, TestContext.Current.CancellationToken)).ShouldHaveSingleItem();
 
         await _dialogs.Received(1).ShowAlertAsync(AppResources.ErrorTitle, AppResources.PhotoUnsupportedFormat, AppResources.CloseButton);
     }
@@ -78,9 +79,9 @@ public sealed class PhotoAttacherTests : IAsyncLifetime
     {
         var tooLarge = new byte[PhotoCompression.MaxBytes + 1];
         Jpeg.CopyTo(tooLarge, 0);
-        _photoService.PickAsync(Arg.Any<CancellationToken>()).Returns(tooLarge);
+        _photoService.PickAsync(Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns([tooLarge]);
 
-        (await _attacher.PickAsync(TestContext.Current.CancellationToken)).ShouldBeNull();
+        (await _attacher.PickAsync(10, TestContext.Current.CancellationToken)).ShouldBeEmpty();
 
         await _dialogs.Received(1).ShowAlertAsync(AppResources.ErrorTitle, AppResources.PhotoTooLarge, AppResources.CloseButton);
     }

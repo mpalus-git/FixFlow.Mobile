@@ -29,8 +29,19 @@ public sealed class PhotoAttacher(IPhotoService photoService, PhotoStore store, 
         return await StoreAsync(await photoService.CaptureAsync(cancellationToken));
     }
 
-    public async Task<PendingPhoto?> PickAsync(CancellationToken cancellationToken) =>
-        await StoreAsync(await photoService.PickAsync(cancellationToken));
+    public async Task<IReadOnlyList<PendingPhoto>> PickAsync(int limit, CancellationToken cancellationToken)
+    {
+        var stored = new List<PendingPhoto>();
+        foreach (var jpeg in await photoService.PickAsync(limit, cancellationToken))
+        {
+            if (await StoreAsync(jpeg) is { } photo)
+            {
+                stored.Add(photo);
+            }
+        }
+
+        return stored;
+    }
 
     public void Discard(PendingPhoto photo)
     {

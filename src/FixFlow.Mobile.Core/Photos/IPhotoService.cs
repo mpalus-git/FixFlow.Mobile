@@ -10,7 +10,7 @@ public interface IPhotoService
 
     Task<byte[]?> CaptureAsync(CancellationToken cancellationToken);
 
-    Task<byte[]?> PickAsync(CancellationToken cancellationToken);
+    Task<IReadOnlyList<byte[]>> PickAsync(int limit, CancellationToken cancellationToken);
 
     Task OpenSettingsAsync();
 }

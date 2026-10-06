@@ -10,6 +10,7 @@ using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Launching;
 using FixFlow.Mobile.Core.Location;
 using FixFlow.Mobile.Core.Navigation;
+using FixFlow.Mobile.Core.Photos;
 using FixFlow.Mobile.Core.Storage;
 using FixFlow.Mobile.Dialogs;
 using FixFlow.Mobile.Dispatching;
@@ -20,6 +21,7 @@ using FixFlow.Mobile.Features.WorkOrders;
 using FixFlow.Mobile.Launching;
 using FixFlow.Mobile.Location;
 using FixFlow.Mobile.Navigation;
+using FixFlow.Mobile.Photos;
 
 namespace FixFlow.Mobile;
 
@@ -49,6 +51,8 @@ public static partial class MauiProgram
         builder.Services.AddSingleton<IDocumentLauncher, EssentialsDocumentLauncher>();
         builder.Services.AddSingleton(Geolocation.Default);
         builder.Services.AddSingleton<ILocationService, EssentialsLocationService>();
+        builder.Services.AddSingleton(MediaPicker.Default);
+        builder.Services.AddSingleton<IPhotoService, EssentialsPhotoService>();
         builder.Services.AddSingleton<IUiDispatcher, MainThreadUiDispatcher>();
         builder.Services.AddSingleton(new DemoAccount(BuildConfiguration.DemoTechnicianEmail, BuildConfiguration.DemoTechnicianPassword));
         builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
