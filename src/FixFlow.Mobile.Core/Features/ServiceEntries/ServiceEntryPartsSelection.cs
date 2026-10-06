@@ -23,7 +23,10 @@ public sealed partial class ServiceEntryPartsSelection(PartRepository parts, Dis
     public partial string SearchText { get; set; } = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasNoResults))]
     public partial IReadOnlyList<PartSearchResult> Results { get; private set; } = [];
+
+    public bool HasNoResults => HasRoom && !string.IsNullOrWhiteSpace(SearchText) && Results.Count == 0;
 
     public bool HasSelected => Selected.Count > 0;
 
@@ -38,7 +41,7 @@ public sealed partial class ServiceEntryPartsSelection(PartRepository parts, Dis
     public async Task SearchAsync()
     {
         var version = ++_searchVersion;
-        var found = await parts.SearchAsync(SearchText, SearchLimit + Selected.Count);
+        IReadOnlyList<Part> found = string.IsNullOrWhiteSpace(SearchText) ? [] : await parts.SearchAsync(SearchText, SearchLimit + Selected.Count);
         if (version == _searchVersion)
         {
             Results = [.. found.Where(part => Selected.All(draft => draft.PartId != part.Id)).Take(SearchLimit).Select(ToResult)];
@@ -88,6 +91,7 @@ public sealed partial class ServiceEntryPartsSelection(PartRepository parts, Dis
     {
         OnPropertyChanged(nameof(HasSelected));
         OnPropertyChanged(nameof(HasRoom));
+        OnPropertyChanged(nameof(HasNoResults));
     }
 
     private PartSearchResult ToResult(Part part)

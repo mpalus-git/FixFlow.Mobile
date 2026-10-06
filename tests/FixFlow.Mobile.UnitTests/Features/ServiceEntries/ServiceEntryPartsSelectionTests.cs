@@ -33,9 +33,20 @@ public sealed class ServiceEntryPartsSelectionTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Should_List_Nothing_Until_Technician_Types_Search_Text()
+    {
+        await _selection.LoadAsync([]);
+
+        _selection.Results.ShouldBeEmpty();
+        _selection.HasNoResults.ShouldBeFalse();
+    }
+
+    [Fact]
     public async Task Should_Show_Availability_Reduced_By_Queued_Entries_When_Catalog_Is_Searched()
     {
         await _selection.LoadAsync([Pending(Filter, 1)]);
+        _selection.SearchText = "-";
+        await _selection.SearchAsync();
 
         var filter = _selection.Results.Single(result => result.Part.Id == Filter.Id);
         filter.Available.ShouldBe(2);
@@ -60,6 +71,8 @@ public sealed class ServiceEntryPartsSelectionTests : IAsyncLifetime
     public async Task Should_Move_Part_To_Selection_With_One_Unit_When_Added()
     {
         await _selection.LoadAsync([]);
+        _selection.SearchText = "-";
+        await _selection.SearchAsync();
 
         await _selection.AddCommand.ExecuteAsync(_selection.Results.Single(result => result.Part.Id == Filter.Id));
 
@@ -73,6 +86,8 @@ public sealed class ServiceEntryPartsSelectionTests : IAsyncLifetime
     public async Task Should_Not_Add_Part_When_It_Is_Out_Of_Stock()
     {
         await _selection.LoadAsync([]);
+        _selection.SearchText = "-";
+        await _selection.SearchAsync();
 
         await _selection.AddCommand.ExecuteAsync(_selection.Results.Single(result => result.Part.Id == Belt.Id));
 
@@ -83,6 +98,8 @@ public sealed class ServiceEntryPartsSelectionTests : IAsyncLifetime
     public async Task Should_Report_Quantity_Above_Stock_When_Catalog_Changed_After_Selection()
     {
         await _selection.LoadAsync([]);
+        _selection.SearchText = "-";
+        await _selection.SearchAsync();
         await _selection.AddCommand.ExecuteAsync(_selection.Results.Single(result => result.Part.Id == Filter.Id));
         _selection.Selected[0].IncreaseCommand.Execute(null);
 

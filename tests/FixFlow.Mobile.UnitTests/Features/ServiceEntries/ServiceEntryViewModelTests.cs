@@ -67,7 +67,7 @@ public sealed class ServiceEntryViewModelTests : IAsyncLifetime
         _viewModel.StartTime.ShouldBe(new TimeSpan(10, 0, 0));
         _viewModel.FinishTime.ShouldBe(new TimeSpan(11, 30, 0));
         _viewModel.LocationText.ShouldBe(AppResources.EntryWithoutLocation);
-        _viewModel.Parts.Results.ShouldHaveSingleItem().Part.Id.ShouldBe(Filter.Id);
+        _viewModel.Parts.Results.ShouldBeEmpty();
     }
 
     [Fact]
@@ -128,6 +128,8 @@ public sealed class ServiceEntryViewModelTests : IAsyncLifetime
         await _viewModel.OnNavigatedToAsync(_workOrder.Id);
         _viewModel.Note = "  Wymiana filtra  ";
         _viewModel.StartTime = new TimeSpan(10, 0, 0);
+        _viewModel.Parts.SearchText = "filtr";
+        await _viewModel.Parts.SearchAsync();
         await _viewModel.Parts.AddCommand.ExecuteAsync(_viewModel.Parts.Results[0]);
         _viewModel.Parts.Selected[0].IncreaseCommand.Execute(null);
 

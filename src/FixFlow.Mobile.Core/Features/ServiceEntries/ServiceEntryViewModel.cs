@@ -93,6 +93,9 @@ public sealed partial class ServiceEntryViewModel(
     }
 
     [RelayCommand]
+    private Task ReloadAsync() => OnNavigatedToAsync(_workOrderId);
+
+    [RelayCommand]
     private async Task SaveAsync()
     {
         var start = ComposeStart();
