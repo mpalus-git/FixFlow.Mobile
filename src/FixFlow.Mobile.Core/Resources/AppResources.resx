@@ -402,4 +402,7 @@
   <data name="EntryPhotoDescription" xml:space="preserve">
     <value>Zdjęcie dołączone do wpisu</value>
   </data>
+  <data name="PhotoUnavailable" xml:space="preserve">
+    <value>Nie udało się otworzyć zdjęcia.</value>
+  </data>
 </root>

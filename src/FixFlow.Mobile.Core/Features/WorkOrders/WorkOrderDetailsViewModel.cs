@@ -29,6 +29,8 @@ public sealed partial class WorkOrderDetailsViewModel(
     TimeProvider timeProvider,
     IUiDispatcher uiDispatcher,
     IMessenger messenger,
+    PhotoStore photos,
+    IDocumentLauncher documents,
     IConnectivityService connectivity,
     IMapLauncher maps,
     IUriLauncher uris,
@@ -238,6 +240,20 @@ public sealed partial class WorkOrderDetailsViewModel(
     }
 
     [RelayCommand]
+    private async Task OpenPhotoAsync(EntryPhotoView photo)
+    {
+        if (photo.IsLocal)
+        {
+            await using var content = File.OpenRead(photo.Source);
+            await documents.OpenAsync(content, Path.GetFileName(photo.Source), PhotoUploadClient.JpegMediaType);
+        }
+        else if (!Uri.TryCreate(photo.Source, UriKind.Absolute, out var uri) || !await uris.OpenAsync(uri))
+        {
+            await ShowErrorAsync(AppResources.PhotoUnavailable);
+        }
+    }
+
+    [RelayCommand]
     private Task OpenHistoryItemAsync(DeviceHistoryView item) =>
         navigation.NavigateToAsync<WorkOrderDetailsViewModel, Guid>(item.WorkOrderId);
 
@@ -293,7 +309,8 @@ public sealed partial class WorkOrderDetailsViewModel(
             await sources.Devices.GetAsync(workOrder.DeviceId),
             await sources.ServiceEntries.GetForWorkOrderAsync(workOrder.Id),
             await sources.DeviceHistory.GetForDeviceAsync(workOrder.DeviceId),
-            pendingOperations);
+            pendingOperations,
+            photos.ExistingPathFor);
         if (version != _localVersion)
         {
             return;

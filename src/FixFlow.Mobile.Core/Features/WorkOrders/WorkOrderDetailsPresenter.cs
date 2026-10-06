@@ -14,7 +14,8 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter)
         Device? device,
         IReadOnlyList<ServiceEntry> entries,
         IReadOnlyList<DeviceHistoryItem> history,
-        IReadOnlyList<OutboxOperation> pendingOperations)
+        IReadOnlyList<OutboxOperation> pendingOperations,
+        Func<Guid, string?>? localPhotoPath = null)
     {
         ArgumentNullException.ThrowIfNull(workOrder);
         ArgumentNullException.ThrowIfNull(entries);
@@ -23,9 +24,9 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter)
 
         var pendingEntries = pendingOperations
             .Where(operation => operation.Kind == OutboxOperationKind.AddServiceEntry)
-            .Select(operation => ToServiceEntry(workOrder.Id, operation))
+            .Select(operation => (Entry: ToServiceEntry(workOrder.Id, operation), OutboxPayload.ToServiceEntry(operation).Photos))
             .ToList();
-        var allEntries = entries.Concat(pendingEntries).ToList();
+        var allEntries = entries.Concat(pendingEntries.Select(pending => pending.Entry)).ToList();
         var usedParts = allEntries.SelectMany(entry => entry.Parts.Select(part => entry.IsCorrection ? -part.Amount : part.Amount)).ToList();
         return new WorkOrderDetailsView(
             workOrder.Number,
@@ -36,7 +37,10 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter)
             workOrder.Description,
             client is null ? null : ToClientView(client),
             device is null ? null : ToDeviceView(device),
-            [.. entries.Select(entry => ToEntryView(entry, isPending: false)), .. pendingEntries.Select(entry => ToEntryView(entry, isPending: true))],
+            [
+                .. entries.Select(entry => ToEntryView(entry, isPending: false, [.. entry.PhotoUrls.Select(url => new EntryPhotoView(url, false))])),
+                .. pendingEntries.Select(pending => ToEntryView(pending.Entry, isPending: true, [.. pending.Photos.Select(photo => ToPhotoView(photo, localPhotoPath))])),
+            ],
             usedParts.Count == 0 ? null : WorkOrderTexts.Format(AppResources.DetailsPartsTotal, formatter.FormatMoney(usedParts.Sum())),
             [.. history.Where(item => item.WorkOrderId != workOrder.Id).Select(ToHistoryView)],
             workOrder.Status is WorkOrderStatus.Completed or WorkOrderStatus.Invoiced);
@@ -94,7 +98,10 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter)
             [.. pending.Parts.Select(part => new ServiceEntryPart(part.PartId, part.PartName, part.CatalogNumber, part.Quantity, part.UnitPrice))]);
     }
 
-    private ServiceEntryView ToEntryView(ServiceEntry entry, bool isPending) => new(
+    private static EntryPhotoView ToPhotoView(PendingPhoto photo, Func<Guid, string?>? localPhotoPath) =>
+        localPhotoPath?.Invoke(photo.Id) is { } path ? new EntryPhotoView(path, true) : new EntryPhotoView(photo.Url, false);
+
+    private ServiceEntryView ToEntryView(ServiceEntry entry, bool isPending, IReadOnlyList<EntryPhotoView> photos) => new(
         entry.Id,
         entry.TechnicianName,
         formatter.FormatDateTime(entry.CreatedAt),
@@ -104,7 +111,8 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter)
         [.. entry.Parts.Select(part => ToPartView(part, entry.IsCorrection))],
         entry.Latitude,
         entry.Longitude,
-        isPending);
+        isPending,
+        photos);
 
     private ServiceEntryPartView ToPartView(ServiceEntryPart part, bool isCorrection)
     {

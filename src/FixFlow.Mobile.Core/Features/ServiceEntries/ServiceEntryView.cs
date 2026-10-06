@@ -10,8 +10,11 @@ public sealed record ServiceEntryView(
     IReadOnlyList<ServiceEntryPartView> Parts,
     double? Latitude,
     double? Longitude,
-    bool IsPending)
+    bool IsPending,
+    IReadOnlyList<EntryPhotoView> Photos)
 {
+    public bool HasPhotos => Photos.Count > 0;
+
     public bool HasLocation => Latitude is not null && Longitude is not null;
 
     public bool HasParts => Parts.Count > 0;

@@ -68,6 +68,8 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
             timeProvider,
             new ImmediateUiDispatcher(),
             _messenger,
+            new PhotoStore(_userDatabase.Options, database),
+            _documents,
             _connectivity,
             _maps,
             _uris,
@@ -211,6 +213,15 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
 
         _handler.Requests.Count.ShouldBe(requestsBefore);
         await _dialogs.Received(1).ShowAlertAsync(AppResources.ErrorTitle, AppResources.ProtocolRequiresConnection, AppResources.CloseButton);
+    }
+
+    [Fact]
+    public async Task Should_Open_Sent_Photo_Address_And_Explain_When_No_App_Can_Show_It()
+    {
+        await _viewModel.OpenPhotoCommand.ExecuteAsync(new EntryPhotoView("https://api.test/api/v1/photos/1", false));
+
+        await _uris.Received(1).OpenAsync(new Uri("https://api.test/api/v1/photos/1"));
+        await _dialogs.Received(1).ShowAlertAsync(AppResources.ErrorTitle, AppResources.PhotoUnavailable, AppResources.CloseButton);
     }
 
     [Fact]
