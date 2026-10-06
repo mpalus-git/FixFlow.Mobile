@@ -447,4 +447,70 @@
   <data name="AddCorrectionButton" xml:space="preserve">
     <value>Correction entry</value>
   </data>
+  <data name="ConflictReasonWorkOrderNotFound" xml:space="preserve">
+    <value>The work order is no longer assigned to you or was deleted.</value>
+  </data>
+  <data name="ConflictReasonWorkOrderNotAssignedToTechnician" xml:space="preserve">
+    <value>The work order is not assigned to you.</value>
+  </data>
+  <data name="ConflictReasonWorkOrderTechnicianAlreadyHasWorkInProgress" xml:space="preserve">
+    <value>You already have another work order in progress. Complete it before starting another one.</value>
+  </data>
+  <data name="ConflictReasonWorkOrderNotInProgress" xml:space="preserve">
+    <value>The work order is not in progress, so no entry can be added to it.</value>
+  </data>
+  <data name="ConflictReasonWorkOrderNoServiceEntries" xml:space="preserve">
+    <value>The work order cannot be completed without at least one service entry.</value>
+  </data>
+  <data name="ConflictReasonWorkOrderClosed" xml:space="preserve">
+    <value>The work order is already completed or invoiced and cannot be changed.</value>
+  </data>
+  <data name="ConflictReasonWorkOrderInvalidStatusTransition" xml:space="preserve">
+    <value>The work order status has changed in the meantime and this change is no longer possible.</value>
+  </data>
+  <data name="ConflictReasonPartNotFound" xml:space="preserve">
+    <value>The part does not exist in the catalog.</value>
+  </data>
+  <data name="ConflictReasonPartArchived" xml:space="preserve">
+    <value>The part was archived and cannot be used.</value>
+  </data>
+  <data name="ConflictReasonPartInsufficientStock" xml:space="preserve">
+    <value>There are not enough units of the part in stock.</value>
+  </data>
+  <data name="ConflictReasonServiceEntryIdConflict" xml:space="preserve">
+    <value>An entry with this identifier already exists on another work order.</value>
+  </data>
+  <data name="ConflictReasonServiceEntryReturnExceedsConsumption" xml:space="preserve">
+    <value>The returned quantity exceeds the quantity of the part used on this work order.</value>
+  </data>
+  <data name="ConflictReasonPhotoContentTooLarge" xml:space="preserve">
+    <value>The photo is too large.</value>
+  </data>
+  <data name="ConflictReasonPhotoIdConflict" xml:space="preserve">
+    <value>A photo with this identifier was already uploaded by another technician.</value>
+  </data>
+  <data name="ConflictReasonLocalPhotoFileMissing" xml:space="preserve">
+    <value>The photo file no longer exists on this device.</value>
+  </data>
+  <data name="ConflictReasonRejected" xml:space="preserve">
+    <value>The server rejected the change (code {0}).</value>
+  </data>
+  <data name="ConflictReasonUnknown" xml:space="preserve">
+    <value>The server rejected the change.</value>
+  </data>
+  <data name="ChangeKindStartWork" xml:space="preserve">
+    <value>Start of work</value>
+  </data>
+  <data name="ChangeKindServiceEntry" xml:space="preserve">
+    <value>Service entry</value>
+  </data>
+  <data name="ChangeKindCorrection" xml:space="preserve">
+    <value>Correction entry</value>
+  </data>
+  <data name="ChangeKindCompleteWorkOrder" xml:space="preserve">
+    <value>Work order completion</value>
+  </data>
+  <data name="ChangeKindUploadPhoto" xml:space="preserve">
+    <value>Entry photo</value>
+  </data>
 </root>

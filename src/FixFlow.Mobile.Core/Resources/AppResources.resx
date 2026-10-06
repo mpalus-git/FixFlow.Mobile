@@ -447,4 +447,70 @@
   <data name="AddCorrectionButton" xml:space="preserve">
     <value>Wpis korygujący</value>
   </data>
+  <data name="ConflictReasonWorkOrderNotFound" xml:space="preserve">
+    <value>Zlecenie nie jest już do Ciebie przypisane albo zostało usunięte.</value>
+  </data>
+  <data name="ConflictReasonWorkOrderNotAssignedToTechnician" xml:space="preserve">
+    <value>Zlecenie nie jest przypisane do Ciebie.</value>
+  </data>
+  <data name="ConflictReasonWorkOrderTechnicianAlreadyHasWorkInProgress" xml:space="preserve">
+    <value>Masz już inne zlecenie w toku. Zakończ je, zanim rozpoczniesz kolejne.</value>
+  </data>
+  <data name="ConflictReasonWorkOrderNotInProgress" xml:space="preserve">
+    <value>Zlecenie nie jest w toku, więc nie można dodać do niego wpisu.</value>
+  </data>
+  <data name="ConflictReasonWorkOrderNoServiceEntries" xml:space="preserve">
+    <value>Zlecenia nie można zakończyć bez co najmniej jednego wpisu serwisowego.</value>
+  </data>
+  <data name="ConflictReasonWorkOrderClosed" xml:space="preserve">
+    <value>Zlecenie jest już zakończone lub rozliczone i nie można go zmieniać.</value>
+  </data>
+  <data name="ConflictReasonWorkOrderInvalidStatusTransition" xml:space="preserve">
+    <value>Status zlecenia zmienił się w międzyczasie i ta zmiana nie jest już możliwa.</value>
+  </data>
+  <data name="ConflictReasonPartNotFound" xml:space="preserve">
+    <value>Część nie istnieje w katalogu.</value>
+  </data>
+  <data name="ConflictReasonPartArchived" xml:space="preserve">
+    <value>Część została wycofana z katalogu i nie można jej zużyć.</value>
+  </data>
+  <data name="ConflictReasonPartInsufficientStock" xml:space="preserve">
+    <value>Brak wystarczającej liczby sztuk części w magazynie.</value>
+  </data>
+  <data name="ConflictReasonServiceEntryIdConflict" xml:space="preserve">
+    <value>Wpis o tym identyfikatorze istnieje już na innym zleceniu.</value>
+  </data>
+  <data name="ConflictReasonServiceEntryReturnExceedsConsumption" xml:space="preserve">
+    <value>Zwracana ilość jest większa niż ilość części zużyta na tym zleceniu.</value>
+  </data>
+  <data name="ConflictReasonPhotoContentTooLarge" xml:space="preserve">
+    <value>Zdjęcie jest za duże.</value>
+  </data>
+  <data name="ConflictReasonPhotoIdConflict" xml:space="preserve">
+    <value>Zdjęcie o tym identyfikatorze wysłał już inny technik.</value>
+  </data>
+  <data name="ConflictReasonLocalPhotoFileMissing" xml:space="preserve">
+    <value>Plik zdjęcia nie istnieje już na urządzeniu.</value>
+  </data>
+  <data name="ConflictReasonRejected" xml:space="preserve">
+    <value>Serwer odrzucił zmianę (kod {0}).</value>
+  </data>
+  <data name="ConflictReasonUnknown" xml:space="preserve">
+    <value>Serwer odrzucił zmianę.</value>
+  </data>
+  <data name="ChangeKindStartWork" xml:space="preserve">
+    <value>Rozpoczęcie pracy</value>
+  </data>
+  <data name="ChangeKindServiceEntry" xml:space="preserve">
+    <value>Wpis serwisowy</value>
+  </data>
+  <data name="ChangeKindCorrection" xml:space="preserve">
+    <value>Wpis korygujący</value>
+  </data>
+  <data name="ChangeKindCompleteWorkOrder" xml:space="preserve">
+    <value>Zakończenie zlecenia</value>
+  </data>
+  <data name="ChangeKindUploadPhoto" xml:space="preserve">
+    <value>Zdjęcie do wpisu</value>
+  </data>
 </root>
