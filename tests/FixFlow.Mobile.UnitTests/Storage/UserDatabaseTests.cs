@@ -63,6 +63,33 @@ public sealed class UserDatabaseTests : IAsyncDisposable
         Should.Throw<InvalidOperationException>(() => _userDatabase.Current);
     }
 
+    [Fact]
+    public async Task Should_Delete_Only_Current_Technician_Files_When_Database_Is_Deleted()
+    {
+        await _userDatabase.OpenAsync(TechnicianB);
+        await _userDatabase.OpenAsync(TechnicianA);
+        await _userDatabase.Current.Connection.ExecuteAsync("CREATE TABLE notes (text TEXT NOT NULL)");
+
+        await _userDatabase.DeleteAsync();
+
+        _userDatabase.UserId.ShouldBeNull();
+        Directory.GetFiles(_file.Directory, $"fixflow-{TechnicianA:N}.db3*").ShouldBeEmpty();
+        File.Exists(_userDatabase.PathFor(TechnicianB)).ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task Should_Start_With_Empty_Database_When_Technician_Logs_In_After_Deletion()
+    {
+        await _userDatabase.OpenAsync(TechnicianA);
+        await _userDatabase.Current.Connection.ExecuteAsync("CREATE TABLE notes (text TEXT NOT NULL)");
+        await _userDatabase.DeleteAsync();
+
+        await _userDatabase.OpenAsync(TechnicianA);
+
+        (await _userDatabase.Current.Connection.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'notes'")).ShouldBe(0);
+    }
+
     public async ValueTask DisposeAsync()
     {
         await _userDatabase.DisposeAsync();

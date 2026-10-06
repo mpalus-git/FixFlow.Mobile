@@ -67,7 +67,7 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
             _messenger);
         _viewModel = new WorkOrderListViewModel(
             new ScreenState(formatter),
-            new AuthService(api, api, _session, _userDatabase.Database, _timeProvider),
+            new AuthService(api, api, _session, _userDatabase.Database, new PhotoStore(_userDatabase.Options, _userDatabase.Database), _timeProvider),
             _workOrders,
             _outbox,
             sync,

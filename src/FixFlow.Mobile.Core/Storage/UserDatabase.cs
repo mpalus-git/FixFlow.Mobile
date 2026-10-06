@@ -32,5 +32,20 @@ public sealed class UserDatabase(LocalDatabaseOptions options, TimeProvider time
         }
     }
 
+    public async Task DeleteAsync()
+    {
+        if (UserId is not { } userId)
+        {
+            return;
+        }
+
+        await CloseAsync();
+        var path = PathFor(userId);
+        foreach (var file in new[] { path, $"{path}-wal", $"{path}-shm", $"{path}-journal" })
+        {
+            File.Delete(file);
+        }
+    }
+
     public async ValueTask DisposeAsync() => await CloseAsync();
 }
