@@ -44,7 +44,8 @@
                            IsPassword="True"
                            ReturnType="Go"
                            ReturnCommand="{Binding LoginCommand}"
-                           SemanticProperties.Description="{x:Static resources:AppResources.LoginPasswordLabel}" />
+                           SemanticProperties.Hint="{OnPlatform Android={x:Static resources:AppResources.LoginPasswordLabel}}"
+                           SemanticProperties.Description="{OnPlatform WinUI={x:Static resources:AppResources.LoginPasswordLabel}}" />
                 </Border>
             </VerticalStackLayout>
 
