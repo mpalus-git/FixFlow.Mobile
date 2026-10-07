@@ -36,8 +36,15 @@ jobs:
 
       - name: Test
         run: |
-          dotnet test --project tests/FixFlow.Mobile.UnitTests --no-build --configuration Release
+          dotnet test --project tests/FixFlow.Mobile.UnitTests --no-build --configuration Release --coverage --coverage-output-format cobertura --coverage-settings tests/CodeCoverage.config --results-directory TestResults/coverage
           dotnet test --project tests/FixFlow.Tools.Tests --no-build --configuration Release
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-unit
+          path: TestResults/coverage/*.cobertura.xml
+          if-no-files-found: error
 
   integration-tests:
     runs-on: ubuntu-26.04
@@ -55,7 +62,28 @@ jobs:
         run: dotnet build tests/FixFlow.Mobile.IntegrationTests --configuration Release
 
       - name: Test
-        run: dotnet test --project tests/FixFlow.Mobile.IntegrationTests --no-build --configuration Release
+        run: dotnet test --project tests/FixFlow.Mobile.IntegrationTests --no-build --configuration Release --coverage --coverage-output-format cobertura --coverage-settings tests/CodeCoverage.config --results-directory TestResults/coverage
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-integration
+          path: TestResults/coverage/*.cobertura.xml
+          if-no-files-found: error
+
+  coverage:
+    needs: [build-and-test, integration-tests]
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: coverage-*
+          path: TestResults/coverage
+
+      - name: Coverage summary
+        run: python3 .github/scripts/coverage_summary.py TestResults/coverage >> "$GITHUB_STEP_SUMMARY"
 
   check-comments:
     runs-on: ubuntu-26.04

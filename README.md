@@ -194,6 +194,10 @@ API przyjmuje zdjęcia jako surowy JPEG pod identyfikatorem nadanym przez klient
 
 Daty są pokazywane w strefie Europe/Warsaw niezależnie od strefy urządzenia, a sekcje listy (dziś, zaległe) liczone są według dnia w Warszawie. Czas pochodzi z wstrzykiwanego `TimeProvider`, więc testy sprawdzają granicę dnia oraz czas letni i zimowy przy urządzeniu ustawionym na inną strefę. Formaty dat są zapisane jawnie dla każdego języka, bo wzorce domyślne zależą od wersji ICU na urządzeniu.
 
+### Dostępność
+
+Elementy interaktywne mają opisy dla TalkBack i Narratora, a błędy logowania i walidacji formularzy są ogłaszane czytnikowi ekranu. Dwie poprawki wynikają z zachowania MAUI: na Androidzie opis (`SemanticProperties.Description`) pola tekstowego trafia do drzewa dostępności razem z surową treścią pola, więc pole hasła dostaje etykietę przez `Hint`, żeby hasło nie wyciekło do usług dostępności. Na Windows elementy `CollectionView` miały w UI Automation nazwę typu MAUI zamiast treści, więc karty listy i nagłówki sekcji dostają nazwy z widocznych tekstów.
+
 ### Pozostałe
 
 - Bez kontrolki mapy: kontrolka MAUI na Androidzie wymaga klucza Google Maps z kontem rozliczeniowym, a technikowi wystarcza otwarcie adresu i pozycji GPS w zewnętrznej aplikacji map (`Map.OpenAsync`).
@@ -206,7 +210,7 @@ Daty są pokazywane w strefie Europe/Warsaw niezależnie od strefy urządzenia, 
 
 | Projekt | Liczba | Zakres |
 |---|---|---|
-| `FixFlow.Mobile.UnitTests` | 388 | ViewModele (komendy, stany, walidacja, widoczność akcji), kolejka operacji (kolejność, ponawianie, klasyfikacja błędów, konflikty), nakładanie zmian oczekujących, sesja i równoległe odświeżanie tokena, mapowanie ProblemDetails, migracje i repozytoria SQLite, daty w Europe/Warsaw, planowanie przypomnień |
+| `FixFlow.Mobile.UnitTests` | 400 | ViewModele (komendy, stany, walidacja, widoczność akcji, ogłaszanie błędów), kolejka operacji (kolejność, ponawianie, klasyfikacja błędów, konflikty), nakładanie zmian oczekujących, sesja i równoległe odświeżanie tokena, mapowanie ProblemDetails, migracje i repozytoria SQLite, sprzątanie zdjęć, daty w Europe/Warsaw, planowanie przypomnień |
 | `FixFlow.Mobile.IntegrationTests` | 12 | synchronizacja na prawdziwym API |
 | `FixFlow.Tools.Tests` | 40 | usuwanie i wykrywanie komentarzy |
 
@@ -214,13 +218,15 @@ Testy jednostkowe używają SQLite na prawdziwym pliku w katalogu tymczasowym (b
 
 Testy integracyjne uruchamiają przez Testcontainers PostgreSQL 18 i obraz `ghcr.io/mpalus-git/fixflow.api` przypięty do konkretnego commita, a dane każdego testu zakłada konto administratora. Sprawdzają m.in. pełny przebieg technika (logowanie, rozpoczęcie, wpis z częścią, zakończenie), wysłanie zdjęcia przed wpisem, odrzucenie rozpoczęcia po przekazaniu zlecenia innemu technikowi, brak duplikatu wpisu wysłanego ponownie po zgubionej odpowiedzi oraz zachowanie kolejki przy zatrzymanym kontenerze API.
 
-CI uruchamia osobno: build i testy jednostkowe, testy integracyjne, kontrolę komentarzy, kontrolę wygenerowanego klienta, porównanie kontraktu z API (ostrzeżenie), build Androida i build Windows. Wydanie na tag `v*` buduje podpisany APK i archiwum zip wersji Windows.
+CI uruchamia osobno: build i testy jednostkowe, testy integracyjne, kontrolę komentarzy, kontrolę wygenerowanego klienta, porównanie kontraktu z API (ostrzeżenie), build Androida i build Windows. Pokrycie linii `FixFlow.Mobile.Core` z testów jednostkowych i integracyjnych razem trafia do podsumowania przebiegu, z podziałem na obszary, bez progów. Wydanie na tag `v*` buduje podpisany APK i archiwum zip wersji Windows.
+
+Wydajność zmierzona na APK wydania 1.0.0 na emulatorze Pixel 9 (Android 16): zimny start do pierwszej klatki (`am start -W`, mediana z 11 prób) 1,1 s zarówno do ekranu logowania, jak i do listy z zapisaną sesją. Przy przewijaniu (`dumpsys gfxinfo`) 3,4% klatek listy i 1,8% klatek szczegółów przekracza budżet klatki, mediana czasu klatki to 17 ms. Wyniki nie wymagały optymalizacji.
 
 ## Ograniczenia
 
 - Brak synchronizacji w tle: kolejka jest wysyłana tylko wtedy, gdy aplikacja działa. Zmiany zrobione offline czekają do jej otwarcia po odzyskaniu sieci, a przypomnienia o zmianie terminu w panelu docierają po najbliższej synchronizacji.
 - Brak wersji iOS i Mac Catalyst.
-- Brak automatycznych testów UI. Ekrany są sprawdzane ręcznie na emulatorze Androida i w wersji Windows, w obu motywach i na małym ekranie.
+- Brak automatycznych testów UI. Ekrany są sprawdzane ręcznie na emulatorze Androida i w wersji Windows, w obu motywach i na małym ekranie. Dostępność jest sprawdzana na drzewie dostępności Androida i drzewie UI Automation, bez ręcznego testu z włączonym TalkBack i Narratorem.
 - Przypomnienia działają tylko na Androidzie: wersja Plugin.LocalNotification dla Windows wymaga nowszego Windows App SDK niż MAUI 10.
 - Pozycja GPS trafia tylko do pierwszego wpisu po rozpoczęciu zlecenia, bo w API jest polem wpisu, a nie rozpoczęcia.
 - Protokół PDF można pobrać tylko online.
