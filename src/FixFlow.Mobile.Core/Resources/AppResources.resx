@@ -18,6 +18,9 @@
   <data name="WorkOrderDetailsTitle" xml:space="preserve">
     <value>Zlecenie</value>
   </data>
+  <data name="DetailsOpenHistoryButton" xml:space="preserve">
+    <value>Otwórz zlecenie</value>
+  </data>
   <data name="OfflineLastSync" xml:space="preserve">
     <value>Brak połączenia. Ostatnia synchronizacja: {0}</value>
   </data>

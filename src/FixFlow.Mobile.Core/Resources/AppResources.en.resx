@@ -18,6 +18,9 @@
   <data name="WorkOrderDetailsTitle" xml:space="preserve">
     <value>Work order</value>
   </data>
+  <data name="DetailsOpenHistoryButton" xml:space="preserve">
+    <value>Open work order</value>
+  </data>
   <data name="OfflineLastSync" xml:space="preserve">
     <value>Offline. Last sync: {0}</value>
   </data>
