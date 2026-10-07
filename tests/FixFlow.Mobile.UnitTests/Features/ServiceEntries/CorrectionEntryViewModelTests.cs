@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Messaging;
+using FixFlow.Mobile.Core.Accessibility;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Settings;
@@ -23,6 +24,7 @@ public sealed class CorrectionEntryViewModelTests : IAsyncLifetime
     private readonly FakeTimeProvider _timeProvider = new(Now);
     private readonly TestUserDatabase _userDatabase = new();
     private readonly INavigationService _navigation = Substitute.For<INavigationService>();
+    private readonly IScreenReaderAnnouncer _announcer = Substitute.For<IScreenReaderAnnouncer>();
     private readonly WorkOrder _workOrder = TestWorkOrders.Create("ZL-1", Now.AddHours(4));
     private readonly OutboxRepository _outbox;
     private readonly OutboxWriter _writer;
@@ -40,7 +42,8 @@ public sealed class CorrectionEntryViewModelTests : IAsyncLifetime
             new ServiceEntryRepository(database),
             _outbox,
             _writer,
-            _navigation);
+            _navigation,
+            _announcer);
     }
 
     public async ValueTask InitializeAsync()
@@ -94,6 +97,16 @@ public sealed class CorrectionEntryViewModelTests : IAsyncLifetime
 
         _viewModel.ValidationMessage.ShouldBe(AppResources.ResourceManager.GetString(expectedKey, AppResources.Culture));
         await _navigation.DidNotReceive().GoBackAsync();
+    }
+
+    [Fact]
+    public async Task Should_Announce_Validation_Message_To_Screen_Reader_When_Reason_Is_Missing()
+    {
+        await _viewModel.OnNavigatedToAsync(_workOrder.Id);
+
+        await _viewModel.SaveCommand.ExecuteAsync(null);
+
+        _announcer.Received(1).Announce(AppResources.CorrectionReasonRequired);
     }
 
     [Fact]

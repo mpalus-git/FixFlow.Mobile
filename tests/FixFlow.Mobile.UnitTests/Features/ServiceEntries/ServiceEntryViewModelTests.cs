@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Messaging;
+using FixFlow.Mobile.Core.Accessibility;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Dialogs;
 using FixFlow.Mobile.Core.Features.Parts;
@@ -27,6 +28,7 @@ public sealed class ServiceEntryViewModelTests : IAsyncLifetime
     private readonly FakeTimeProvider _timeProvider = new(StartedAt);
     private readonly TestUserDatabase _userDatabase = new();
     private readonly INavigationService _navigation = Substitute.For<INavigationService>();
+    private readonly IScreenReaderAnnouncer _announcer = Substitute.For<IScreenReaderAnnouncer>();
     private readonly WorkOrder _workOrder = TestWorkOrders.Create("ZL-1", StartedAt.AddHours(4));
     private readonly OutboxRepository _outbox;
     private readonly WorkTimerRepository _timers;
@@ -56,7 +58,8 @@ public sealed class ServiceEntryViewModelTests : IAsyncLifetime
             new OutboxWriter(_outbox, _timeProvider, new WeakReferenceMessenger()),
             clock,
             _formatter,
-            _navigation);
+            _navigation,
+            _announcer);
     }
 
     public async ValueTask InitializeAsync()
@@ -128,6 +131,17 @@ public sealed class ServiceEntryViewModelTests : IAsyncLifetime
         _viewModel.ValidationMessage.ShouldBe(AppResources.EntryNoteRequired);
         (await _outbox.GetAllAsync()).ShouldHaveSingleItem().Kind.ShouldBe(OutboxOperationKind.StartWork);
         await _navigation.DidNotReceive().GoBackAsync();
+    }
+
+    [Fact]
+    public async Task Should_Announce_Validation_Message_To_Screen_Reader_When_Entry_Is_Invalid()
+    {
+        await _viewModel.OnNavigatedToAsync(_workOrder.Id);
+        _viewModel.Note = string.Empty;
+
+        await _viewModel.SaveCommand.ExecuteAsync(null);
+
+        _announcer.Received(1).Announce(AppResources.EntryNoteRequired);
     }
 
     [Fact]
