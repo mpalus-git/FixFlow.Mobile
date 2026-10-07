@@ -31,11 +31,40 @@ public sealed class PhotoStore(LocalDatabaseOptions options, UserDatabase userDa
         }
     }
 
+    public void DeleteAllExcept(IReadOnlySet<Guid> keptPhotoIds)
+    {
+        ArgumentNullException.ThrowIfNull(keptPhotoIds);
+        if (!Directory.Exists(UserDirectory))
+        {
+            return;
+        }
+
+        foreach (var path in Directory.EnumerateFiles(UserDirectory, "*.jpg"))
+        {
+            if (Guid.TryParseExact(Path.GetFileNameWithoutExtension(path), "N", out var photoId) && !keptPhotoIds.Contains(photoId))
+            {
+                TryDelete(path);
+            }
+        }
+    }
+
     public void Delete(Guid photoId)
     {
         if (ExistingPathFor(photoId) is { } path)
         {
             File.Delete(path);
+        }
+    }
+
+    private static void TryDelete(string path)
+    {
+        try
+        {
+            File.Delete(path);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            return;
         }
     }
 }

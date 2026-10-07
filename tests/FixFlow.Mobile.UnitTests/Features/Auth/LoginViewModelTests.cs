@@ -6,6 +6,7 @@ using FixFlow.Mobile.Core.Connectivity;
 using FixFlow.Mobile.Core.Dialogs;
 using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
+using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Launching;
 using FixFlow.Mobile.Core.Navigation;
@@ -42,7 +43,7 @@ public sealed class LoginViewModelTests : IAsyncDisposable
         var anonymousApi = RestService.ForGenerated<IFixFlowApi>(CreateClient(_handler));
         _refresher = new TokenRefresher(anonymousApi, session, _timeProvider);
         _authenticationHandler = new AuthenticationHandler(session, _refresher) { InnerHandler = _handler };
-        var authService = new AuthService(anonymousApi, RestService.ForGenerated<IFixFlowApi>(CreateClient(_authenticationHandler)), session, _userDatabase.Database, new PhotoStore(_userDatabase.Options, _userDatabase.Database), _timeProvider);
+        var authService = new AuthService(anonymousApi, RestService.ForGenerated<IFixFlowApi>(CreateClient(_authenticationHandler)), session, _userDatabase.Database, new PhotoStore(_userDatabase.Options, _userDatabase.Database), new OrphanedPhotoCleaner(new OutboxRepository(_userDatabase.Database), new PhotoStore(_userDatabase.Options, _userDatabase.Database)), _timeProvider);
         var readinessProbe = new ServerReadinessProbe(CreateClient(_handler), _timeProvider);
         var demoAccount = new DemoAccount("demo@fixflow.test", "demo-secret");
         _viewModel = new LoginViewModel(authService, readinessProbe, _connectivity, _navigation, _dialogs, _uriLauncher, demoAccount)

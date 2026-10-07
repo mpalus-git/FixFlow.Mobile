@@ -12,6 +12,7 @@ public sealed class AuthService(
     SessionStore session,
     UserDatabase userDatabase,
     PhotoStore photos,
+    OrphanedPhotoCleaner photoCleaner,
     TimeProvider timeProvider)
 {
     public static readonly TimeSpan RevokeTimeout = TimeSpan.FromSeconds(5);
@@ -22,6 +23,7 @@ public sealed class AuthService(
         if (user is not null)
         {
             await userDatabase.OpenAsync(user.Id);
+            await photoCleaner.CleanAsync();
         }
 
         return user;
@@ -54,6 +56,7 @@ public sealed class AuthService(
 
         await session.StartAsync(tokens, user);
         await userDatabase.OpenAsync(user.Id);
+        await photoCleaner.CleanAsync();
         return LoginResult.Succeeded(user);
     }
 

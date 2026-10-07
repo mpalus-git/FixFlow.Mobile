@@ -1,6 +1,7 @@
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
+using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Navigation;
 using FixFlow.Mobile.UnitTests.Storage;
@@ -22,7 +23,7 @@ public sealed class StartupViewModelTests : IAsyncDisposable
     {
         _session = new SessionStore(_secureStore, TimeProvider.System);
         var api = RestService.ForGenerated<IFixFlowApi>(_httpClient);
-        _viewModel = new StartupViewModel(new AuthService(api, api, _session, _userDatabase.Database, new PhotoStore(_userDatabase.Options, _userDatabase.Database), TimeProvider.System), _navigation);
+        _viewModel = new StartupViewModel(new AuthService(api, api, _session, _userDatabase.Database, new PhotoStore(_userDatabase.Options, _userDatabase.Database), new OrphanedPhotoCleaner(new OutboxRepository(_userDatabase.Database), new PhotoStore(_userDatabase.Options, _userDatabase.Database)), TimeProvider.System), _navigation);
     }
 
     [Fact]
