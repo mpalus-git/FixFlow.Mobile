@@ -436,6 +436,60 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
         _viewModel.Pause();
     }
 
+    [Fact]
+    public async Task Should_Clear_Offline_Banner_When_Connection_Returns()
+    {
+        await ShowOfflineAsync();
+        _viewModel.Resume();
+
+        _messenger.Send(new ConnectivityChangedMessage(true));
+        await WaitUntilAsync(() => !_viewModel.Screen.IsOffline);
+
+        _viewModel.Screen.IsOffline.ShouldBeFalse();
+        _viewModel.Pause();
+    }
+
+    [Fact]
+    public async Task Should_Show_Offline_Banner_When_Connection_Is_Lost()
+    {
+        await _viewModel.OnNavigatedToAsync(_api.WorkOrderId);
+        _viewModel.Resume();
+
+        _messenger.Send(new ConnectivityChangedMessage(false));
+        await WaitUntilAsync(() => _viewModel.Screen.IsOffline);
+
+        _viewModel.Screen.IsOffline.ShouldBeTrue();
+        _viewModel.Pause();
+    }
+
+    [Fact]
+    public async Task Should_Clear_Refresh_Notice_When_Background_Sync_Succeeds()
+    {
+        _api.Failures[$"/api/v1/devices/{_api.DeviceId}/work-orders"] = HttpStatusCode.ServiceUnavailable;
+        await _viewModel.OnNavigatedToAsync(_api.WorkOrderId);
+        _viewModel.HasNotice.ShouldBeTrue();
+        _api.Failures.Clear();
+        _viewModel.Resume();
+
+        _messenger.Send(new SyncCompletedMessage(new SyncResult(false, false, null, PullResult.Succeeded)));
+        await WaitUntilAsync(() => !_viewModel.HasNotice);
+
+        _viewModel.HasNotice.ShouldBeFalse();
+        _viewModel.Pause();
+    }
+
+    [Fact]
+    public async Task Should_Ignore_Connection_Changes_When_Page_Is_Hidden()
+    {
+        await ShowOfflineAsync();
+        _viewModel.Resume();
+        _viewModel.Pause();
+
+        _messenger.Send(new ConnectivityChangedMessage(true));
+
+        _viewModel.Screen.IsOffline.ShouldBeTrue();
+    }
+
     public async ValueTask DisposeAsync()
     {
         _handler.Dispose();
