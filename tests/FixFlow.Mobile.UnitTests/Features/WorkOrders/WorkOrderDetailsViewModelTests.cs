@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Connectivity;
 using FixFlow.Mobile.Core.Dialogs;
+using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Settings;
 using FixFlow.Mobile.Core.Features.Sync;
@@ -60,7 +61,7 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
             _sources,
             new WorkOrderDetailsSyncService(api, _sources.WorkOrders, _sources.Clients, _sources.Devices, _sources.ServiceEntries, _sources.DeviceHistory),
             new SyncStateRepository(database, timeProvider),
-            new WorkOrderDetailsPresenter(formatter),
+            new WorkOrderDetailsPresenter(formatter, new SessionStore(Substitute.For<ISecureStore>(), timeProvider)),
             new ServiceProtocolService(api, _documents),
             new OutboxWriter(_sources.Outbox, timeProvider, new WeakReferenceMessenger()),
             new WorkLocationRecorder(_location, _dialogs, _sources.WorkTimers),
@@ -434,6 +435,60 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
 
         _viewModel.Details!.StatusText.ShouldBe(WorkOrderTexts.Status(WorkOrderStatus.InProgress));
         _viewModel.Pause();
+    }
+
+    [Fact]
+    public async Task Should_Clear_Offline_Banner_When_Connection_Returns()
+    {
+        await ShowOfflineAsync();
+        _viewModel.Resume();
+
+        _messenger.Send(new ConnectivityChangedMessage(true));
+        await WaitUntilAsync(() => !_viewModel.Screen.IsOffline);
+
+        _viewModel.Screen.IsOffline.ShouldBeFalse();
+        _viewModel.Pause();
+    }
+
+    [Fact]
+    public async Task Should_Show_Offline_Banner_When_Connection_Is_Lost()
+    {
+        await _viewModel.OnNavigatedToAsync(_api.WorkOrderId);
+        _viewModel.Resume();
+
+        _messenger.Send(new ConnectivityChangedMessage(false));
+        await WaitUntilAsync(() => _viewModel.Screen.IsOffline);
+
+        _viewModel.Screen.IsOffline.ShouldBeTrue();
+        _viewModel.Pause();
+    }
+
+    [Fact]
+    public async Task Should_Clear_Refresh_Notice_When_Background_Sync_Succeeds()
+    {
+        _api.Failures[$"/api/v1/devices/{_api.DeviceId}/work-orders"] = HttpStatusCode.ServiceUnavailable;
+        await _viewModel.OnNavigatedToAsync(_api.WorkOrderId);
+        _viewModel.HasNotice.ShouldBeTrue();
+        _api.Failures.Clear();
+        _viewModel.Resume();
+
+        _messenger.Send(new SyncCompletedMessage(new SyncResult(false, false, null, PullResult.Succeeded)));
+        await WaitUntilAsync(() => !_viewModel.HasNotice);
+
+        _viewModel.HasNotice.ShouldBeFalse();
+        _viewModel.Pause();
+    }
+
+    [Fact]
+    public async Task Should_Ignore_Connection_Changes_When_Page_Is_Hidden()
+    {
+        await ShowOfflineAsync();
+        _viewModel.Resume();
+        _viewModel.Pause();
+
+        _messenger.Send(new ConnectivityChangedMessage(true));
+
+        _viewModel.Screen.IsOffline.ShouldBeTrue();
     }
 
     public async ValueTask DisposeAsync()

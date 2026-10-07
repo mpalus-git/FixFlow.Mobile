@@ -44,6 +44,7 @@ public sealed partial class WorkOrderDetailsViewModel(
     private bool _isLocating;
     private ITimer? _clock;
     private int _localVersion;
+    private int _connectionVersion;
 
     public ScreenState Screen { get; } = screen;
 
@@ -97,7 +98,8 @@ public sealed partial class WorkOrderDetailsViewModel(
         _clock ??= timeProvider.CreateTimer(_ => uiDispatcher.Post(ShowWorkTimerAsync), null, ClockInterval, ClockInterval);
         if (!messenger.IsRegistered<SyncCompletedMessage>(this))
         {
-            messenger.Register<WorkOrderDetailsViewModel, SyncCompletedMessage>(this, static (recipient, _) => recipient.ReloadLocal());
+            messenger.Register<WorkOrderDetailsViewModel, SyncCompletedMessage>(this, static (recipient, message) => recipient.OnSyncCompleted(message.Result));
+            messenger.Register<WorkOrderDetailsViewModel, ConnectivityChangedMessage>(this, static (recipient, message) => recipient.OnConnectivityChanged(message.IsOnline));
         }
 
         ReloadLocal();
@@ -108,6 +110,7 @@ public sealed partial class WorkOrderDetailsViewModel(
         _clock?.Dispose();
         _clock = null;
         messenger.Unregister<SyncCompletedMessage>(this);
+        messenger.Unregister<ConnectivityChangedMessage>(this);
     }
 
     public async Task OnNavigatedToAsync(Guid parameter)
@@ -136,7 +139,7 @@ public sealed partial class WorkOrderDetailsViewModel(
             Notice = null;
             if (!connectivity.IsOnline)
             {
-                Screen.SetOffline((await syncStates.GetAsync(WorkOrderSyncService.SyncStateKey))?.UpdatedAt);
+                await ShowConnectionAsync(isOnline: false);
                 if (Details is null)
                 {
                     Screen.ShowError(AppResources.DetailsLoadFailed);
@@ -318,7 +321,49 @@ public sealed partial class WorkOrderDetailsViewModel(
     {
         if (Details is not null)
         {
-            uiDispatcher.Post(ShowLocalAsync);
+            uiDispatcher.Post(async () =>
+            {
+                await ShowConnectionAsync(connectivity.IsOnline);
+                await ShowLocalAsync();
+            });
+        }
+    }
+
+    private void OnSyncCompleted(SyncResult result)
+    {
+        if (Details is not null)
+        {
+            uiDispatcher.Post(() => ApplySyncResultAsync(result));
+        }
+    }
+
+    private async Task ApplySyncResultAsync(SyncResult result)
+    {
+        await ShowConnectionAsync(!result.IsOffline);
+        if (result.Pull?.Outcome == PullOutcome.Succeeded && HasNotice)
+        {
+            await RefreshCommand.ExecuteAsync(null);
+            return;
+        }
+
+        await ShowLocalAsync();
+    }
+
+    private void OnConnectivityChanged(bool isOnline) => uiDispatcher.Post(() => ShowConnectionAsync(isOnline));
+
+    private async Task ShowConnectionAsync(bool isOnline)
+    {
+        var version = ++_connectionVersion;
+        if (isOnline)
+        {
+            Screen.SetOnline();
+            return;
+        }
+
+        var lastSyncedAt = (await syncStates.GetAsync(WorkOrderSyncService.SyncStateKey))?.UpdatedAt;
+        if (version == _connectionVersion)
+        {
+            Screen.SetOffline(lastSyncedAt);
         }
     }
 

@@ -200,7 +200,7 @@ public sealed class SettingsViewModelTests : IAsyncLifetime
     private SettingsViewModel CreateViewModel()
     {
         var api = RestService.ForGenerated<IFixFlowApi>(new HttpClient(_handler, disposeHandler: false) { BaseAddress = new Uri("https://api.test") });
-        var authService = new AuthService(api, api, _session, _userDatabase.Database, new PhotoStore(_userDatabase.Options, _userDatabase.Database), _timeProvider);
+        var authService = new AuthService(api, api, _session, _userDatabase.Database, new PhotoStore(_userDatabase.Options, _userDatabase.Database), new OrphanedPhotoCleaner(new OutboxRepository(_userDatabase.Database), new PhotoStore(_userDatabase.Options, _userDatabase.Database)), _timeProvider);
         return new SettingsViewModel(
             _language,
             _theme,

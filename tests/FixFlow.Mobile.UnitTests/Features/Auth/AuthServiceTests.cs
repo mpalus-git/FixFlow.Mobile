@@ -5,6 +5,7 @@ using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Api.Errors;
 using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
+using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.UnitTests.Api;
 using FixFlow.Mobile.UnitTests.Storage;
 using Microsoft.Extensions.Time.Testing;
@@ -41,7 +42,7 @@ public sealed class AuthServiceTests : IAsyncDisposable
         _refresher = new TokenRefresher(anonymousApi, _session, _timeProvider);
         _authenticationHandler = new AuthenticationHandler(_session, _refresher) { InnerHandler = _handler };
         var api = RestService.ForGenerated<IFixFlowApi>(new HttpClient(_authenticationHandler, disposeHandler: false) { BaseAddress = new Uri("https://api.test") });
-        _service = new AuthService(anonymousApi, api, _session, _userDatabase.Database, new PhotoStore(_userDatabase.Options, _userDatabase.Database), _timeProvider);
+        _service = new AuthService(anonymousApi, api, _session, _userDatabase.Database, new PhotoStore(_userDatabase.Options, _userDatabase.Database), new OrphanedPhotoCleaner(new OutboxRepository(_userDatabase.Database), new PhotoStore(_userDatabase.Options, _userDatabase.Database)), _timeProvider);
     }
 
     [Fact]

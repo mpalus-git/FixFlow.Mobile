@@ -1,4 +1,5 @@
 using FixFlow.Mobile.Core.Api;
+using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Settings;
 using FixFlow.Mobile.Core.Features.Sync;
@@ -16,6 +17,7 @@ public sealed class WorkOrderDetailsPresenterTests : IDisposable
 
     private readonly GlobalCultureScope _cultureScope = new();
     private readonly DisplayFormatter _formatter;
+    private readonly SessionStore _session = new(Substitute.For<ISecureStore>(), new FakeTimeProvider(Now));
     private readonly WorkOrderDetailsPresenter _presenter;
     private readonly WorkOrder _workOrder = TestWorkOrders.Create("ZL-2026-0042", Now.AddHours(4), WorkOrderStatus.InProgress);
 
@@ -24,7 +26,7 @@ public sealed class WorkOrderDetailsPresenterTests : IDisposable
         var languageService = new LanguageService(Substitute.For<ISettingsStore>());
         languageService.ChangeLanguage(AppLanguage.Polish);
         _formatter = new DisplayFormatter(languageService, BusinessClock.CreateForWarsaw(new FakeTimeProvider(Now)));
-        _presenter = new WorkOrderDetailsPresenter(_formatter);
+        _presenter = new WorkOrderDetailsPresenter(_formatter, _session);
     }
 
     [Fact]
@@ -94,6 +96,20 @@ public sealed class WorkOrderDetailsPresenterTests : IDisposable
         view.Entries.Select(entry => entry.IsPending).ShouldBe([false, true]);
         view.Entries[1].Note.ShouldBe("Druga wizyta");
         view.PartsTotalText.ShouldBe($"Części netto razem: {_formatter.FormatMoney(15m)}");
+    }
+
+    [Fact]
+    public async Task Should_Show_Current_Technician_As_Author_When_Entry_Is_Pending()
+    {
+        await _session.StartAsync(
+            new AuthTokensResponse("access", Now.AddMinutes(15), "refresh", Now.AddDays(7)),
+            new SessionUser(Guid.NewGuid(), "jan@fixflow.test", "Jan Kowalski", SessionUser.TechnicianRole));
+        var pending = new PendingServiceEntry(Guid.CreateVersion7(), "Offline", false, null, null, null, null, []);
+        var operation = new OutboxOperation(Guid.CreateVersion7(), _workOrder.Id, OutboxOperationKind.AddServiceEntry, OutboxPayload.Serialize(pending), Now, 0, null, null);
+
+        var view = _presenter.Present(_workOrder, null, null, [], [], [operation]);
+
+        view.Entries.ShouldHaveSingleItem().TechnicianName.ShouldBe("Jan Kowalski");
     }
 
     [Theory]
