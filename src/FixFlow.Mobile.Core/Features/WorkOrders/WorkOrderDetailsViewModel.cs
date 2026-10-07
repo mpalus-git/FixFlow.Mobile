@@ -44,6 +44,7 @@ public sealed partial class WorkOrderDetailsViewModel(
     private bool _isLocating;
     private ITimer? _clock;
     private int _localVersion;
+    private int _connectionVersion;
 
     public ScreenState Screen { get; } = screen;
 
@@ -352,13 +353,17 @@ public sealed partial class WorkOrderDetailsViewModel(
 
     private async Task ShowConnectionAsync(bool isOnline)
     {
+        var version = ++_connectionVersion;
         if (isOnline)
         {
             Screen.SetOnline();
+            return;
         }
-        else
+
+        var lastSyncedAt = (await syncStates.GetAsync(WorkOrderSyncService.SyncStateKey))?.UpdatedAt;
+        if (version == _connectionVersion)
         {
-            Screen.SetOffline((await syncStates.GetAsync(WorkOrderSyncService.SyncStateKey))?.UpdatedAt);
+            Screen.SetOffline(lastSyncedAt);
         }
     }
 
