@@ -15,6 +15,9 @@
   <data name="WorkOrderListTitle" xml:space="preserve">
     <value>My work orders</value>
   </data>
+  <data name="WorkOrderDetailsTitle" xml:space="preserve">
+    <value>Work order</value>
+  </data>
   <data name="OfflineLastSync" xml:space="preserve">
     <value>Offline. Last sync: {0}</value>
   </data>

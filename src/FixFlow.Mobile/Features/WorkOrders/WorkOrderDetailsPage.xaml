@@ -7,7 +7,7 @@
              xmlns:viewModels="clr-namespace:FixFlow.Mobile.Core.Features.WorkOrders;assembly=FixFlow.Mobile.Core"
              x:Class="FixFlow.Mobile.Features.WorkOrders.WorkOrderDetailsPage"
              x:DataType="viewModels:WorkOrderDetailsViewModel"
-             Title="{Binding Details.Number}">
+             Title="{Binding Details.Number, TargetNullValue={x:Static resources:AppResources.WorkOrderDetailsTitle}}">
     <Grid RowDefinitions="Auto,Auto,*">
         <controls:OfflineBanner IsVisible="{Binding Screen.IsOffline}"
                                 Message="{Binding Screen.OfflineMessage}" />
