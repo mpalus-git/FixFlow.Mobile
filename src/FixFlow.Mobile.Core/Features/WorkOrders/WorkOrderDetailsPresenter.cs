@@ -1,4 +1,5 @@
 using FixFlow.Mobile.Core.Api;
+using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Formatting;
@@ -6,7 +7,7 @@ using FixFlow.Mobile.Core.Resources;
 
 namespace FixFlow.Mobile.Core.Features.WorkOrders;
 
-public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter)
+public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, SessionStore session)
 {
     public WorkOrderDetailsView Present(
         WorkOrder workOrder,
@@ -80,14 +81,15 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter)
         WorkOrderTexts.Format(AppResources.DetailsSerialNumber, device.SerialNumber),
         WorkOrderTexts.Format(AppResources.DetailsInstalledOn, formatter.FormatDate(device.InstallationDate)));
 
-    private static ServiceEntry ToServiceEntry(Guid workOrderId, OutboxOperation operation)
+    private ServiceEntry ToServiceEntry(Guid workOrderId, OutboxOperation operation)
     {
         var pending = OutboxPayload.ToServiceEntry(operation);
+        var author = session.CurrentUser;
         return new ServiceEntry(
             pending.Id,
             workOrderId,
-            Guid.Empty,
-            string.Empty,
+            author?.Id ?? Guid.Empty,
+            author?.FullName ?? string.Empty,
             pending.Note,
             pending.IsCorrection,
             pending.WorkStartedAt,

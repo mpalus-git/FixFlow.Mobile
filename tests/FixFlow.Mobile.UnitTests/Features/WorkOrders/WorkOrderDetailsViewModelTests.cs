@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Connectivity;
 using FixFlow.Mobile.Core.Dialogs;
+using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Settings;
 using FixFlow.Mobile.Core.Features.Sync;
@@ -60,7 +61,7 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
             _sources,
             new WorkOrderDetailsSyncService(api, _sources.WorkOrders, _sources.Clients, _sources.Devices, _sources.ServiceEntries, _sources.DeviceHistory),
             new SyncStateRepository(database, timeProvider),
-            new WorkOrderDetailsPresenter(formatter),
+            new WorkOrderDetailsPresenter(formatter, new SessionStore(Substitute.For<ISecureStore>(), timeProvider)),
             new ServiceProtocolService(api, _documents),
             new OutboxWriter(_sources.Outbox, timeProvider, new WeakReferenceMessenger()),
             new WorkLocationRecorder(_location, _dialogs, _sources.WorkTimers),
