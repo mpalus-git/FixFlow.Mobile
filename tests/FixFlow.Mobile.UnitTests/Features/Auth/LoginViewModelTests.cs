@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using FixFlow.Mobile.Core.Accessibility;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Connectivity;
 using FixFlow.Mobile.Core.Dialogs;
@@ -27,6 +28,7 @@ public sealed class LoginViewModelTests : IAsyncDisposable
     private readonly INavigationService _navigation = Substitute.For<INavigationService>();
     private readonly IDialogService _dialogs = Substitute.For<IDialogService>();
     private readonly IUriLauncher _uriLauncher = Substitute.For<IUriLauncher>();
+    private readonly IScreenReaderAnnouncer _announcer = Substitute.For<IScreenReaderAnnouncer>();
     private readonly StubHttpMessageHandler _handler;
     private readonly AuthenticationHandler _authenticationHandler;
     private readonly TokenRefresher _refresher;
@@ -46,7 +48,7 @@ public sealed class LoginViewModelTests : IAsyncDisposable
         var authService = new AuthService(anonymousApi, RestService.ForGenerated<IFixFlowApi>(CreateClient(_authenticationHandler)), session, _userDatabase.Database, new PhotoStore(_userDatabase.Options, _userDatabase.Database), new OrphanedPhotoCleaner(new OutboxRepository(_userDatabase.Database), new PhotoStore(_userDatabase.Options, _userDatabase.Database)), _timeProvider);
         var readinessProbe = new ServerReadinessProbe(CreateClient(_handler), _timeProvider);
         var demoAccount = new DemoAccount("demo@fixflow.test", "demo-secret");
-        _viewModel = new LoginViewModel(authService, readinessProbe, _connectivity, _navigation, _dialogs, _uriLauncher, demoAccount)
+        _viewModel = new LoginViewModel(authService, readinessProbe, _connectivity, _navigation, _dialogs, _uriLauncher, demoAccount, _announcer)
         {
             Email = " jan@fixflow.test ",
             Password = "secret",
@@ -97,6 +99,16 @@ public sealed class LoginViewModelTests : IAsyncDisposable
         await _viewModel.LoginCommand.ExecuteAsync(null);
 
         _viewModel.ErrorMessage.ShouldBe("Email must be a valid email address.");
+    }
+
+    [Fact]
+    public async Task Should_Announce_Error_To_Screen_Reader_When_Login_Fails()
+    {
+        _connectivity.IsOnline.Returns(false);
+
+        await _viewModel.LoginCommand.ExecuteAsync(null);
+
+        _announcer.Received(1).Announce(AppResources.LoginOffline);
     }
 
     [Fact]

@@ -18,6 +18,9 @@
   <data name="WorkOrderDetailsTitle" xml:space="preserve">
     <value>Work order</value>
   </data>
+  <data name="DetailsOpenHistoryButton" xml:space="preserve">
+    <value>Open work order</value>
+  </data>
   <data name="OfflineLastSync" xml:space="preserve">
     <value>Offline. Last sync: {0}</value>
   </data>
@@ -94,7 +97,7 @@
     <value>Session expired</value>
   </data>
   <data name="SessionExpiredMessage" xml:space="preserve">
-    <value>Sign in again. Data saved on the device has been kept.</value>
+    <value>Sign in again. Your data on this device has been kept.</value>
   </data>
   <data name="DemoLoginButton" xml:space="preserve">
     <value>Sign in with demo account</value>
@@ -172,7 +175,7 @@
     <value>{0} pcs</value>
   </data>
   <data name="DetailsPartsTotal" xml:space="preserve">
-    <value>Net parts total: {0}</value>
+    <value>Parts total (net): {0}</value>
   </data>
   <data name="DetailsEntryCount" xml:space="preserve">
     <value>Entries: {0}</value>
@@ -196,10 +199,10 @@
     <value>Could not open the phone app.</value>
   </data>
   <data name="ProtocolRequiresConnection" xml:space="preserve">
-    <value>The protocol can only be downloaded with a network connection.</value>
+    <value>The service report can only be downloaded online.</value>
   </data>
   <data name="ProtocolFailed" xml:space="preserve">
-    <value>Could not download the protocol.</value>
+    <value>Could not download the service report.</value>
   </data>
   <data name="DetailsClientSection" xml:space="preserve">
     <value>Client</value>
@@ -232,16 +235,16 @@
     <value>No previous work orders on this device.</value>
   </data>
   <data name="DetailsDownloadProtocolButton" xml:space="preserve">
-    <value>Download PDF protocol</value>
+    <value>Download service report (PDF)</value>
   </data>
   <data name="PendingSyncLabel" xml:space="preserve">
     <value>Waiting to be sent</value>
   </data>
   <data name="SyncPendingCount" xml:space="preserve">
-    <value>To send: {0}</value>
+    <value>Pending: {0}</value>
   </data>
   <data name="SyncConflictCount" xml:space="preserve">
-    <value>To resolve: {0}</value>
+    <value>Needs resolving: {0}</value>
   </data>
   <data name="LocationExplanationTitle" xml:space="preserve">
     <value>Location when starting work</value>
@@ -313,10 +316,10 @@
     <value>Work cannot start before the work order was started ({0}).</value>
   </data>
   <data name="EntryFinishBeforeStart" xml:space="preserve">
-    <value>Work must finish after it started.</value>
+    <value>The end of work must be after its start.</value>
   </data>
   <data name="EntryFinishInFuture" xml:space="preserve">
-    <value>Work cannot finish in the future.</value>
+    <value>The end of work cannot be in the future.</value>
   </data>
   <data name="EntryLocationAttached" xml:space="preserve">
     <value>The position from the start of work will be attached to this entry.</value>
@@ -337,10 +340,10 @@
     <value>What was done?</value>
   </data>
   <data name="EntryWorkStartLabel" xml:space="preserve">
-    <value>Work started</value>
+    <value>Work start</value>
   </data>
   <data name="EntryWorkFinishLabel" xml:space="preserve">
-    <value>Work finished</value>
+    <value>Work end</value>
   </data>
   <data name="EntryPartsSection" xml:space="preserve">
     <value>Used parts</value>
@@ -439,7 +442,7 @@
     <value>Reason for correction</value>
   </data>
   <data name="CorrectionReasonPlaceholder" xml:space="preserve">
-    <value>E.g. two filters too many were recorded</value>
+    <value>E.g. two extra filters were recorded</value>
   </data>
   <data name="CorrectionPartsSection" xml:space="preserve">
     <value>Parts to return</value>
@@ -544,16 +547,16 @@
     <value>Photos: {0}</value>
   </data>
   <data name="SyncLastSync" xml:space="preserve">
-    <value>Last synchronization: {0}</value>
+    <value>Last sync: {0}</value>
   </data>
   <data name="SyncNeverSynced" xml:space="preserve">
-    <value>Data has not been synchronized yet.</value>
+    <value>Data has not been synced yet.</value>
   </data>
   <data name="SyncRejectedAt" xml:space="preserve">
     <value>Rejected {0}</value>
   </data>
   <data name="SyncFollowingChanges" xml:space="preserve">
-    <value>Further changes of this work order on hold: {0}</value>
+    <value>Further changes to this work order on hold: {0}</value>
   </data>
   <data name="SyncPendingHeld" xml:space="preserve">
     <value>On hold until the conflict is resolved</value>
@@ -565,7 +568,7 @@
     <value>Could not reach the server. Changes will be sent later.</value>
   </data>
   <data name="ChangeCopied" xml:space="preserve">
-    <value>The change content was copied.</value>
+    <value>Change copied.</value>
   </data>
   <data name="DiscardChangeTitle" xml:space="preserve">
     <value>Discard the change?</value>
@@ -574,16 +577,16 @@
     <value>The change will be removed from this device and will not reach the server. Copy it first if you want to keep its content.</value>
   </data>
   <data name="DiscardAllChangesTitle" xml:space="preserve">
-    <value>Discard all changes of the work order?</value>
+    <value>Discard all changes to the work order?</value>
   </data>
   <data name="DiscardAllChangesMessage" xml:space="preserve">
-    <value>All unsent changes of this work order, including the rejected one, will be removed from this device and will not reach the server. Number of changes: {0}</value>
+    <value>All unsent changes to this work order, including the rejected one, will be removed from this device and will not reach the server. Number of changes: {0}</value>
   </data>
   <data name="DiscardChangeButton" xml:space="preserve">
     <value>Discard</value>
   </data>
   <data name="SyncTitle" xml:space="preserve">
-    <value>Synchronization</value>
+    <value>Sync</value>
   </data>
   <data name="SyncNowButton" xml:space="preserve">
     <value>Sync now</value>
@@ -592,10 +595,10 @@
     <value>All changes have been sent.</value>
   </data>
   <data name="SyncConflictsSection" xml:space="preserve">
-    <value>To resolve</value>
+    <value>Needs resolving</value>
   </data>
   <data name="SyncConflictsHint" xml:space="preserve">
-    <value>The server rejected these changes. Copy the change content, send it again once the cause is gone, or discard the change.</value>
+    <value>The server rejected these changes. Copy the change, send it again once the cause is gone, or discard it.</value>
   </data>
   <data name="SyncPendingSection" xml:space="preserve">
     <value>Waiting to be sent</value>
@@ -607,10 +610,10 @@
     <value>Retry</value>
   </data>
   <data name="DiscardAllChangesButton" xml:space="preserve">
-    <value>Discard all work order changes</value>
+    <value>Discard all changes to this work order</value>
   </data>
   <data name="DetailsRejectedChanges" xml:space="preserve">
-    <value>The server rejected a change in this work order. Further changes of the work order wait until you resolve it.</value>
+    <value>The server rejected a change to this work order. Further changes to it wait until you resolve it.</value>
   </data>
   <data name="OpenSyncButton" xml:space="preserve">
     <value>Resolve</value>
@@ -646,10 +649,10 @@
     <value>Changes that have not reached the server will be lost ({0}). Work order data will be removed from this device.</value>
   </data>
   <data name="LogoutPendingPart" xml:space="preserve">
-    <value>to send: {0}</value>
+    <value>pending: {0}</value>
   </data>
   <data name="LogoutConflictPart" xml:space="preserve">
-    <value>to resolve: {0}</value>
+    <value>needs resolving: {0}</value>
   </data>
   <data name="SettingsNotificationsHeader" xml:space="preserve">
     <value>Reminders</value>

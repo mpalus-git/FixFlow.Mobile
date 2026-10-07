@@ -3,6 +3,7 @@ using System.Net;
 using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FixFlow.Mobile.Core.Accessibility;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Api.Errors;
 using FixFlow.Mobile.Core.Connectivity;
@@ -21,7 +22,8 @@ public sealed partial class LoginViewModel(
     INavigationService navigation,
     IDialogService dialogs,
     IUriLauncher uriLauncher,
-    DemoAccount demoAccount) : ObservableObject
+    DemoAccount demoAccount,
+    IScreenReaderAnnouncer announcer) : ObservableObject
 {
     public static readonly Uri WebPanelUri = new("https://fix-flow-web.vercel.app");
 
@@ -46,6 +48,10 @@ public sealed partial class LoginViewModel(
     public bool HasErrorMessage => ErrorMessage is not null;
 
     public bool HasStatusMessage => StatusMessage is not null;
+
+    partial void OnErrorMessageChanged(string? value) => AnnounceIfPresent(value);
+
+    partial void OnStatusMessageChanged(string? value) => AnnounceIfPresent(value);
 
     public bool IsDemoLoginAvailable => demoAccount.IsAvailable;
 
@@ -94,6 +100,14 @@ public sealed partial class LoginViewModel(
         Email = demoAccount.Email;
         Password = demoAccount.Password;
         return LoginAsync(cancellationToken);
+    }
+
+    private void AnnounceIfPresent(string? message)
+    {
+        if (message is not null)
+        {
+            announcer.Announce(message);
+        }
     }
 
     private static string Describe(ApiError error) => error switch

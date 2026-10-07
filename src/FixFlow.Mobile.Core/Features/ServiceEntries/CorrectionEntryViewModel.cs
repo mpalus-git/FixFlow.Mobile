@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FixFlow.Mobile.Core.Accessibility;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Features.WorkOrders;
@@ -16,7 +17,8 @@ public sealed partial class CorrectionEntryViewModel(
     ServiceEntryRepository serviceEntries,
     OutboxRepository outbox,
     OutboxWriter outboxWriter,
-    INavigationService navigation) : ObservableObject, INavigatedTo<Guid>
+    INavigationService navigation,
+    IScreenReaderAnnouncer announcer) : ObservableObject, INavigatedTo<Guid>
 {
     private Guid _workOrderId;
 
@@ -35,6 +37,14 @@ public sealed partial class CorrectionEntryViewModel(
     public partial string? ValidationMessage { get; private set; }
 
     public bool HasValidationMessage => ValidationMessage is not null;
+
+    partial void OnValidationMessageChanged(string? value)
+    {
+        if (value is not null)
+        {
+            announcer.Announce(value);
+        }
+    }
 
     public async Task OnNavigatedToAsync(Guid parameter)
     {

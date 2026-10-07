@@ -1,4 +1,5 @@
 using FixFlow.Mobile.Core.Notifications;
+using Microsoft.Maui.Controls.Handlers.Items;
 using Microsoft.Maui.Handlers;
 using Microsoft.Maui.Platform;
 
@@ -17,6 +18,15 @@ public static partial class MauiProgram
         EditorHandler.Mapper.AppendToMapping("BorderlessEditor", (handler, _) => RemoveTextBoxChrome(handler.PlatformView));
         DatePickerHandler.Mapper.AppendToMapping("BorderlessDatePicker", (handler, _) => RemoveControlChrome(handler.PlatformView));
         TimePickerHandler.Mapper.AppendToMapping("BorderlessTimePicker", (handler, _) => RemoveControlChrome(handler.PlatformView));
+        CollectionViewHandler.Mapper.AppendToMapping("ItemAutomationNames", (handler, view) =>
+        {
+            if (handler.PlatformView is Microsoft.UI.Xaml.Controls.ListViewBase listView)
+            {
+                listView.ContainerContentChanging -= NameItemContainer;
+                listView.ContainerContentChanging += NameItemContainer;
+                listView.ChoosingGroupHeaderContainer += (_, args) => NameGroupHeaderContainer(view, args);
+            }
+        });
         RadioButtonHandler.Mapper.AppendToMapping(nameof(ITextStyle.TextColor), (handler, view) =>
         {
             if (view.TextColor is { } color)
@@ -37,6 +47,23 @@ public static partial class MauiProgram
         textBox.Resources["TextControlBackground"] = transparent;
         textBox.Resources["TextControlBackgroundPointerOver"] = transparent;
         textBox.Resources["TextControlBackgroundFocused"] = transparent;
+    }
+
+    private static void NameItemContainer(Microsoft.UI.Xaml.Controls.ListViewBase sender, Microsoft.UI.Xaml.Controls.ContainerContentChangingEventArgs args)
+    {
+        if (args.Item is Microsoft.Maui.Controls.Platform.ItemTemplateContext { Item: { } item })
+        {
+            Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(args.ItemContainer, item.ToString());
+        }
+    }
+
+    private static void NameGroupHeaderContainer(CollectionView view, Microsoft.UI.Xaml.Controls.ChoosingGroupHeaderContainerEventArgs args)
+    {
+        if (view.ItemsSource?.Cast<object>().ElementAtOrDefault(args.GroupIndex) is { } group)
+        {
+            args.GroupHeaderContainer ??= new Microsoft.UI.Xaml.Controls.ListViewHeaderItem();
+            Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(args.GroupHeaderContainer, group.ToString());
+        }
     }
 
     private static void ApplyRadioButtonColor(Microsoft.UI.Xaml.Controls.RadioButton radioButton, Color color)

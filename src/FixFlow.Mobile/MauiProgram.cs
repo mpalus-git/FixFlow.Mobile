@@ -1,6 +1,8 @@
+using FixFlow.Mobile.Accessibility;
 using FixFlow.Mobile.Clipboard;
 using FixFlow.Mobile.Connectivity;
 using FixFlow.Mobile.Core;
+using FixFlow.Mobile.Core.Accessibility;
 using FixFlow.Mobile.Core.Clipboard;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Connectivity;
@@ -63,6 +65,8 @@ public static partial class MauiProgram
         builder.Services.AddSingleton<IUiDispatcher, MainThreadUiDispatcher>();
         builder.Services.AddSingleton(Microsoft.Maui.ApplicationModel.DataTransfer.Clipboard.Default);
         builder.Services.AddSingleton<IClipboardService, EssentialsClipboardService>();
+        builder.Services.AddSingleton(SemanticScreenReader.Default);
+        builder.Services.AddSingleton<IScreenReaderAnnouncer, SemanticScreenReaderAnnouncer>();
         builder.Services.AddSingleton(new DemoAccount(BuildConfiguration.DemoTechnicianEmail, BuildConfiguration.DemoTechnicianPassword));
         builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
         builder.Services.AddSingleton<IDialogService, PageDialogService>();

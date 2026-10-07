@@ -1,4 +1,5 @@
 using FixFlow.Mobile.Core.Api;
+using FixFlow.Mobile.Core.Resources;
 
 namespace FixFlow.Mobile.Core.Features.WorkOrders;
 
@@ -19,4 +20,29 @@ public sealed record WorkOrderListItem(
 
     public bool IsUrgent =>
         Priority is WorkOrderPriority.High or WorkOrderPriority.Critical && WorkOrderTexts.IsActive(Status);
+
+    public override string ToString() => string.Join(", ", ScreenReaderParts());
+
+    private IEnumerable<string> ScreenReaderParts()
+    {
+        yield return Number;
+        yield return StatusText;
+        yield return ClientName;
+        yield return DeviceModel;
+        yield return DateText;
+        if (IsUrgent)
+        {
+            yield return PriorityText;
+        }
+
+        if (IsPending)
+        {
+            yield return AppResources.PendingSyncLabel;
+        }
+
+        if (HasRejectedChange)
+        {
+            yield return AppResources.WorkOrderRejectedChange;
+        }
+    }
 }

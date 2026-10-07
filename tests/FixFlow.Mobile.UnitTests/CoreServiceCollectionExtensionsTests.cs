@@ -1,4 +1,5 @@
 using FixFlow.Mobile.Core;
+using FixFlow.Mobile.Core.Accessibility;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Clipboard;
 using FixFlow.Mobile.Core.Connectivity;
@@ -35,6 +36,7 @@ public sealed class CoreServiceCollectionExtensionsTests
             .AddSingleton(Substitute.For<IPhotoService>())
             .AddSingleton(Substitute.For<IUiDispatcher>())
             .AddSingleton(Substitute.For<IClipboardService>())
+            .AddSingleton(Substitute.For<IScreenReaderAnnouncer>())
             .AddSingleton(Substitute.For<INotificationScheduler>())
             .AddSingleton(Substitute.For<IAppVersion>())
             .AddSingleton(new DemoAccount(string.Empty, string.Empty))

@@ -68,6 +68,18 @@ public sealed class WorkOrderListPresenterTests : IDisposable
     }
 
     [Fact]
+    public void Should_Describe_Card_And_Section_For_Screen_Reader_In_Reading_Order_When_Changes_Wait_In_Queue()
+    {
+        var workOrder = TestWorkOrders.Create("ZL-2026-0042", Now.AddHours(2));
+
+        var group = _presenter.Present([workOrder], new HashSet<Guid> { workOrder.Id }, new HashSet<Guid>()).ShouldHaveSingleItem();
+        var item = group.ShouldHaveSingleItem();
+
+        group.ToString().ShouldBe("Dziś");
+        item.ToString().ShouldBe($"ZL-2026-0042, {item.StatusText}, {item.ClientName}, {item.DeviceModel}, {item.DateText}, {AppResources.PendingSyncLabel}");
+    }
+
+    [Fact]
     public void Should_Mark_Rejected_Instead_Of_Pending_When_Work_Order_Has_Conflict()
     {
         var workOrder = TestWorkOrders.Create("ZL-2026-0042", Now.AddHours(2));
