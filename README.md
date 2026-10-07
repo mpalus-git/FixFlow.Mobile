@@ -111,3 +111,128 @@ Przycisk szybkiego logowania kontem demo pojawia się tylko wtedy, gdy przy buil
 | `dotnet test --project tests/FixFlow.Mobile.UnitTests` | testy jednostkowe |
 | `dotnet test --project tests/FixFlow.Mobile.IntegrationTests` | testy integracyjne na prawdziwym API (wymagają Dockera) |
 | `dotnet run --project tools/FixFlow.Tools -- check-comments .` | kontrola braku komentarzy w repozytorium |
+
+## Architektura
+
+```mermaid
+flowchart LR
+    subgraph app["FixFlow.Mobile (MAUI)"]
+        views["Widoki XAML<br/>Android i Windows"]
+        platform["Implementacje platformy<br/>Essentials, powiadomienia"]
+    end
+
+    subgraph core["FixFlow.Mobile.Core (net10.0, bez MAUI)"]
+        vm["ViewModele"] --> writer["OutboxWriter"]
+        vm --> repos["Repozytoria"]
+        writer --> db[("SQLite<br/>baza technika")]
+        repos --> db
+        sync["SyncCoordinator"] --> dispatcher["OutboxDispatcher"]
+        sync --> pull["Pobieranie zleceń,<br/>szczegółów i części"]
+        dispatcher --> db
+        pull --> db
+        dispatcher --> client["Klient Refit<br/>z Refitter i Polly"]
+        pull --> client
+    end
+
+    views --> vm
+    platform -. "abstrakcje" .-> core
+    client --> api["FixFlow.Api"]
+```
+
+Kod jest podzielony na dwa projekty:
+
+- `src/FixFlow.Mobile.Core` (zwykłe `net10.0`, bez zależności od MAUI): ViewModele, synchronizacja, kolejka operacji, dostęp do SQLite, wygenerowany klient API, zasoby językowe i abstrakcje platformy (`INavigationService`, `IConnectivityService`, `ISecureStore`, `ILocationService` i inne). Dzięki temu cała logika jest testowana zwykłymi testami jednostkowymi, bez emulatora.
+- `src/FixFlow.Mobile`: widoki XAML, implementacje abstrakcji na MAUI Essentials, `MauiProgram` z rejestracją w DI i kod platformowy w `Platforms/`.
+
+W obu projektach kod jest podzielony według funkcji: `Features/Auth`, `WorkOrders`, `ServiceEntries`, `Parts`, `Sync`, `Settings`. Para widok i ViewModel to np. `WorkOrderListPage.xaml` w aplikacji i `WorkOrderListViewModel` w Core. Nawigacja idzie wyłącznie przez `INavigationService` z parametrem odbieranym przez interfejs `INavigatedTo<T>`, więc ViewModele nie znają Shell.
+
+## Decyzje techniczne
+
+### Offline-first i kolejka operacji
+
+Ekrany czytają najpierw dane z lokalnej bazy, a odświeżenie z API idzie w tle. Każda zmiana (rozpoczęcie, wpis serwisowy, zdjęcie, wpis korygujący, zakończenie) zapisuje się w tabeli `outbox_operations` w jednej transakcji SQLite z danymi lokalnymi, np. z licznikiem czasu pracy. ViewModele nigdy nie wołają API przy operacjach zmieniających stan.
+
+Dane pobrane z serwera nie są modyfikowane przez lokalne zmiany. Operacje czekające w kolejce są nakładane na wynik przy odczycie (status, wpis ze znacznikiem „Oczekuje na wysłanie”, dostępna ilość części), więc pobranie z API może zawsze nadpisać lokalną kopię (serwer wygrywa), a zmiany technika nie znikają z ekranu.
+
+`OutboxDispatcher` wysyła operacje ściśle w kolejności powstania w obrębie zlecenia; zlecenia są od siebie niezależne. Synchronizacja (`SyncCoordinator`, jedna naraz i najwyżej jeden przebieg w kolejce) rusza przy starcie i powrocie aplikacji na pierwszy plan, po odzyskaniu sieci, po każdej lokalnej zmianie i przy pull-to-refresh.
+
+### Idempotencja
+
+Wpis serwisowy zużywa części, więc dwukrotne wysłanie tego samego wpisu byłoby błędem danych. Identyfikator wpisu i zdjęcia nadaje aplikacja (`Guid.CreateVersion7()`) w chwili zapisu offline, a API przy ponownym wysłaniu tego samego id zwraca 200 bez ponownego zdjęcia części ze stanu. Dla rozpoczęcia i zakończenia odpowiedź 409 jest sprawdzana pobraniem zlecenia: jeśli ma już docelowy status, operacja była wykonana wcześniej i jej odpowiedź się zgubiła. Obie zmiany w API powstały na potrzeby tej aplikacji, a scenariusz „odpowiedź zgubiona, wpis wysłany ponownie” jest pokryty testem integracyjnym.
+
+### Błędy: ponowienie czy konflikt
+
+Odpowiedzi błędów są mapowane z ProblemDetails (`errorCode`, błędy pól, `Retry-After`) i klasyfikowane:
+
+| Odpowiedź | Co się dzieje |
+|---|---|
+| brak sieci, timeout, 408, 429, 5xx | operacja zostaje w kolejce i jest ponawiana z backoffem 5 s, 15 s, 1 min, 5 min, 15 min z losowym rozrzutem 20%; `Retry-After` ma pierwszeństwo |
+| 401 | wysyłka się zatrzymuje, kolejka zostaje bez zmian do ponownego zalogowania |
+| inne 4xx, w tym 404 po odebraniu zlecenia, 409 i brak części na stanie | operacja trafia do „Do wyjaśnienia”, a dalsze zmiany tego zlecenia czekają na decyzję technika |
+
+Nic nie znika po cichu i nic nie jest ślepo nadpisywane. Ekran synchronizacji pokazuje przyczynę przetłumaczoną po `errorCode` (gdy tłumaczenia brak, `detail` z ProblemDetails) i treść lokalnej zmiany do skopiowania. Technik może ponowić zmianę, gdy przyczyna zniknie (np. po dostawie części), odrzucić ją albo odrzucić wszystkie zmiany zlecenia. Odrzucenie sprząta też dane zależne: licznik czasu, pliki zdjęć.
+
+### Sesja i odświeżanie tokenów single-flight
+
+Access token jest tylko w pamięci, refresh token w SecureStorage. API rotuje refresh token przy każdym odświeżeniu, a ponowne użycie starego unieważnia całą rodzinę tokenów. Dlatego `TokenRefresher` odświeża pod `SemaphoreSlim`: równoległe żądania, które dostały 401, czekają na jedno odświeżenie, a wewnątrz blokady sprawdzane jest, czy inne żądanie już nie wymieniło tokena. `AuthenticationHandler` powtarza żądanie najwyżej raz. Po 429 (limit 10 logowań i odświeżeń na minutę) nowa próba czeka do czasu z `Retry-After`.
+
+Wygaśnięcie sesji przenosi do logowania, ale lokalne dane i kolejka zostają: po ponownym zalogowaniu tego samego technika synchronizacja rusza dalej. Każdy technik ma osobny plik bazy, więc zmiany jednej osoby nigdy nie zostaną wysłane na konto innej. Start bez sieci z zapisaną sesją otwiera dane lokalne bez wymuszania logowania. Świadome wylogowanie wymaga potwierdzenia z liczbą niewysłanych zmian i usuwa dane technika z urządzenia.
+
+### Uśpiony serwer
+
+Instancja na Render po okresie bezczynności trzyma pierwsze żądanie bez odpowiedzi do startu, nawet około minuty. Przed pierwszą synchronizacją aplikacja wywołuje `/api/v1/system/ready`; gdy odpowiedź nie przyjdzie w 3 s, pokazuje pasek „Serwer się uruchamia” i ponawia co 3 s do 90 s, a technik w tym czasie pracuje na danych lokalnych. Zwykłe żądania mają timeout 10 s na próbę i 30 s łącznie, a ponawianie przez Polly dotyczy tylko metod bezpiecznych; operacje zmieniające stan ponawia kolejka.
+
+### Kontrakt API i generowany klient
+
+Kopia kontraktu jest w `openapi/fixflow-api.v1.json`. Refitter generuje z niej interfejs Refit i rekordy żądań i odpowiedzi, więc w repozytorium nie ma ręcznie pisanych DTO. CI generuje klienta ponownie i odrzuca build, jeśli różni się od commitowanego, a osobny, nieblokujący job ostrzega, gdy kopia kontraktu rozjechała się z main repozytorium API.
+
+### Zdjęcia
+
+API przyjmuje zdjęcia jako surowy JPEG pod identyfikatorem nadanym przez klienta (`PUT /api/v1/photos/{id}`, do 1 MiB), a wpis zawiera ich adresy. Dzięki temu adres zdjęcia jest znany offline, a wysłanie zdjęcia jest osobną operacją w kolejce, która musi się udać przed wysłaniem wpisu. Zdjęcia są skalowane do 1600 px na dłuższym boku z jakością JPEG 75, trzymane w katalogu danych aplikacji i usuwane po wysłaniu.
+
+### Strefa czasowa i formaty
+
+Daty są pokazywane w strefie Europe/Warsaw niezależnie od strefy urządzenia, a sekcje listy (dziś, zaległe) liczone są według dnia w Warszawie. Czas pochodzi z wstrzykiwanego `TimeProvider`, więc testy sprawdzają granicę dnia oraz czas letni i zimowy przy urządzeniu ustawionym na inną strefę. Formaty dat są zapisane jawnie dla każdego języka, bo wzorce domyślne zależą od wersji ICU na urządzeniu.
+
+### Pozostałe
+
+- Bez kontrolki mapy: kontrolka MAUI na Androidzie wymaga klucza Google Maps z kontem rozliczeniowym, a technikowi wystarcza otwarcie adresu i pozycji GPS w zewnętrznej aplikacji map (`Map.OpenAsync`).
+- Uprawnienia (aparat, lokalizacja, powiadomienia na Android 13+) są proszone dopiero przy pierwszym użyciu funkcji, z wyjaśnieniem i linkiem do ustawień po odmowie. Brak zgody na lokalizację nie blokuje pracy, wpis idzie bez pozycji.
+- Przypomnienia o terminie są planowane i anulowane przy każdej synchronizacji (zmiana terminu, odebranie zlecenia, zakończenie), jako powiadomienia nieprecyzyjne, bez uprawnienia do dokładnych alarmów.
+- Teksty widoczne dla użytkownika pochodzą wyłącznie z plików .resx. Język domyślny to polski, niezależnie od języka urządzenia.
+- Repozytorium nie zawiera komentarzy w kodzie, XAML, plikach projektu ani YAML. Pilnuje tego własne narzędzie na Roslyn uruchamiane w CI, a z wygenerowanego klienta komentarze są usuwane.
+
+## Testy
+
+| Projekt | Liczba | Zakres |
+|---|---|---|
+| `FixFlow.Mobile.UnitTests` | 388 | ViewModele (komendy, stany, walidacja, widoczność akcji), kolejka operacji (kolejność, ponawianie, klasyfikacja błędów, konflikty), nakładanie zmian oczekujących, sesja i równoległe odświeżanie tokena, mapowanie ProblemDetails, migracje i repozytoria SQLite, daty w Europe/Warsaw, planowanie przypomnień |
+| `FixFlow.Mobile.IntegrationTests` | 12 | synchronizacja na prawdziwym API |
+| `FixFlow.Tools.Tests` | 40 | usuwanie i wykrywanie komentarzy |
+
+Testy jednostkowe używają SQLite na prawdziwym pliku w katalogu tymczasowym (bez mockowania bazy), własnego `HttpMessageHandler` zamiast HttpClient i NSubstitute tylko dla abstrakcji platformy.
+
+Testy integracyjne uruchamiają przez Testcontainers PostgreSQL 18 i obraz `ghcr.io/mpalus-git/fixflow.api` przypięty do konkretnego commita, a dane każdego testu zakłada konto administratora. Sprawdzają m.in. pełny przebieg technika (logowanie, rozpoczęcie, wpis z częścią, zakończenie), wysłanie zdjęcia przed wpisem, odrzucenie rozpoczęcia po przekazaniu zlecenia innemu technikowi, brak duplikatu wpisu wysłanego ponownie po zgubionej odpowiedzi oraz zachowanie kolejki przy zatrzymanym kontenerze API.
+
+CI uruchamia osobno: build i testy jednostkowe, testy integracyjne, kontrolę komentarzy, kontrolę wygenerowanego klienta, porównanie kontraktu z API (ostrzeżenie), build Androida i build Windows. Wydanie na tag `v*` buduje podpisany APK i archiwum zip wersji Windows.
+
+## Ograniczenia
+
+- Brak synchronizacji w tle: kolejka jest wysyłana tylko wtedy, gdy aplikacja działa. Zmiany zrobione offline czekają do jej otwarcia po odzyskaniu sieci, a przypomnienia o zmianie terminu w panelu docierają po najbliższej synchronizacji.
+- Brak wersji iOS i Mac Catalyst.
+- Brak automatycznych testów UI. Ekrany są sprawdzane ręcznie na emulatorze Androida i w wersji Windows, w obu motywach i na małym ekranie.
+- Przypomnienia działają tylko na Androidzie: wersja Plugin.LocalNotification dla Windows wymaga nowszego Windows App SDK niż MAUI 10.
+- Pozycja GPS trafia tylko do pierwszego wpisu po rozpoczęciu zlecenia, bo w API jest polem wpisu, a nie rozpoczęcia.
+- Protokół PDF można pobrać tylko online.
+- Konto demo technika jest wspólne: zlecenia rozpoczęte lub zakończone przez innych odwiedzających są widoczne do nocnego resetu, a limit 10 logowań i odświeżeń sesji na minutę liczy się dla adresu IP.
+
+## Co zrobiłbym inaczej
+
+- Synchronizacja w tle (WorkManager na Androidzie), żeby kolejka wychodziła bez otwierania aplikacji.
+- Powiadomienia push z serwera o nowym przypisaniu i odebraniu zlecenia zamiast polegania na synchronizacji przy otwarciu.
+- Rozwiązywanie konfliktu przez edycję zmiany (np. zmniejszenie ilości części i ponowienie) zamiast tylko kopiowania, ponowienia albo odrzucenia.
+- Testy UI kluczowej ścieżki offline (Appium) na emulatorze w CI.
+
+## Licencja
+
+Wszelkie prawa zastrzeżone. Kod jest udostępniony wyłącznie do wglądu; wykorzystanie, kopiowanie lub modyfikacja wymagają zgody autora.
