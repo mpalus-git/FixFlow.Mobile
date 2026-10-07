@@ -6,4 +6,6 @@ public sealed class WorkOrderGroup(WorkOrderSection section, string title, IEnum
     public WorkOrderSection Section { get; } = section;
 
     public string Title { get; } = title;
+
+    public override string ToString() => Title;
 }
