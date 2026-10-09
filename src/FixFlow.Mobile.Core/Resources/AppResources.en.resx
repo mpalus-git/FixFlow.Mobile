@@ -708,4 +708,37 @@
   <data name="SettingsAboutHeader" xml:space="preserve">
     <value>About</value>
   </data>
+  <data name="DetailsEventsSection" xml:space="preserve">
+    <value>Work order history</value>
+  </data>
+  <data name="EventCreated" xml:space="preserve">
+    <value>Work order created</value>
+  </data>
+  <data name="EventUpdated" xml:space="preserve">
+    <value>Work order updated</value>
+  </data>
+  <data name="EventDueDateChanged" xml:space="preserve">
+    <value>Due date changed: {0}</value>
+  </data>
+  <data name="EventAssigned" xml:space="preserve">
+    <value>Assigned to {0}</value>
+  </data>
+  <data name="EventReassigned" xml:space="preserve">
+    <value>Reassigned to {0}</value>
+  </data>
+  <data name="EventUnassigned" xml:space="preserve">
+    <value>Unassigned</value>
+  </data>
+  <data name="EventStarted" xml:space="preserve">
+    <value>Work started</value>
+  </data>
+  <data name="EventCompleted" xml:space="preserve">
+    <value>Work order completed</value>
+  </data>
+  <data name="EventInvoiced" xml:space="preserve">
+    <value>Work order invoiced</value>
+  </data>
+  <data name="EventSystemActor" xml:space="preserve">
+    <value>System</value>
+  </data>
 </root>

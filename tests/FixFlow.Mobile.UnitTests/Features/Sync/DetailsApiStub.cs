@@ -69,6 +69,11 @@ internal sealed class DetailsApiStub
                     },
                 },
             },
+            _ when path == $"/api/v1/work-orders/{WorkOrderId}/events" => new object[]
+            {
+                new { id = Guid.NewGuid(), type = "Created", occurredAt = Now.AddDays(-2), dueDate = Now },
+                new { id = Guid.NewGuid(), type = "Assigned", occurredAt = Now.AddDays(-1), actorName = "Anna Nowak", technicianName = "Jan Kowalski", dueDate = Now },
+            },
             _ => throw new InvalidOperationException($"Unexpected request {path}"),
         };
 

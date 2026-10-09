@@ -245,6 +245,36 @@
                            HorizontalTextAlignment="End"
                            IsVisible="{Binding Details.HasPartsTotal}" />
 
+                    <Label Text="{x:Static resources:AppResources.DetailsEventsSection}"
+                           Style="{StaticResource SectionLabel}"
+                           IsVisible="{Binding Details.HasEvents}" />
+                    <Border Style="{StaticResource CardBorder}"
+                            IsVisible="{Binding Details.HasEvents}">
+                        <VerticalStackLayout Spacing="12"
+                                             BindableLayout.ItemsSource="{Binding Details.Events}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="viewModels:WorkOrderEventView">
+                                    <VerticalStackLayout Spacing="2">
+                                        <Label Text="{Binding Title}" />
+                                        <Label Style="{StaticResource SecondaryLabel}">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="{Binding DateText}" />
+                                                    <Span Text="  ·  " />
+                                                    <Span Text="{Binding ActorText}" />
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
+                                        <Label Text="{x:Static resources:AppResources.PendingSyncLabel}"
+                                               IsVisible="{Binding IsPending}"
+                                               Style="{StaticResource SecondaryLabel}"
+                                               FontAttributes="Italic" />
+                                    </VerticalStackLayout>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </Border>
+
                     <Label Text="{x:Static resources:AppResources.DetailsHistorySection}"
                            Style="{StaticResource SectionLabel}" />
                     <Label Text="{x:Static resources:AppResources.DetailsNoHistory}"

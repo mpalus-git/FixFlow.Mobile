@@ -58,6 +58,7 @@ public static class CoreServiceCollectionExtensions
         services.AddTransient<WorkOrderRepository>();
         services.AddTransient<DeviceRepository>();
         services.AddTransient<DeviceHistoryRepository>();
+        services.AddTransient<WorkOrderEventRepository>();
         services.AddTransient<ServiceProtocolService>();
         services.AddTransient<ServiceEntryRepository>();
         services.AddTransient<PhotoStore>();

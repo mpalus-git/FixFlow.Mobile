@@ -12,7 +12,8 @@ public sealed class WorkOrderDetailsSyncService(
     WorkOrderRepository workOrders,
     DeviceRepository devices,
     ServiceEntryRepository serviceEntries,
-    DeviceHistoryRepository deviceHistory)
+    DeviceHistoryRepository deviceHistory,
+    WorkOrderEventRepository workOrderEvents)
 {
     public const int HistoryPageSize = 100;
 
@@ -25,6 +26,7 @@ public sealed class WorkOrderDetailsSyncService(
             if (error.StatusCode == HttpStatusCode.NotFound)
             {
                 await serviceEntries.ReplaceForWorkOrderAsync(workOrderId, []);
+                await workOrderEvents.ReplaceForWorkOrderAsync(workOrderId, []);
                 await workOrders.DeleteAsync(workOrderId);
                 return PullResult.NotFound;
             }
@@ -38,11 +40,13 @@ public sealed class WorkOrderDetailsSyncService(
         var deviceTask = api.GetDeviceAsync(workOrder.DeviceId, cancellationToken);
         var entriesTask = api.ListServiceEntriesAsync(workOrderId, cancellationToken);
         var historyTask = api.ListDeviceWorkOrdersAsync(workOrder.DeviceId, 1, HistoryPageSize, cancellationToken);
-        await Task.WhenAll(deviceTask, entriesTask, historyTask);
+        var eventsTask = api.ListWorkOrderEventsAsync(workOrderId, cancellationToken);
+        await Task.WhenAll(deviceTask, entriesTask, historyTask, eventsTask);
 
         using var deviceResponse = await deviceTask;
         using var entriesResponse = await entriesTask;
         using var historyResponse = await historyTask;
+        using var eventsResponse = await eventsTask;
 
         if (deviceResponse.Content is { } device)
         {
@@ -61,7 +65,12 @@ public sealed class WorkOrderDetailsSyncService(
                 [.. history.Items.Select(item => WorkOrderMapper.ToHistoryItem(workOrder.DeviceId, item))]);
         }
 
-        IApiResponse[] responses = [deviceResponse, entriesResponse, historyResponse];
+        if (eventsResponse.Content is { } events)
+        {
+            await workOrderEvents.ReplaceForWorkOrderAsync(workOrderId, [.. events.Select(item => WorkOrderMapper.ToEvent(workOrderId, item))]);
+        }
+
+        IApiResponse[] responses = [deviceResponse, entriesResponse, historyResponse, eventsResponse];
         return responses.FirstOrDefault(response => !response.IsSuccessful) is { } failed
             ? PullResult.Failed(ApiErrorMapper.FromResponse(failed))
             : PullResult.Succeeded;

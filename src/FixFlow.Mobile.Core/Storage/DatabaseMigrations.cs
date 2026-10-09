@@ -172,5 +172,20 @@ public static class DatabaseMigrations
         [
             "DROP TABLE clients",
         ]),
+        new(12, "create_work_order_events",
+        [
+            """
+            CREATE TABLE work_order_events (
+                id TEXT NOT NULL PRIMARY KEY,
+                work_order_id TEXT NOT NULL,
+                position INTEGER NOT NULL,
+                type TEXT NOT NULL,
+                occurred_at INTEGER NOT NULL,
+                actor_name TEXT,
+                technician_name TEXT,
+                due_date INTEGER NOT NULL)
+            """,
+            "CREATE INDEX ix_work_order_events_work_order_id ON work_order_events (work_order_id)",
+        ]),
     ];
 }

@@ -68,6 +68,10 @@ namespace FixFlow.Mobile.Core.Api
         [Get("/api/v1/work-orders/{workOrderId}/protocol")]
         Task<IApiResponse<System.IO.Stream>> GetServiceProtocolAsync(System.Guid workOrderId, CancellationToken cancellationToken = default);
 
+        [Headers("Accept: application/json, application/problem+json")]
+        [Get("/api/v1/work-orders/{workOrderId}/events")]
+        Task<IApiResponse<ICollection<WorkOrderEventResponse>>> ListWorkOrderEventsAsync(System.Guid workOrderId, CancellationToken cancellationToken = default);
+
         [Headers("Accept: application/problem+json, application/json", "Content-Type: application/json")]
         [Post("/api/v1/parts")]
         Task<IApiResponse<PartResponse>> CreatePartAsync([Body] CreatePartRequest body, CancellationToken cancellationToken = default);
@@ -1161,6 +1165,92 @@ public WorkOrderPriority Priority { get; init; }
             get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
             set { _additionalProperties = value; }
         }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial record WorkOrderEventResponse
+    {
+        [JsonConstructor]
+        public WorkOrderEventResponse(System.Guid? @actorId, string? @actorName, System.DateTimeOffset @dueDate, System.Guid @id, System.DateTimeOffset @occurredAt, System.Guid? @technicianId, string? @technicianName, WorkOrderEventType @type)
+        {
+            this.Id = @id;
+            this.Type = @type;
+            this.OccurredAt = @occurredAt;
+            this.ActorId = @actorId;
+            this.ActorName = @actorName;
+            this.TechnicianId = @technicianId;
+            this.TechnicianName = @technicianName;
+            this.DueDate = @dueDate;
+        }
+
+        [JsonPropertyName("id")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public System.Guid Id { get; init; }
+
+        [JsonPropertyName("type")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+public WorkOrderEventType Type { get; init; }
+
+        [JsonPropertyName("occurredAt")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public System.DateTimeOffset OccurredAt { get; init; }
+
+        [JsonPropertyName("actorId")]
+        public System.Guid? ActorId { get; init; }
+
+        [JsonPropertyName("actorName")]
+        public string? ActorName { get; init; }
+
+        [JsonPropertyName("technicianId")]
+        public System.Guid? TechnicianId { get; init; }
+
+        [JsonPropertyName("technicianName")]
+        public string? TechnicianName { get; init; }
+
+        [JsonPropertyName("dueDate")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public System.DateTimeOffset DueDate { get; init; }
+
+        private IDictionary<string, object>? _additionalProperties;
+
+        [JsonExtensionData]
+        public IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    [JsonConverter(typeof(JsonStringEnumConverter<WorkOrderEventType>))]
+    public enum WorkOrderEventType
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Created")]
+        Created = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Updated")]
+        Updated = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Assigned")]
+        Assigned = 2,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Reassigned")]
+        Reassigned = 3,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Unassigned")]
+        Unassigned = 4,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Started")]
+        Started = 5,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Completed")]
+        Completed = 6,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Invoiced")]
+        Invoiced = 7,
 
     }
 
