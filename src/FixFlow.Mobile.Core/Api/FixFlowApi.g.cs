@@ -29,14 +29,6 @@ namespace FixFlow.Mobile.Core.Api
         Task<IApiResponse<UserResponse>> GetCurrentUserAsync(CancellationToken cancellationToken = default);
 
         [Headers("Accept: application/json, application/problem+json")]
-        [Get("/api/v1/clients/{clientId}")]
-        Task<IApiResponse<ClientResponse>> GetClientAsync(System.Guid clientId, CancellationToken cancellationToken = default);
-
-        [Headers("Accept: application/problem+json, application/json", "Content-Type: application/json")]
-        [Put("/api/v1/clients/{clientId}")]
-        Task<IApiResponse<ClientResponse>> UpdateClientAsync(System.Guid clientId, [Body] UpdateClientRequest body, [Header("If-Match")] string if_Match, CancellationToken cancellationToken = default);
-
-        [Headers("Accept: application/json, application/problem+json")]
         [Get("/api/v1/devices/{deviceId}")]
         Task<IApiResponse<DeviceResponse>> GetDeviceAsync(System.Guid deviceId, CancellationToken cancellationToken = default);
 
@@ -259,63 +251,6 @@ namespace FixFlow.Mobile.Core.Api
         [JsonPropertyName("city")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string City { get; init; }
-
-        private IDictionary<string, object>? _additionalProperties;
-
-        [JsonExtensionData]
-        public IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial record ClientResponse
-    {
-        [JsonConstructor]
-        public ClientResponse(ClientAddress @address, System.DateTimeOffset? @archivedAt, string @contactPerson, System.DateTimeOffset @createdAt, string? @email, System.Guid @id, string @name, string @phone)
-        {
-            this.Id = @id;
-            this.Name = @name;
-            this.Address = @address;
-            this.ContactPerson = @contactPerson;
-            this.Phone = @phone;
-            this.Email = @email;
-            this.CreatedAt = @createdAt;
-            this.ArchivedAt = @archivedAt;
-        }
-
-        [JsonPropertyName("id")]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        public System.Guid Id { get; init; }
-
-        [JsonPropertyName("name")]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        public string Name { get; init; }
-
-        [JsonPropertyName("address")]
-        [System.ComponentModel.DataAnnotations.Required]
-        public ClientAddress Address { get; init; }
-
-        [JsonPropertyName("contactPerson")]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        public string ContactPerson { get; init; }
-
-        [JsonPropertyName("phone")]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        public string Phone { get; init; }
-
-        [JsonPropertyName("email")]
-        public string? Email { get; init; }
-
-        [JsonPropertyName("createdAt")]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        public System.DateTimeOffset CreatedAt { get; init; }
-
-        [JsonPropertyName("archivedAt")]
-        public System.DateTimeOffset? ArchivedAt { get; init; }
 
         private IDictionary<string, object>? _additionalProperties;
 
@@ -1068,49 +1003,6 @@ public WorkOrderPriority Priority { get; init; }
 
         [JsonPropertyName("startedAt")]
         public System.DateTimeOffset? StartedAt { get; init; }
-
-        private IDictionary<string, object>? _additionalProperties;
-
-        [JsonExtensionData]
-        public IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial record UpdateClientRequest
-    {
-        [JsonConstructor]
-        public UpdateClientRequest(ClientAddress @address, string @contactPerson, string? @email, string @name, string @phone)
-        {
-            this.Name = @name;
-            this.Address = @address;
-            this.ContactPerson = @contactPerson;
-            this.Phone = @phone;
-            this.Email = @email;
-        }
-
-        [JsonPropertyName("name")]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        public string Name { get; init; }
-
-        [JsonPropertyName("address")]
-        [System.ComponentModel.DataAnnotations.Required]
-        public ClientAddress Address { get; init; }
-
-        [JsonPropertyName("contactPerson")]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        public string ContactPerson { get; init; }
-
-        [JsonPropertyName("phone")]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        public string Phone { get; init; }
-
-        [JsonPropertyName("email")]
-        public string? Email { get; init; }
 
         private IDictionary<string, object>? _additionalProperties;
 
