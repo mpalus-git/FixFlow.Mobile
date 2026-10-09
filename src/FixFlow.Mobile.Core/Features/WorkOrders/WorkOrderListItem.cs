@@ -16,7 +16,9 @@ public sealed record WorkOrderListItem(
     bool IsPending,
     bool HasRejectedChange)
 {
-    public bool IsInProgress => Status == WorkOrderStatus.InProgress;
+    public BadgeTone StatusTone => WorkOrderBadges.ForStatus(Status);
+
+    public BadgeTone PriorityTone => WorkOrderBadges.ForPriority(Priority);
 
     public bool IsUrgent =>
         Priority is WorkOrderPriority.High or WorkOrderPriority.Critical && WorkOrderTexts.IsActive(Status);

@@ -39,8 +39,9 @@ public sealed class WorkOrderListPresenterTests : IDisposable
         item.DateText.ShouldBe("Termin: 05.10.2026 14:30");
         item.StatusText.ShouldBe("W toku");
         item.PriorityText.ShouldBe("Krytyczny priorytet");
-        item.IsInProgress.ShouldBeTrue();
         item.IsUrgent.ShouldBeTrue();
+        item.StatusTone.ShouldBe(BadgeTone.Warning);
+        item.PriorityTone.ShouldBe(BadgeTone.Destructive);
     }
 
     [Fact]

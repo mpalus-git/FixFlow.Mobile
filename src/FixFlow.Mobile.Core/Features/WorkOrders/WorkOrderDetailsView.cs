@@ -5,8 +5,11 @@ namespace FixFlow.Mobile.Core.Features.WorkOrders;
 public sealed record WorkOrderDetailsView(
     string Number,
     string StatusText,
+    BadgeTone StatusTone,
     string PriorityText,
+    BadgeTone PriorityTone,
     bool IsUrgent,
+    bool IsOverdue,
     string DueText,
     string Description,
     ClientView? Client,
@@ -18,6 +21,8 @@ public sealed record WorkOrderDetailsView(
     EntryPhotoView? ClientSignature,
     bool CanDownloadProtocol)
 {
+    public bool HasAttentionBadges => IsUrgent || IsOverdue;
+
     public bool HasClientSignature => ClientSignature is not null;
 
     public bool HasEvents => Events.Count > 0;

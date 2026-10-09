@@ -61,7 +61,7 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
             _sources,
             new WorkOrderDetailsSyncService(api, _sources.WorkOrders, _sources.Devices, _sources.ServiceEntries, _sources.DeviceHistory, _sources.WorkOrderEvents),
             new SyncStateRepository(database, timeProvider),
-            new WorkOrderDetailsPresenter(formatter, new SessionStore(Substitute.For<ISecureStore>(), timeProvider), new ApiAddress(new Uri("https://api.test/"))),
+            new WorkOrderDetailsPresenter(formatter, new WorkOrderSectionClassifier(BusinessClock.CreateForWarsaw(timeProvider)), new SessionStore(Substitute.For<ISecureStore>(), timeProvider), new ApiAddress(new Uri("https://api.test/"))),
             new ServiceProtocolService(api, _documents),
             new OutboxWriter(_sources.Outbox, timeProvider, new WeakReferenceMessenger()),
             new WorkLocationRecorder(_location, _dialogs, _sources.WorkTimers),

@@ -12,10 +12,18 @@
                              Spacing="16"
                              HorizontalOptions="{OnIdiom Phone=Fill, Default=Center}"
                              WidthRequest="{OnIdiom Phone=-1, Default=468}">
-            <Label Text="{x:Static resources:AppResources.AppName}"
-                   Style="{StaticResource HeadlineLabel}"
-                   FontSize="28"
-                   SemanticProperties.HeadingLevel="Level1" />
+            <HorizontalStackLayout Spacing="12"
+                                   HorizontalOptions="Center">
+                <Image Source="brandmark.png"
+                       WidthRequest="40"
+                       HeightRequest="40"
+                       VerticalOptions="Center" />
+                <Label Text="{x:Static resources:AppResources.AppName}"
+                       Style="{StaticResource HeadlineLabel}"
+                       FontSize="32"
+                       VerticalOptions="Center"
+                       SemanticProperties.HeadingLevel="Level1" />
+            </HorizontalStackLayout>
             <Label Text="{x:Static resources:AppResources.LoginSubtitle}"
                    Style="{StaticResource SecondaryLabel}"
                    HorizontalTextAlignment="Center"

@@ -25,8 +25,34 @@ public sealed class WorkOrderDetailsPresenterTests : IDisposable
     {
         var languageService = new LanguageService(Substitute.For<ISettingsStore>());
         languageService.ChangeLanguage(AppLanguage.Polish);
-        _formatter = new DisplayFormatter(languageService, BusinessClock.CreateForWarsaw(new FakeTimeProvider(Now)));
-        _presenter = new WorkOrderDetailsPresenter(_formatter, _session, new ApiAddress(new Uri("https://api.test/")));
+        var clock = BusinessClock.CreateForWarsaw(new FakeTimeProvider(Now));
+        _formatter = new DisplayFormatter(languageService, clock);
+        _presenter = new WorkOrderDetailsPresenter(_formatter, new WorkOrderSectionClassifier(clock), _session, new ApiAddress(new Uri("https://api.test/")));
+    }
+
+    [Fact]
+    public void Should_Mark_Overdue_With_Status_And_Priority_Tones_When_Active_Work_Order_Is_Past_Due()
+    {
+        var workOrder = _workOrder with { DueDate = Now.AddDays(-1), Status = WorkOrderStatus.Assigned, Priority = WorkOrderPriority.High };
+
+        var view = _presenter.Present(workOrder, null, [], [], [], []);
+
+        view.IsOverdue.ShouldBeTrue();
+        view.HasAttentionBadges.ShouldBeTrue();
+        view.StatusTone.ShouldBe(BadgeTone.Info);
+        view.PriorityTone.ShouldBe(BadgeTone.Caution);
+    }
+
+    [Fact]
+    public void Should_Not_Mark_Overdue_When_Completed_Work_Order_Was_Past_Due()
+    {
+        var workOrder = _workOrder with { DueDate = Now.AddDays(-1), Status = WorkOrderStatus.Completed, CompletedAt = Now };
+
+        var view = _presenter.Present(workOrder, null, [], [], [], []);
+
+        view.IsOverdue.ShouldBeFalse();
+        view.HasAttentionBadges.ShouldBeFalse();
+        view.StatusTone.ShouldBe(BadgeTone.Success);
     }
 
     [Fact]
@@ -165,7 +191,7 @@ public sealed class WorkOrderDetailsPresenterTests : IDisposable
 
         var view = _presenter.Present(_workOrder, null, [], [current, previous], [], []);
 
-        view.History.ShouldBe([new DeviceHistoryView(previous.WorkOrderId, "ZL-2026-0007", "Rozliczone", "05.09.2026 08:00", "Jan Kowalski", "Wpisy: 3")]);
+        view.History.ShouldBe([new DeviceHistoryView(previous.WorkOrderId, "ZL-2026-0007", "Rozliczone", BadgeTone.Outline, "05.09.2026 08:00", "Jan Kowalski", "Wpisy: 3")]);
     }
 
     [Fact]

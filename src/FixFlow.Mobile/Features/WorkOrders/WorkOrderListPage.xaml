@@ -57,22 +57,9 @@
                                       RowSpacing="2">
                                     <Label Text="{Binding Number}"
                                            FontAttributes="Bold" />
-                                    <Border Grid.Column="1"
-                                            Style="{StaticResource StatusBadge}">
-                                        <Border.Triggers>
-                                            <DataTrigger TargetType="Border" Binding="{Binding IsInProgress}" Value="True">
-                                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
-                                            </DataTrigger>
-                                        </Border.Triggers>
-                                        <Label Text="{Binding StatusText}"
-                                               FontSize="12">
-                                            <Label.Triggers>
-                                                <DataTrigger TargetType="Label" Binding="{Binding IsInProgress}" Value="True">
-                                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource PrimaryForegroundLight}, Dark={StaticResource PrimaryForegroundDark}}" />
-                                                </DataTrigger>
-                                            </Label.Triggers>
-                                        </Label>
-                                    </Border>
+                                    <controls:Badge Grid.Column="1"
+                                                    Text="{Binding StatusText}"
+                                                    Tone="{Binding StatusTone}" />
                                     <Label Grid.Row="1"
                                            Grid.ColumnSpan="2"
                                            Text="{Binding ClientName}" />
@@ -95,11 +82,13 @@
                                            Text="{x:Static resources:AppResources.WorkOrderRejectedChange}"
                                            IsVisible="{Binding HasRejectedChange}"
                                            Style="{StaticResource ErrorLabel}" />
-                                    <Label Grid.Row="4"
-                                           Grid.ColumnSpan="2"
-                                           Text="{Binding PriorityText}"
-                                           IsVisible="{Binding IsUrgent}"
-                                           Style="{StaticResource ErrorLabel}" />
+                                    <controls:Badge Grid.Row="4"
+                                                    Grid.ColumnSpan="2"
+                                                    Text="{Binding PriorityText}"
+                                                    Tone="{Binding PriorityTone}"
+                                                    IsVisible="{Binding IsUrgent}"
+                                                    HorizontalOptions="Start"
+                                                    Margin="0,4,0,0" />
                                 </Grid>
                             </Border>
                         </Grid>
