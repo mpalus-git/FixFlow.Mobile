@@ -73,7 +73,8 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
             _connectivity,
             _navigation,
             _ui,
-            _messenger);
+            _messenger,
+            _timeProvider);
     }
 
     public async ValueTask InitializeAsync() => await _userDatabase.Database.OpenAsync(Guid.NewGuid());
@@ -100,6 +101,57 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
         release.SetResult();
         await load;
         _viewModel.Groups.SelectMany(group => group).Count().ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task Should_Show_Local_Data_Without_Requests_When_Returning_Shortly_After_Pull()
+    {
+        await _viewModel.AppearCommand.ExecuteAsync(null);
+        var requestsBefore = _handler.Requests.Count;
+        var groups = _viewModel.Groups;
+        await new OutboxWriter(_outbox, _timeProvider, _messenger).StartWorkAsync(_viewModel.Groups[0][0].Id);
+        _timeProvider.Advance(WorkOrderListViewModel.RefreshOnReturnAfter - TimeSpan.FromSeconds(1));
+
+        await _viewModel.AppearCommand.ExecuteAsync(null);
+
+        _handler.Requests.Count.ShouldBe(requestsBefore);
+        _viewModel.SyncStatus.ShouldBe("Do wysłania: 1");
+        _viewModel.Groups.ShouldNotBeSameAs(groups);
+    }
+
+    [Fact]
+    public async Task Should_Refresh_From_Api_When_Returning_After_Last_Pull_Got_Old()
+    {
+        await _viewModel.AppearCommand.ExecuteAsync(null);
+        _timeProvider.Advance(WorkOrderListViewModel.RefreshOnReturnAfter);
+
+        await _viewModel.AppearCommand.ExecuteAsync(null);
+
+        _handler.Requests.Count(IsListRequest).ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task Should_Refresh_From_Api_When_List_Appears_For_Another_Technician()
+    {
+        await _viewModel.AppearCommand.ExecuteAsync(null);
+        await _userDatabase.Database.CloseAsync();
+        await _userDatabase.Database.OpenAsync(Guid.NewGuid());
+
+        await _viewModel.AppearCommand.ExecuteAsync(null);
+
+        _handler.Requests.Count(IsListRequest).ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task Should_Keep_Groups_When_Synchronization_Brings_No_Changes()
+    {
+        await _viewModel.AppearCommand.ExecuteAsync(null);
+        var groups = _viewModel.Groups;
+
+        _messenger.Send(new SyncCompletedMessage(new SyncResult(false, false, null, PullResult.Succeeded)));
+        await Task.Delay(50, TestContext.Current.CancellationToken);
+
+        _viewModel.Groups.ShouldBeSameAs(groups);
     }
 
     [Fact]
