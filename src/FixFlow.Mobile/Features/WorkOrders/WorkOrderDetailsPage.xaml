@@ -22,15 +22,17 @@
                                      Spacing="12">
                     <Border Style="{StaticResource CardBorder}">
                         <VerticalStackLayout Spacing="4">
-                            <Grid ColumnDefinitions="*,Auto">
+                            <FlexLayout Style="{StaticResource HeaderWithBadge}">
                                 <Label Text="{Binding Details.Number}"
                                        Style="{StaticResource HeadlineLabel}"
                                        HorizontalTextAlignment="Start"
-                                       SemanticProperties.HeadingLevel="Level1" />
-                                <controls:Badge Grid.Column="1"
-                                                Text="{Binding Details.StatusText}"
-                                                Tone="{Binding Details.StatusTone}" />
-                            </Grid>
+                                       SemanticProperties.HeadingLevel="Level1"
+                                       Margin="0,0,8,0"
+                                       FlexLayout.Shrink="0" />
+                                <controls:Badge Text="{Binding Details.StatusText}"
+                                                Tone="{Binding Details.StatusTone}"
+                                                FlexLayout.Shrink="0" />
+                            </FlexLayout>
                             <Label Text="{Binding Details.DueText}"
                                    Style="{StaticResource SecondaryLabel}" />
                             <HorizontalStackLayout Spacing="8"
@@ -302,11 +304,16 @@
                                 <Border Style="{StaticResource CardBorder}">
                                     <Grid ColumnDefinitions="*,Auto"
                                           RowDefinitions="Auto,Auto,Auto,Auto">
-                                        <Label Text="{Binding Number}"
-                                               FontAttributes="Bold" />
-                                        <controls:Badge Grid.Column="1"
-                                                        Text="{Binding StatusText}"
-                                                        Tone="{Binding StatusTone}" />
+                                        <FlexLayout Grid.ColumnSpan="2"
+                                                    Style="{StaticResource HeaderWithBadge}">
+                                            <Label Text="{Binding Number}"
+                                                   FontAttributes="Bold"
+                                                   Margin="0,0,8,0"
+                                                   FlexLayout.Shrink="0" />
+                                            <controls:Badge Text="{Binding StatusText}"
+                                                            Tone="{Binding StatusTone}"
+                                                            FlexLayout.Shrink="0" />
+                                        </FlexLayout>
                                         <Label Grid.Row="1"
                                                Grid.ColumnSpan="2"
                                                Text="{Binding DateText}"
