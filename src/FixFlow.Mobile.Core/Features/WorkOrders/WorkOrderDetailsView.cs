@@ -21,6 +21,8 @@ public sealed record WorkOrderDetailsView(
     EntryPhotoView? ClientSignature,
     bool CanDownloadProtocol)
 {
+    public bool HasAttentionBadges => IsUrgent || IsOverdue;
+
     public bool HasClientSignature => ClientSignature is not null;
 
     public bool HasEvents => Events.Count > 0;

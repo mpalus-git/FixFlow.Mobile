@@ -112,7 +112,7 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
         await _viewModel.LoadCommand.ExecuteAsync(null);
 
         var item = _viewModel.Groups.SelectMany(group => group).ShouldHaveSingleItem();
-        item.IsInProgress.ShouldBeTrue();
+        item.StatusTone.ShouldBe(BadgeTone.Warning);
         item.IsPending.ShouldBeTrue();
         _viewModel.SyncStatus.ShouldBe("Do wysłania: 1");
     }

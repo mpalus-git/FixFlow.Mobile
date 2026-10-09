@@ -21,4 +21,22 @@
     <Color x:Key="InputDark">#313131</Color>
     <Color x:Key="DestructiveTextLight">#C10007</Color>
     <Color x:Key="DestructiveTextDark">#FFA2A2</Color>
+    <Color x:Key="BadgeInfoLight">#DFF2FE</Color>
+    <Color x:Key="BadgeInfoDark">#052F4A</Color>
+    <Color x:Key="BadgeInfoForegroundLight">#024A70</Color>
+    <Color x:Key="BadgeInfoForegroundDark">#B8E6FE</Color>
+    <Color x:Key="BadgeWarningLight">#FEF3C6</Color>
+    <Color x:Key="BadgeWarningDark">#461901</Color>
+    <Color x:Key="BadgeWarningForegroundLight">#7B3306</Color>
+    <Color x:Key="BadgeWarningForegroundDark">#FEE685</Color>
+    <Color x:Key="BadgeSuccessLight">#D0FAE5</Color>
+    <Color x:Key="BadgeSuccessDark">#002C22</Color>
+    <Color x:Key="BadgeSuccessForegroundLight">#004F3B</Color>
+    <Color x:Key="BadgeSuccessForegroundDark">#A4F4CF</Color>
+    <Color x:Key="BadgeCautionLight">#FFEDD4</Color>
+    <Color x:Key="BadgeCautionDark">#441306</Color>
+    <Color x:Key="BadgeCautionForegroundLight">#7E2A0C</Color>
+    <Color x:Key="BadgeCautionForegroundDark">#FFD6A7</Color>
+    <Color x:Key="BadgeDestructiveLight">#FDE6E7</Color>
+    <Color x:Key="BadgeDestructiveDark">#3B1C1D</Color>
 </ResourceDictionary>

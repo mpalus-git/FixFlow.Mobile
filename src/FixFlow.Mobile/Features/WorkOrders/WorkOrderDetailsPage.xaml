@@ -29,17 +29,22 @@
                                        Style="{StaticResource HeadlineLabel}"
                                        HorizontalTextAlignment="Start"
                                        SemanticProperties.HeadingLevel="Level1" />
-                                <Border Grid.Column="1"
-                                        Style="{StaticResource StatusBadge}">
-                                    <Label Text="{Binding Details.StatusText}"
-                                           FontSize="12" />
-                                </Border>
+                                <controls:Badge Grid.Column="1"
+                                                Text="{Binding Details.StatusText}"
+                                                Tone="{Binding Details.StatusTone}" />
                             </Grid>
                             <Label Text="{Binding Details.DueText}"
                                    Style="{StaticResource SecondaryLabel}" />
-                            <Label Text="{Binding Details.PriorityText}"
-                                   IsVisible="{Binding Details.IsUrgent}"
-                                   Style="{StaticResource ErrorLabel}" />
+                            <HorizontalStackLayout Spacing="8"
+                                                   Margin="0,4,0,0"
+                                                   IsVisible="{Binding Details.HasAttentionBadges}">
+                                <controls:Badge Text="{Binding Details.PriorityText}"
+                                                Tone="{Binding Details.PriorityTone}"
+                                                IsVisible="{Binding Details.IsUrgent}" />
+                                <controls:Badge Text="{x:Static resources:AppResources.DetailsOverdueBadge}"
+                                                Tone="Destructive"
+                                                IsVisible="{Binding Details.IsOverdue}" />
+                            </HorizontalStackLayout>
                             <Label Text="{Binding Details.Description}"
                                    Margin="0,8,0,0" />
                         </VerticalStackLayout>
@@ -164,12 +169,9 @@
                                         <Grid ColumnDefinitions="*,Auto">
                                             <Label Text="{Binding TechnicianName}"
                                                    FontAttributes="Bold" />
-                                            <Border Grid.Column="1"
-                                                    Style="{StaticResource StatusBadge}"
-                                                    IsVisible="{Binding IsCorrection}">
-                                                <Label Text="{x:Static resources:AppResources.DetailsCorrectionBadge}"
-                                                       FontSize="12" />
-                                            </Border>
+                                            <controls:Badge Grid.Column="1"
+                                                            Text="{x:Static resources:AppResources.DetailsCorrectionBadge}"
+                                                            IsVisible="{Binding IsCorrection}" />
                                         </Grid>
                                         <Label Text="{Binding CreatedText}"
                                                Style="{StaticResource SecondaryLabel}" />
@@ -304,11 +306,9 @@
                                           RowDefinitions="Auto,Auto,Auto,Auto">
                                         <Label Text="{Binding Number}"
                                                FontAttributes="Bold" />
-                                        <Border Grid.Column="1"
-                                                Style="{StaticResource StatusBadge}">
-                                            <Label Text="{Binding StatusText}"
-                                                   FontSize="12" />
-                                        </Border>
+                                        <controls:Badge Grid.Column="1"
+                                                        Text="{Binding StatusText}"
+                                                        Tone="{Binding StatusTone}" />
                                         <Label Grid.Row="1"
                                                Grid.ColumnSpan="2"
                                                Text="{Binding DateText}"

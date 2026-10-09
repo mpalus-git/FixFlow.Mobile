@@ -765,4 +765,7 @@
   <data name="DetailsSignatureDescription" xml:space="preserve">
     <value>Client signature given when the work order was completed</value>
   </data>
+  <data name="DetailsOverdueBadge" xml:space="preserve">
+    <value>Overdue</value>
+  </data>
 </root>

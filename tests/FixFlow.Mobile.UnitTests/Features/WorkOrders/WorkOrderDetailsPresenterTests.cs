@@ -38,6 +38,7 @@ public sealed class WorkOrderDetailsPresenterTests : IDisposable
         var view = _presenter.Present(workOrder, null, [], [], [], []);
 
         view.IsOverdue.ShouldBeTrue();
+        view.HasAttentionBadges.ShouldBeTrue();
         view.StatusTone.ShouldBe(BadgeTone.Info);
         view.PriorityTone.ShouldBe(BadgeTone.Caution);
     }
@@ -50,6 +51,7 @@ public sealed class WorkOrderDetailsPresenterTests : IDisposable
         var view = _presenter.Present(workOrder, null, [], [], [], []);
 
         view.IsOverdue.ShouldBeFalse();
+        view.HasAttentionBadges.ShouldBeFalse();
         view.StatusTone.ShouldBe(BadgeTone.Success);
     }
 
