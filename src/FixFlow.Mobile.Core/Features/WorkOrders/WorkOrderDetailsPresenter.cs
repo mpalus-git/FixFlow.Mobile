@@ -47,7 +47,8 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, Sessio
             [.. history.Where(item => item.WorkOrderId != workOrder.Id).Select(ToHistoryView)],
             [.. events.Select((item, index) => ToEventView(item, index == 0 ? item.DueDate : events[index - 1].DueDate)), .. PendingEventViews(pendingOperations)],
             workOrder.ClientSignaturePhotoId is { } signatureId ? ToSignatureView(signatureId, localPhotoPath) : null,
-            workOrder.Status is WorkOrderStatus.Completed or WorkOrderStatus.Invoiced);
+            workOrder.Status is WorkOrderStatus.Completed or WorkOrderStatus.Invoiced
+                && !pendingOperations.Any(operation => operation.Kind == OutboxOperationKind.CompleteWorkOrder));
     }
 
     public WorkTimerView PresentWorkTimer(WorkTimer timer, DateTimeOffset now, bool isLocating)

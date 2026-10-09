@@ -206,6 +206,16 @@ public sealed class WorkOrderDetailsPresenterTests : IDisposable
         _presenter.Present(_workOrder with { Status = status }, null, [], [], [], []).CanDownloadProtocol.ShouldBe(expected);
     }
 
+    [Fact]
+    public void Should_Hide_Protocol_When_Completion_Waits_In_Queue()
+    {
+        var complete = new OutboxOperation(Guid.CreateVersion7(), _workOrder.Id, OutboxOperationKind.CompleteWorkOrder, OutboxPayload.Serialize(new PendingCompletion(Now)), Now, 0, null, null);
+
+        var view = _presenter.Present(_workOrder with { Status = WorkOrderStatus.Completed }, null, [], [], [], [complete]);
+
+        view.CanDownloadProtocol.ShouldBeFalse();
+    }
+
     private WorkOrderEvent Event(WorkOrderEventType type, string? actorName, string? technicianName, DateTimeOffset dueDate) =>
         new(Guid.NewGuid(), _workOrder.Id, type, Now, actorName, technicianName, dueDate);
 
