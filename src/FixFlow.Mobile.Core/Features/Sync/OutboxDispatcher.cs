@@ -25,6 +25,8 @@ public sealed class OutboxDispatcher(
         var blockedWorkOrders = (await outbox.GetConflictsAsync()).Select(conflict => conflict.WorkOrderId).ToHashSet();
         var operations = await outbox.GetAllAsync();
         int sent = 0, rejected = 0;
+        DateTimeOffset? nextAttemptAt = null;
+        var changedPartStock = false;
 
         foreach (var workOrderQueue in operations.GroupBy(operation => operation.WorkOrderId))
         {
@@ -35,8 +37,9 @@ public sealed class OutboxDispatcher(
 
             foreach (var operation in workOrderQueue)
             {
-                if (operation.NextAttemptAt > timeProvider.GetUtcNow())
+                if (operation.NextAttemptAt is { } waitingUntil && waitingUntil > timeProvider.GetUtcNow())
                 {
+                    nextAttemptAt = Earliest(nextAttemptAt, waitingUntil);
                     break;
                 }
 
@@ -49,19 +52,21 @@ public sealed class OutboxDispatcher(
                         photos.Delete(OutboxPayload.PhotoId(operation));
                     }
 
+                    changedPartStock |= operation.Kind == OutboxOperationKind.AddServiceEntry && OutboxPayload.ToServiceEntry(operation).Parts.Count > 0;
                     sent++;
                     continue;
                 }
 
                 if (error.Kind == ApiErrorKind.Unauthorized)
                 {
-                    return new DispatchSummary(sent, rejected, operations.Count - sent - rejected, SessionRejected: true);
+                    return new DispatchSummary(sent, rejected, operations.Count - sent - rejected, SessionRejected: true) { ChangedPartStock = changedPartStock };
                 }
 
                 if (error.ShouldRetry)
                 {
-                    var nextAttemptAt = timeProvider.GetUtcNow() + retryPolicy.NextDelay(operation.AttemptCount + 1, error.RetryAfter);
-                    await outbox.RecordFailedAttemptAsync(operation.Id, nextAttemptAt, Describe(error));
+                    var retryAt = timeProvider.GetUtcNow() + retryPolicy.NextDelay(operation.AttemptCount + 1, error.RetryAfter);
+                    await outbox.RecordFailedAttemptAsync(operation.Id, retryAt, Describe(error));
+                    nextAttemptAt = Earliest(nextAttemptAt, retryAt);
                 }
                 else
                 {
@@ -82,8 +87,15 @@ public sealed class OutboxDispatcher(
             }
         }
 
-        return new DispatchSummary(sent, rejected, operations.Count - sent - rejected, SessionRejected: false);
+        return new DispatchSummary(sent, rejected, operations.Count - sent - rejected, SessionRejected: false)
+        {
+            NextAttemptAt = nextAttemptAt,
+            ChangedPartStock = changedPartStock,
+        };
     }
+
+    private static DateTimeOffset Earliest(DateTimeOffset? current, DateTimeOffset candidate) =>
+        current is { } earlier && earlier < candidate ? earlier : candidate;
 
     private static string Describe(ApiError error) =>
         error.Detail ?? (error.StatusCode is { } status ? ((int)status).ToString(CultureInfo.InvariantCulture) : "network");

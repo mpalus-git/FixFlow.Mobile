@@ -107,8 +107,8 @@ public sealed partial class SyncViewModel
                 return;
             }
 
-            var result = await _coordinator.SynchronizeAsync();
-            Notice = result.IsServerUnavailable || result.Pull?.Outcome is PullOutcome.ServerUnavailable or PullOutcome.Failed
+            var result = await _coordinator.SynchronizeAsync(refreshPartCatalog: true);
+            Notice = result.IsServerUnavailable || result.Pull?.Outcome == PullOutcome.Failed
                 ? AppResources.SyncFailedNotice
                 : null;
             await ShowLocalAsync();

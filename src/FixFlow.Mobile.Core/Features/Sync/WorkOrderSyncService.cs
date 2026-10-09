@@ -7,8 +7,6 @@ namespace FixFlow.Mobile.Core.Features.Sync;
 
 public sealed class WorkOrderSyncService(
     IFixFlowApi api,
-    ServerReadinessProbe readinessProbe,
-    ServerWarmup warmup,
     WorkOrderRepository workOrders,
     SyncStateRepository syncStates)
 {
@@ -18,18 +16,8 @@ public sealed class WorkOrderSyncService(
 
     public async Task<DateTimeOffset?> GetLastPulledAtAsync() => (await syncStates.GetAsync(SyncStateKey))?.UpdatedAt;
 
-    public async Task<PullResult> PullAsync(Action onServerStarting, CancellationToken cancellationToken)
+    public async Task<PullResult> PullAsync(CancellationToken cancellationToken)
     {
-        if (!warmup.IsServerReady)
-        {
-            if (!await readinessProbe.WaitUntilReadyAsync(onServerStarting, cancellationToken))
-            {
-                return PullResult.ServerUnavailable;
-            }
-
-            warmup.MarkReady();
-        }
-
         var pulled = new List<WorkOrder>();
         for (var page = 1; ; page++)
         {

@@ -11,6 +11,8 @@ public sealed class PartSyncService(IFixFlowApi api, PartRepository parts, SyncS
 
     public const int PageSize = 100;
 
+    public async Task<DateTimeOffset?> GetLastPulledAtAsync() => (await syncStates.GetAsync(SyncStateKey))?.UpdatedAt;
+
     public async Task<PullResult> PullAsync(CancellationToken cancellationToken)
     {
         var pulled = new List<Part>();

@@ -19,14 +19,11 @@ public sealed class WorkOrderSyncServiceTests : IAsyncLifetime
 
     private readonly FakeTimeProvider _timeProvider = new(Now);
     private readonly TestUserDatabase _userDatabase = new();
-    private readonly ServerWarmup _warmup = new();
     private readonly StubHttpMessageHandler _handler;
     private readonly WorkOrderRepository _workOrders;
     private readonly WorkOrderSyncService _service;
-    private HttpStatusCode _readyStatus = HttpStatusCode.OK;
     private HttpStatusCode _listStatus = HttpStatusCode.OK;
     private int _remoteCount = 3;
-    private int _startingNotices;
 
     public WorkOrderSyncServiceTests()
     {
@@ -35,8 +32,6 @@ public sealed class WorkOrderSyncServiceTests : IAsyncLifetime
         _workOrders = new WorkOrderRepository(_userDatabase.Database);
         _service = new WorkOrderSyncService(
             RestService.ForGenerated<IFixFlowApi>(httpClient),
-            new ServerReadinessProbe(httpClient, _timeProvider),
-            _warmup,
             _workOrders,
             new SyncStateRepository(_userDatabase.Database, _timeProvider));
     }
@@ -76,40 +71,13 @@ public sealed class WorkOrderSyncServiceTests : IAsyncLifetime
         (await _service.GetLastPulledAtAsync()).ShouldBeNull();
     }
 
-    [Fact]
-    public async Task Should_Check_Server_Readiness_Only_Before_First_Pull()
-    {
-        await PullAsync();
-        await PullAsync();
-
-        _handler.Requests.Count(request => request.RequestUri!.AbsolutePath == "/api/v1/system/ready").ShouldBe(1);
-    }
-
-    [Fact]
-    public async Task Should_Report_Server_Unavailable_Without_Pulling_When_Server_Does_Not_Start()
-    {
-        _readyStatus = HttpStatusCode.ServiceUnavailable;
-
-        var pull = PullAsync();
-        while (!pull.IsCompleted)
-        {
-            _timeProvider.Advance(TimeSpan.FromSeconds(3));
-            await Task.Delay(10, TestContext.Current.CancellationToken);
-        }
-
-        (await pull).ShouldBe(PullResult.ServerUnavailable);
-        _startingNotices.ShouldBe(1);
-        ListRequests().ShouldBeEmpty();
-        _warmup.IsServerReady.ShouldBeFalse();
-    }
-
     public async ValueTask DisposeAsync()
     {
         _handler.Dispose();
         await _userDatabase.DisposeAsync();
     }
 
-    private Task<PullResult> PullAsync() => _service.PullAsync(() => _startingNotices++, TestContext.Current.CancellationToken);
+    private Task<PullResult> PullAsync() => _service.PullAsync(TestContext.Current.CancellationToken);
 
     private List<System.Collections.Specialized.NameValueCollection> ListRequests() =>
     [
@@ -120,17 +88,12 @@ public sealed class WorkOrderSyncServiceTests : IAsyncLifetime
 
     private HttpResponseMessage Route(HttpRequestMessage request)
     {
-        if (request.RequestUri!.AbsolutePath == "/api/v1/system/ready")
-        {
-            return new HttpResponseMessage(_readyStatus);
-        }
-
         if (_listStatus != HttpStatusCode.OK)
         {
             return new HttpResponseMessage(_listStatus);
         }
 
-        var page = int.Parse(HttpUtility.ParseQueryString(request.RequestUri.Query)["page"]!, System.Globalization.CultureInfo.InvariantCulture);
+        var page = int.Parse(HttpUtility.ParseQueryString(request.RequestUri!.Query)["page"]!, System.Globalization.CultureInfo.InvariantCulture);
         var items = Enumerable.Range((page - 1) * WorkOrderSyncService.PageSize, WorkOrderSyncService.PageSize)
             .Where(index => index < _remoteCount)
             .Select(index => new

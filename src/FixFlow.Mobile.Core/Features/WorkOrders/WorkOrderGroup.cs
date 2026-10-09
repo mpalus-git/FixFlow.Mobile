@@ -8,4 +8,15 @@ public sealed class WorkOrderGroup(WorkOrderSection section, string title, IEnum
     public string Title { get; } = title;
 
     public override string ToString() => Title;
+
+    public static bool HaveSameContent(IReadOnlyList<WorkOrderGroup> left, IReadOnlyList<WorkOrderGroup> right)
+    {
+        ArgumentNullException.ThrowIfNull(left);
+        ArgumentNullException.ThrowIfNull(right);
+
+        return left.Count == right.Count
+            && left.Zip(right).All(pair => pair.First.Section == pair.Second.Section
+                && pair.First.Title == pair.Second.Title
+                && pair.First.SequenceEqual(pair.Second));
+    }
 }

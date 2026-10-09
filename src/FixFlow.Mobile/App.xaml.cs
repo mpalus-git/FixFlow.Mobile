@@ -28,10 +28,16 @@ public partial class App : Application
 
     private AppShell CreateShell() => _services.GetRequiredService<AppShell>();
 
+    protected override void OnSleep()
+    {
+        _services.GetRequiredService<SyncCoordinator>().SuspendRetries();
+        base.OnSleep();
+    }
+
     protected override async void OnResume()
     {
         base.OnResume();
-        await _services.GetRequiredService<SyncCoordinator>().SynchronizeInBackgroundAsync();
+        await _services.GetRequiredService<SyncCoordinator>().ResumeAsync();
     }
 
     private void OnLanguageChanged(object? sender, EventArgs e)

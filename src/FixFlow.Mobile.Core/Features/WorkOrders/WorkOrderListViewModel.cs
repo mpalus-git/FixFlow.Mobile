@@ -16,6 +16,8 @@ namespace FixFlow.Mobile.Core.Features.WorkOrders;
 public sealed partial class WorkOrderListViewModel
     : ObservableObject, IRecipient<ConnectivityChangedMessage>, IRecipient<SyncCompletedMessage>, IRecipient<ServerStartingMessage>
 {
+    public static readonly TimeSpan RefreshOnReturnAfter = TimeSpan.FromMinutes(5);
+
     private readonly UserDatabase _userDatabase;
     private readonly WorkOrderRepository _workOrders;
     private readonly OutboxRepository _outbox;
@@ -25,6 +27,8 @@ public sealed partial class WorkOrderListViewModel
     private readonly WorkOrderListPresenter _presenter;
     private readonly IConnectivityService _connectivity;
     private readonly INavigationService _navigation;
+    private readonly TimeProvider _timeProvider;
+    private Guid? _loadedForUserId;
 
     public WorkOrderListViewModel(
         ScreenState screen,
@@ -37,7 +41,8 @@ public sealed partial class WorkOrderListViewModel
         IConnectivityService connectivity,
         INavigationService navigation,
         IUiDispatcher ui,
-        IMessenger messenger)
+        IMessenger messenger,
+        TimeProvider timeProvider)
     {
         ArgumentNullException.ThrowIfNull(messenger);
         Screen = screen;
@@ -50,6 +55,7 @@ public sealed partial class WorkOrderListViewModel
         _presenter = presenter;
         _connectivity = connectivity;
         _navigation = navigation;
+        _timeProvider = timeProvider;
         messenger.RegisterAll(this);
     }
 
@@ -75,6 +81,29 @@ public sealed partial class WorkOrderListViewModel
     public bool HasNotice => Notice is not null;
 
     public bool HasSyncStatus => SyncStatus is not null;
+
+    [RelayCommand]
+    private async Task AppearAsync(CancellationToken cancellationToken)
+    {
+        if (_userDatabase.UserId is not { } userId)
+        {
+            return;
+        }
+
+        if (userId != _loadedForUserId)
+        {
+            _loadedForUserId = userId;
+            await LoadAsync(cancellationToken);
+        }
+        else if (await _sync.GetLastPulledAtAsync() is { } pulledAt && _timeProvider.GetUtcNow() - pulledAt < RefreshOnReturnAfter)
+        {
+            await ShowLocalAsync(updateScreen: true);
+        }
+        else
+        {
+            await LoadAsync(cancellationToken);
+        }
+    }
 
     [RelayCommand]
     private async Task LoadAsync(CancellationToken cancellationToken)
@@ -107,7 +136,7 @@ public sealed partial class WorkOrderListViewModel
             }
 
             Screen.SetOnline();
-            var result = await _coordinator.SynchronizeAsync();
+            var result = await _coordinator.SynchronizeAsync(refreshPartCatalog: true);
             Notice = null;
             if (result.Pull?.Outcome == PullOutcome.Succeeded)
             {
@@ -178,10 +207,15 @@ public sealed partial class WorkOrderListViewModel
         var operations = await _outbox.GetAllAsync();
         var conflicts = await _outbox.GetConflictsAsync();
         SyncStatus = DescribeQueue(operations.Count, conflicts.Count);
-        Groups = _presenter.Present(
+        var groups = _presenter.Present(
             PendingOperationsOverlay.Apply(await _workOrders.GetAllAsync(), operations),
             operations.Select(operation => operation.WorkOrderId).ToHashSet(),
             conflicts.Select(conflict => conflict.WorkOrderId).ToHashSet());
+        if (!WorkOrderGroup.HaveSameContent(Groups, groups))
+        {
+            Groups = groups;
+        }
+
         if (updateScreen)
         {
             Screen.ShowContent(hasItems: Groups.Count > 0);
