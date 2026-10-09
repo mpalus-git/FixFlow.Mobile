@@ -138,7 +138,23 @@ public sealed class WorkOrderDetailsPresenterTests : IDisposable
 
         var view = _presenter.Present(_workOrder, null, [entry], [], [], []);
 
-        view.Entries.ShouldHaveSingleItem().WorkTimeText.ShouldBe("Czas pracy: 05.10.2026 08:15 – 10:45 (2 h 30 min)");
+        view.Entries.ShouldHaveSingleItem().WorkTimeText.ShouldBe("Czas pracy: 05.10.2026 08:15 – 10:45 (2\u00A0h\u00A030\u00A0min)");
+    }
+
+    [Theory]
+    [InlineData("2026-10-05T21:30:00Z", "2026-10-05T22:30:00Z", "Czas pracy: 05.10.2026 23:30 – 06.10.2026 00:30 (1\u00A0h\u00A00\u00A0min)")]
+    [InlineData("2026-10-07T10:40:00Z", "2026-10-09T10:49:00Z", "Czas pracy: 07.10.2026 12:40 – 09.10.2026 12:49 (48\u00A0h\u00A09\u00A0min)")]
+    public void Should_Show_End_Date_When_Work_Ends_On_Another_Day_In_Warsaw(string startedAt, string finishedAt, string expected)
+    {
+        var entry = CreateEntry(isCorrection: false) with
+        {
+            WorkStartedAt = DateTimeOffset.Parse(startedAt, System.Globalization.CultureInfo.InvariantCulture),
+            WorkFinishedAt = DateTimeOffset.Parse(finishedAt, System.Globalization.CultureInfo.InvariantCulture),
+        };
+
+        var view = _presenter.Present(_workOrder, null, [entry], [], [], []);
+
+        view.Entries.ShouldHaveSingleItem().WorkTimeText.ShouldBe(expected);
     }
 
     [Fact]
@@ -190,6 +206,16 @@ public sealed class WorkOrderDetailsPresenterTests : IDisposable
         _presenter.Present(_workOrder with { Status = status }, null, [], [], [], []).CanDownloadProtocol.ShouldBe(expected);
     }
 
+    [Fact]
+    public void Should_Hide_Protocol_When_Completion_Waits_In_Queue()
+    {
+        var complete = new OutboxOperation(Guid.CreateVersion7(), _workOrder.Id, OutboxOperationKind.CompleteWorkOrder, OutboxPayload.Serialize(new PendingCompletion(Now)), Now, 0, null, null);
+
+        var view = _presenter.Present(_workOrder with { Status = WorkOrderStatus.Completed }, null, [], [], [], [complete]);
+
+        view.CanDownloadProtocol.ShouldBeFalse();
+    }
+
     private WorkOrderEvent Event(WorkOrderEventType type, string? actorName, string? technicianName, DateTimeOffset dueDate) =>
         new(Guid.NewGuid(), _workOrder.Id, type, Now, actorName, technicianName, dueDate);
 
@@ -205,7 +231,7 @@ public sealed class WorkOrderDetailsPresenterTests : IDisposable
 
         var view = _presenter.PresentWorkTimer(timer, Now, isLocating: false);
 
-        view.ShouldBe(new WorkTimerView("Praca od 05.10.2026 06:45", "Trwa: 1 h 15 min", "Pozycja zapisana", false, false, false));
+        view.ShouldBe(new WorkTimerView("Praca od 05.10.2026 06:45", "Trwa: 1\u00A0h\u00A015\u00A0min", "Pozycja zapisana", false, false, false));
     }
 
     [Fact]
@@ -227,7 +253,7 @@ public sealed class WorkOrderDetailsPresenterTests : IDisposable
 
         var view = _presenter.PresentWorkTimer(timer, Now, isLocating: true);
 
-        view.ElapsedText.ShouldBe("Trwa: 0 h 0 min");
+        view.ElapsedText.ShouldBe("Trwa: 0\u00A0h\u00A00\u00A0min");
         view.LocationText.ShouldBe("Ustalanie pozycji…");
         view.CanRetryLocation.ShouldBeFalse();
     }

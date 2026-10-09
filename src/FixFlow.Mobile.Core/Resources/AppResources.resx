@@ -169,7 +169,7 @@
     <value>Czas pracy: {0} – {1} ({2})</value>
   </data>
   <data name="DetailsDuration" xml:space="preserve">
-    <value>{0} h {1} min</value>
+    <value>{0} h {1} min</value>
   </data>
   <data name="DetailsQuantity" xml:space="preserve">
     <value>{0} szt.</value>
