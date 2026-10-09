@@ -155,7 +155,7 @@ public sealed class ServiceEntryViewModelTests : IAsyncLifetime
 
         await _viewModel.SaveCommand.ExecuteAsync(null);
 
-        _viewModel.ValidationMessage.ShouldBe(WorkOrderTexts.Format(AppResources.EntryStartBeforeWorkOrder, _formatter.FormatDateTime(StartedAt)));
+        _viewModel.ValidationMessage.ShouldBe(AppText.Format(AppResources.EntryStartBeforeWorkOrder, _formatter.FormatDateTime(StartedAt)));
     }
 
     [Theory]

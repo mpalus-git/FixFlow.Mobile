@@ -38,7 +38,7 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, WorkOr
             WorkOrderBadges.ForPriority(workOrder.Priority),
             workOrder.Priority is WorkOrderPriority.High or WorkOrderPriority.Critical && WorkOrderTexts.IsActive(workOrder.Status),
             classifier.Classify(workOrder) == WorkOrderSection.Overdue,
-            WorkOrderTexts.Format(AppResources.WorkOrderDueAt, formatter.FormatDateTime(workOrder.DueDate)),
+            AppText.Format(AppResources.WorkOrderDueAt, formatter.FormatDateTime(workOrder.DueDate)),
             workOrder.Description,
             workOrder.ClientContact.IsEmpty ? null : ToClientView(workOrder.ClientName, workOrder.ClientContact),
             device is null ? null : ToDeviceView(device),
@@ -46,7 +46,7 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, WorkOr
                 .. entries.Select(entry => ToEntryView(entry, isPending: false, [.. entry.PhotoUrls.Select(url => new EntryPhotoView(url, false))])),
                 .. pendingEntries.Select(pending => ToEntryView(pending.Entry, isPending: true, [.. pending.Photos.Select(photo => ToPhotoView(photo, localPhotoPath))])),
             ],
-            usedParts.Count == 0 ? null : WorkOrderTexts.Format(AppResources.DetailsPartsTotal, formatter.FormatMoney(usedParts.Sum())),
+            usedParts.Count == 0 ? null : AppText.Format(AppResources.DetailsPartsTotal, formatter.FormatMoney(usedParts.Sum())),
             [.. history.Where(item => item.WorkOrderId != workOrder.Id).Select(ToHistoryView)],
             [.. events.Select((item, index) => ToEventView(item, index == 0 ? item.DueDate : events[index - 1].DueDate)), .. PendingEventViews(pendingOperations)],
             workOrder.ClientSignaturePhotoId is { } signatureId ? ToSignatureView(signatureId, localPhotoPath) : null,
@@ -60,8 +60,8 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, WorkOr
 
         var elapsed = now > timer.StartedAt ? now - timer.StartedAt : TimeSpan.Zero;
         return new WorkTimerView(
-            WorkOrderTexts.Format(AppResources.WorkTimerStartedAt, formatter.FormatDateTime(timer.StartedAt)),
-            WorkOrderTexts.Format(AppResources.WorkTimerElapsed, WorkOrderTexts.Format(AppResources.DetailsDuration, (int)elapsed.TotalHours, elapsed.Minutes)),
+            AppText.Format(AppResources.WorkTimerStartedAt, formatter.FormatDateTime(timer.StartedAt)),
+            AppText.Format(AppResources.WorkTimerElapsed, AppText.Format(AppResources.DetailsDuration, (int)elapsed.TotalHours, elapsed.Minutes)),
             isLocating ? AppResources.WorkLocationLocating : timer.LocationStatus switch
             {
                 WorkLocationStatus.Captured => AppResources.WorkLocationCaptured,
@@ -76,7 +76,7 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, WorkOr
 
     private static ClientView ToClientView(string name, ClientContact client) => new(
         name,
-        WorkOrderTexts.Format(AppResources.DetailsContactPerson, client.ContactPerson),
+        AppText.Format(AppResources.DetailsContactPerson, client.ContactPerson),
         client.Phone,
         $"{client.Street} {client.BuildingNumber}, {client.PostalCode} {client.City}",
         $"{client.Street} {client.BuildingNumber}",
@@ -85,8 +85,8 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, WorkOr
 
     private DeviceView ToDeviceView(Device device) => new(
         $"{device.Manufacturer} {device.Model}",
-        WorkOrderTexts.Format(AppResources.DetailsSerialNumber, device.SerialNumber),
-        WorkOrderTexts.Format(AppResources.DetailsInstalledOn, formatter.FormatDate(device.InstallationDate)));
+        AppText.Format(AppResources.DetailsSerialNumber, device.SerialNumber),
+        AppText.Format(AppResources.DetailsInstalledOn, formatter.FormatDate(device.InstallationDate)));
 
     private ServiceEntry ToServiceEntry(Guid workOrderId, OutboxOperation operation)
     {
@@ -132,7 +132,7 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, WorkOr
         return new ServiceEntryPartView(
             part.PartName,
             part.CatalogNumber,
-            WorkOrderTexts.Format(AppResources.DetailsQuantity, sign * part.Quantity),
+            AppText.Format(AppResources.DetailsQuantity, sign * part.Quantity),
             formatter.FormatMoney(part.UnitPrice),
             formatter.FormatMoney(sign * part.Amount));
     }
@@ -142,10 +142,10 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, WorkOr
         {
             WorkOrderEventType.Created => AppResources.EventCreated,
             WorkOrderEventType.Updated when item.DueDate != previousDueDate =>
-                WorkOrderTexts.Format(AppResources.EventDueDateChanged, formatter.FormatDateTime(item.DueDate)),
+                AppText.Format(AppResources.EventDueDateChanged, formatter.FormatDateTime(item.DueDate)),
             WorkOrderEventType.Updated => AppResources.EventUpdated,
-            WorkOrderEventType.Assigned => WorkOrderTexts.Format(AppResources.EventAssigned, item.TechnicianName ?? string.Empty),
-            WorkOrderEventType.Reassigned => WorkOrderTexts.Format(AppResources.EventReassigned, item.TechnicianName ?? string.Empty),
+            WorkOrderEventType.Assigned => AppText.Format(AppResources.EventAssigned, item.TechnicianName ?? string.Empty),
+            WorkOrderEventType.Reassigned => AppText.Format(AppResources.EventReassigned, item.TechnicianName ?? string.Empty),
             WorkOrderEventType.Unassigned => AppResources.EventUnassigned,
             WorkOrderEventType.Started => AppResources.EventStarted,
             WorkOrderEventType.Completed => AppResources.EventCompleted,
@@ -172,15 +172,15 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, WorkOr
         WorkOrderBadges.ForStatus(item.Status),
         formatter.FormatDateTime(item.CompletedAt ?? item.CreatedAt),
         item.TechnicianName,
-        WorkOrderTexts.Format(AppResources.DetailsEntryCount, item.ServiceEntryCount));
+        AppText.Format(AppResources.DetailsEntryCount, item.ServiceEntryCount));
 
     private string FormatWorkTime(DateTimeOffset started, DateTimeOffset finished)
     {
         var duration = finished - started;
-        return WorkOrderTexts.Format(
+        return AppText.Format(
             AppResources.DetailsWorkTime,
             formatter.FormatDateTime(started),
             formatter.IsSameBusinessDay(started, finished) ? formatter.FormatTime(finished) : formatter.FormatDateTime(finished),
-            WorkOrderTexts.Format(AppResources.DetailsDuration, (int)duration.TotalHours, duration.Minutes));
+            AppText.Format(AppResources.DetailsDuration, (int)duration.TotalHours, duration.Minutes));
     }
 }

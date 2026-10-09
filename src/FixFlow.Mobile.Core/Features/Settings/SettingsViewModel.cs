@@ -48,7 +48,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         SelectedTheme = theme.CurrentTheme;
         UserName = session.CurrentUser?.FullName;
         UserEmail = session.CurrentUser?.Email;
-        Version = WorkOrderTexts.Format(AppResources.SettingsVersion, appVersion.Version, appVersion.Build);
+        Version = AppText.Format(AppResources.SettingsVersion, appVersion.Version, appVersion.Build);
     }
 
     public string? UserName { get; }
@@ -133,11 +133,11 @@ public sealed partial class SettingsViewModel : ObservableObject
     {
         string[] parts =
         [
-            .. pending > 0 ? [WorkOrderTexts.Format(AppResources.LogoutPendingPart, pending)] : Array.Empty<string>(),
-            .. conflicts > 0 ? [WorkOrderTexts.Format(AppResources.LogoutConflictPart, conflicts)] : Array.Empty<string>(),
+            .. pending > 0 ? [AppText.Format(AppResources.LogoutPendingPart, pending)] : Array.Empty<string>(),
+            .. conflicts > 0 ? [AppText.Format(AppResources.LogoutConflictPart, conflicts)] : Array.Empty<string>(),
         ];
         return parts.Length == 0
             ? AppResources.LogoutConfirmMessage
-            : WorkOrderTexts.Format(AppResources.LogoutUnsentConfirmMessage, string.Join(", ", parts));
+            : AppText.Format(AppResources.LogoutUnsentConfirmMessage, string.Join(", ", parts));
     }
 }

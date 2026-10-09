@@ -22,7 +22,7 @@ public sealed class DueDateReminderPlanner(BusinessClock clock, DisplayFormatter
                     workOrder.Id,
                     workOrder.DueDate - LeadTime,
                     AppResources.ReminderTitle,
-                    WorkOrderTexts.Format(AppResources.ReminderMessage, workOrder.Number, workOrder.ClientName, formatter.FormatTime(workOrder.DueDate)))),
+                    AppText.Format(AppResources.ReminderMessage, workOrder.Number, workOrder.ClientName, formatter.FormatTime(workOrder.DueDate)))),
         ];
     }
 

@@ -26,8 +26,8 @@ public sealed class WorkOrderListPresenter(WorkOrderSectionClassifier classifier
         workOrder.ClientName,
         workOrder.DeviceModel,
         section == WorkOrderSection.RecentlyCompleted && workOrder.CompletedAt is { } completedAt
-            ? WorkOrderTexts.Format(AppResources.WorkOrderCompletedAt, formatter.FormatDateTime(completedAt))
-            : WorkOrderTexts.Format(AppResources.WorkOrderDueAt, formatter.FormatDateTime(workOrder.DueDate)),
+            ? AppText.Format(AppResources.WorkOrderCompletedAt, formatter.FormatDateTime(completedAt))
+            : AppText.Format(AppResources.WorkOrderDueAt, formatter.FormatDateTime(workOrder.DueDate)),
         workOrder.Status,
         WorkOrderTexts.Status(workOrder.Status),
         workOrder.Priority,

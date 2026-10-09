@@ -64,7 +64,7 @@ public sealed partial class CompleteWorkOrderViewModel(
             return;
         }
 
-        Message = WorkOrderTexts.Format(AppResources.CompleteConfirmMessage, workOrder.Number);
+        Message = AppText.Format(AppResources.CompleteConfirmMessage, workOrder.Number);
         Screen.ShowContent(hasItems: true);
     }
 

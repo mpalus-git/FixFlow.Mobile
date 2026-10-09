@@ -159,7 +159,7 @@ public sealed partial class SyncViewModel
     {
         if (!await _dialogs.ConfirmAsync(
                 AppResources.DiscardAllChangesTitle,
-                WorkOrderTexts.Format(AppResources.DiscardAllChangesMessage, conflict.FollowingChangeCount + 1),
+                AppText.Format(AppResources.DiscardAllChangesMessage, conflict.FollowingChangeCount + 1),
                 AppResources.DiscardChangeButton,
                 AppResources.CancelButton))
         {
@@ -188,7 +188,7 @@ public sealed partial class SyncViewModel
     {
         var lastSyncedAt = (await _syncStates.GetAsync(WorkOrderSyncService.SyncStateKey))?.UpdatedAt;
         LastSyncText = lastSyncedAt is { } syncedAt
-            ? WorkOrderTexts.Format(AppResources.SyncLastSync, _formatter.FormatDateTime(syncedAt))
+            ? AppText.Format(AppResources.SyncLastSync, _formatter.FormatDateTime(syncedAt))
             : AppResources.SyncNeverSynced;
         if (_connectivity.IsOnline)
         {

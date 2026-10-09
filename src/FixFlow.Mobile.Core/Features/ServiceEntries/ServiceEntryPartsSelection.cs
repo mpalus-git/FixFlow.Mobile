@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FixFlow.Mobile.Core.Features.Parts;
-using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Formatting;
 using FixFlow.Mobile.Core.Resources;
 
@@ -55,7 +54,7 @@ public sealed partial class ServiceEntryPartsSelection(PartRepository parts, Dis
             var available = await parts.GetAsync(draft.PartId) is { IsArchived: false } part ? PartAvailability.Available(part, _pendingEntries) : 0;
             if (draft.Quantity > available)
             {
-                return WorkOrderTexts.Format(AppResources.EntryQuantityExceedsStock, draft.Name, Math.Max(available, 0));
+                return AppText.Format(AppResources.EntryQuantityExceedsStock, draft.Name, Math.Max(available, 0));
             }
         }
 
@@ -101,7 +100,7 @@ public sealed partial class ServiceEntryPartsSelection(PartRepository parts, Dis
             part,
             available,
             $"{part.CatalogNumber} · {formatter.FormatMoney(part.UnitPrice)}",
-            available > 0 ? WorkOrderTexts.Format(AppResources.EntryPartAvailable, available) : AppResources.EntryPartOutOfStock,
+            available > 0 ? AppText.Format(AppResources.EntryPartAvailable, available) : AppResources.EntryPartOutOfStock,
             available > 0);
     }
 }

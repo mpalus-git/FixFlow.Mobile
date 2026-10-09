@@ -1,4 +1,3 @@
-using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Resources;
 
 namespace FixFlow.Mobile.Core.Screens;
@@ -11,8 +10,8 @@ public sealed record StatusBannerView(string Text, StatusTone Tone, bool HasQueu
     {
         string[] queue =
         [
-            .. pendingChanges > 0 ? [WorkOrderTexts.Format(AppResources.SyncPendingCount, pendingChanges)] : Array.Empty<string>(),
-            .. rejectedChanges > 0 ? [WorkOrderTexts.Format(AppResources.SyncConflictCount, rejectedChanges)] : Array.Empty<string>(),
+            .. pendingChanges > 0 ? [AppText.Format(AppResources.SyncPendingCount, pendingChanges)] : Array.Empty<string>(),
+            .. rejectedChanges > 0 ? [AppText.Format(AppResources.SyncConflictCount, rejectedChanges)] : Array.Empty<string>(),
         ];
         string[] lines =
         [

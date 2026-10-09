@@ -64,7 +64,7 @@ public sealed class SettingsViewModelTests : IAsyncLifetime
 
         viewModel.UserName.ShouldBe("Jan Kowalski");
         viewModel.UserEmail.ShouldBe("jan@fixflow.test");
-        viewModel.Version.ShouldBe(WorkOrderTexts.Format(AppResources.SettingsVersion, "1.2", "34"));
+        viewModel.Version.ShouldBe(AppText.Format(AppResources.SettingsVersion, "1.2", "34"));
         viewModel.SelectedLanguage.ShouldBe(AppLanguage.Polish);
         viewModel.SelectedTheme.ShouldBe(AppThemePreference.System);
     }
@@ -157,9 +157,9 @@ public sealed class SettingsViewModelTests : IAsyncLifetime
 
         await viewModel.LogoutCommand.ExecuteAsync(null);
 
-        var expected = WorkOrderTexts.Format(
+        var expected = AppText.Format(
             AppResources.LogoutUnsentConfirmMessage,
-            $"{WorkOrderTexts.Format(AppResources.LogoutPendingPart, 1)}, {WorkOrderTexts.Format(AppResources.LogoutConflictPart, 1)}");
+            $"{AppText.Format(AppResources.LogoutPendingPart, 1)}, {AppText.Format(AppResources.LogoutConflictPart, 1)}");
         await _dialogs.Received(1).ConfirmAsync(AppResources.LogoutConfirmTitle, expected, AppResources.LogoutButton, AppResources.CancelButton);
     }
 

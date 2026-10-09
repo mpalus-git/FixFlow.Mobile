@@ -1,5 +1,3 @@
-using System.Globalization;
-using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
 using FixFlow.Mobile.Core.Accessibility;
 using FixFlow.Mobile.Core.Formatting;
@@ -63,10 +61,7 @@ public sealed partial class ScreenState(DisplayFormatter formatter, IScreenReade
     public void SetOffline(DateTimeOffset? lastSyncedAt)
     {
         OfflineMessage = lastSyncedAt is { } syncedAt
-            ? string.Format(
-                CultureInfo.CurrentCulture,
-                CompositeFormat.Parse(AppResources.OfflineLastSync),
-                formatter.FormatDateTime(syncedAt))
+            ? AppText.Format(AppResources.OfflineLastSync, formatter.FormatDateTime(syncedAt))
             : AppResources.OfflineNeverSynced;
         IsOffline = true;
     }

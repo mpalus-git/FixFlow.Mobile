@@ -274,7 +274,7 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
         await ShowOfflineAsync(TestWorkOrders.Create("ZL-2", DetailsApiStub.Now, WorkOrderStatus.InProgress));
 
         _viewModel.CanStartWork.ShouldBeFalse();
-        _viewModel.StartBlockedText.ShouldBe(WorkOrderTexts.Format(AppResources.StartWorkBlocked, "ZL-2"));
+        _viewModel.StartBlockedText.ShouldBe(AppText.Format(AppResources.StartWorkBlocked, "ZL-2"));
     }
 
     [Fact]
@@ -347,7 +347,7 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
         _timeProvider.Advance(TimeSpan.FromMinutes(90));
 
         _viewModel.WorkTimer.ShouldNotBeNull().ElapsedText.ShouldBe(
-            WorkOrderTexts.Format(AppResources.WorkTimerElapsed, WorkOrderTexts.Format(AppResources.DetailsDuration, 1, 30)));
+            AppText.Format(AppResources.WorkTimerElapsed, AppText.Format(AppResources.DetailsDuration, 1, 30)));
         _viewModel.Pause();
     }
 

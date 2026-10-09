@@ -1,4 +1,3 @@
-using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Resources;
 
 namespace FixFlow.Mobile.Core.Features.Sync;
@@ -20,7 +19,7 @@ public static class ConflictTexts
         }
 
         return conflict.StatusCode is { } status
-            ? WorkOrderTexts.Format(AppResources.ConflictReasonRejected, (int)status)
+            ? AppText.Format(AppResources.ConflictReasonRejected, (int)status)
             : AppResources.ConflictReasonUnknown;
     }
 

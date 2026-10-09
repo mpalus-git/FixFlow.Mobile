@@ -250,7 +250,7 @@ public sealed partial class ServiceEntryViewModel(
 
         if (_workOrderStartedAt is { } workOrderStartedAt && start < workOrderStartedAt)
         {
-            return WorkOrderTexts.Format(AppResources.EntryStartBeforeWorkOrder, formatter.FormatDateTime(workOrderStartedAt));
+            return AppText.Format(AppResources.EntryStartBeforeWorkOrder, formatter.FormatDateTime(workOrderStartedAt));
         }
 
         if (finish <= start)

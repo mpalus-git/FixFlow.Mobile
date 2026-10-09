@@ -179,7 +179,7 @@ public sealed partial class WorkOrderDetailsViewModel(
         if (Details is not { } details || !CanStartWork
             || !await dialogs.ConfirmAsync(
                 AppResources.StartWorkConfirmTitle,
-                WorkOrderTexts.Format(AppResources.StartWorkConfirmMessage, details.Number),
+                AppText.Format(AppResources.StartWorkConfirmMessage, details.Number),
                 AppResources.StartWorkButton,
                 AppResources.CancelButton))
         {
@@ -393,7 +393,7 @@ public sealed partial class WorkOrderDetailsViewModel(
         }
 
         CanStartWork = availability.CanStart;
-        StartBlockedText = availability.BlockingWorkOrderNumber is { } number ? WorkOrderTexts.Format(AppResources.StartWorkBlocked, number) : null;
+        StartBlockedText = availability.BlockingWorkOrderNumber is { } number ? AppText.Format(AppResources.StartWorkBlocked, number) : null;
         _workTimer = workTimer;
         await ShowWorkTimerAsync();
         Details = details;
