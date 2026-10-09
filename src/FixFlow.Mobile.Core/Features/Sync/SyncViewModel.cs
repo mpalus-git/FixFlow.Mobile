@@ -30,6 +30,7 @@ public sealed partial class SyncViewModel
     private readonly IDialogService _dialogs;
     private readonly IUiDispatcher _ui;
     private readonly IScreenReaderAnnouncer _announcer;
+    private readonly IMessenger _messenger;
     private int _localVersion;
 
     public SyncViewModel(
@@ -49,7 +50,6 @@ public sealed partial class SyncViewModel
         IScreenReaderAnnouncer announcer,
         IMessenger messenger)
     {
-        ArgumentNullException.ThrowIfNull(messenger);
         Screen = screen;
         _userDatabase = userDatabase;
         _outbox = outbox;
@@ -64,10 +64,20 @@ public sealed partial class SyncViewModel
         _dialogs = dialogs;
         _ui = ui;
         _announcer = announcer;
-        messenger.RegisterAll(this);
+        _messenger = messenger;
     }
 
     public ScreenState Screen { get; }
+
+    public void Resume()
+    {
+        if (!_messenger.IsRegistered<SyncCompletedMessage>(this))
+        {
+            _messenger.RegisterAll(this);
+        }
+    }
+
+    public void Pause() => _messenger.UnregisterAll(this);
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasConflicts))]

@@ -15,6 +15,13 @@ public partial class SyncPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
+        _viewModel.Resume();
         _viewModel.LoadCommand.Execute(null);
+    }
+
+    protected override void OnDisappearing()
+    {
+        _viewModel.Pause();
+        base.OnDisappearing();
     }
 }

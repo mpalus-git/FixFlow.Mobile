@@ -66,6 +66,7 @@ public sealed class SyncViewModelTests : IAsyncLifetime
             _ui,
             Substitute.For<IScreenReaderAnnouncer>(),
             _messenger);
+        _viewModel.Resume();
     }
 
     public async ValueTask InitializeAsync()

@@ -28,6 +28,7 @@ public sealed partial class WorkOrderListViewModel
     private readonly IConnectivityService _connectivity;
     private readonly INavigationService _navigation;
     private readonly TimeProvider _timeProvider;
+    private readonly IMessenger _messenger;
     private Guid? _loadedForUserId;
 
     public WorkOrderListViewModel(
@@ -44,7 +45,6 @@ public sealed partial class WorkOrderListViewModel
         IMessenger messenger,
         TimeProvider timeProvider)
     {
-        ArgumentNullException.ThrowIfNull(messenger);
         Screen = screen;
         _userDatabase = userDatabase;
         _workOrders = workOrders;
@@ -56,10 +56,20 @@ public sealed partial class WorkOrderListViewModel
         _connectivity = connectivity;
         _navigation = navigation;
         _timeProvider = timeProvider;
-        messenger.RegisterAll(this);
+        _messenger = messenger;
     }
 
     public ScreenState Screen { get; }
+
+    public void Resume()
+    {
+        if (!_messenger.IsRegistered<SyncCompletedMessage>(this))
+        {
+            _messenger.RegisterAll(this);
+        }
+    }
+
+    public void Pause() => _messenger.UnregisterAll(this);
 
     [ObservableProperty]
     public partial IReadOnlyList<WorkOrderGroup> Groups { get; private set; } = [];
@@ -85,6 +95,7 @@ public sealed partial class WorkOrderListViewModel
         }
         else if (await _sync.GetLastPulledAtAsync() is { } pulledAt && _timeProvider.GetUtcNow() - pulledAt < RefreshOnReturnAfter)
         {
+            await ShowConnectionAsync(_connectivity.IsOnline);
             await ShowLocalAsync(updateScreen: true);
         }
         else
@@ -172,7 +183,12 @@ public sealed partial class WorkOrderListViewModel
             return;
         }
 
-        if (message.IsOnline)
+        await ShowConnectionAsync(message.IsOnline);
+    }
+
+    private async Task ShowConnectionAsync(bool isOnline)
+    {
+        if (isOnline)
         {
             Screen.SetOnline();
         }
