@@ -26,6 +26,27 @@ public sealed class OutboxIntegrationTests(ApiEnvironment environment)
     }
 
     [Fact]
+    public async Task Should_Treat_Start_And_Completion_As_Sent_When_They_Are_Sent_Again_After_Lost_Response()
+    {
+        using var admin = await AdminApi.LogInAsync(environment);
+        var scenario = await TechnicianScenario.CreateAsync(admin);
+        await using var device = await TechnicianDevice.LogInAsync(environment.BaseAddress, scenario.Email, scenario.Password);
+        var writer = device.Get<OutboxWriter>();
+        var dispatcher = device.Get<OutboxDispatcher>();
+        var start = await writer.StartWorkAsync(scenario.WorkOrderId);
+        await writer.AddServiceEntryAsync(scenario.WorkOrderId, CreateEntry(scenario.PartId, quantity: 1, start));
+        await writer.CompleteWorkOrderAsync(scenario.WorkOrderId);
+        await dispatcher.DispatchAsync(CancellationToken.None);
+
+        await writer.StartWorkAsync(scenario.WorkOrderId);
+        await writer.CompleteWorkOrderAsync(scenario.WorkOrderId);
+        var retry = await dispatcher.DispatchAsync(CancellationToken.None);
+
+        retry.ShouldBe(new DispatchSummary(Sent: 2, Rejected: 0, Remaining: 0, SessionRejected: false));
+        (await admin.GetAsync($"api/v1/work-orders/{scenario.WorkOrderId}")).GetProperty("status").GetString().ShouldBe("Completed");
+    }
+
+    [Fact]
     public async Task Should_Not_Duplicate_Entry_When_Same_Entry_Is_Sent_Again_After_Lost_Response()
     {
         using var admin = await AdminApi.LogInAsync(environment);

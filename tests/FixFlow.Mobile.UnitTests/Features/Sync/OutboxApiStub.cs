@@ -18,8 +18,6 @@ internal sealed class OutboxApiStub
 
     public Dictionary<string, Func<Task<HttpResponseMessage>>> AsyncOverrides { get; } = [];
 
-    public string RemoteStatus { get; set; } = "Assigned";
-
     public async Task<HttpResponseMessage> RouteAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         var call = $"{request.Method} {request.RequestUri!.AbsolutePath}";
@@ -68,7 +66,7 @@ internal sealed class OutboxApiStub
 
         if (request.Method == HttpMethod.Get)
         {
-            return Json(HttpStatusCode.OK, $$"""{"id":"{{Guid.Empty}}","number":"ZL","deviceId":"{{Guid.Empty}}","deviceSerialNumber":"SN","deviceModel":"M","clientId":"{{Guid.Empty}}","clientName":"C","description":"D","priority":"Normal","status":"{{RemoteStatus}}","dueDate":"2026-10-05T08:00:00Z","isOverdue":false,"createdAt":"2026-10-01T08:00:00Z"}""");
+            return Json(HttpStatusCode.OK, $$"""{"id":"{{Guid.Empty}}","number":"ZL","deviceId":"{{Guid.Empty}}","deviceSerialNumber":"SN","deviceModel":"M","clientId":"{{Guid.Empty}}","clientName":"C","description":"D","priority":"Normal","status":"Assigned","dueDate":"2026-10-05T08:00:00Z","isOverdue":false,"createdAt":"2026-10-01T08:00:00Z"}""");
         }
 
         return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("{}", Encoding.UTF8, "application/json") };

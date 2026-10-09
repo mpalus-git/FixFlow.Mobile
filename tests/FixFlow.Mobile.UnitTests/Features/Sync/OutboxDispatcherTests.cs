@@ -226,21 +226,7 @@ public sealed class OutboxDispatcherTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Should_Treat_Start_As_Sent_When_Api_Returns_409_And_Work_Order_Is_Already_In_Progress()
-    {
-        await QueueAsync(_writer.StartWorkAsync(WorkOrderId));
-        _api.Overrides[$"POST /api/v1/work-orders/{WorkOrderId}/start"] = () => OutboxApiStub.Json(
-            HttpStatusCode.Conflict, """{"status":409,"errorCode":"WorkOrder.InvalidStatusTransition"}""");
-        _api.RemoteStatus = "InProgress";
-
-        var summary = await DispatchAsync();
-
-        summary.Sent.ShouldBe(1);
-        (await _outbox.GetConflictsAsync()).ShouldBeEmpty();
-    }
-
-    [Fact]
-    public async Task Should_Report_Conflict_When_Api_Returns_409_And_Work_Order_Is_Not_In_Target_Status()
+    public async Task Should_Move_Start_To_Conflicts_Without_Reading_Work_Order_When_Api_Returns_409()
     {
         await QueueAsync(_writer.StartWorkAsync(WorkOrderId));
         _api.Overrides[$"POST /api/v1/work-orders/{WorkOrderId}/start"] = () => OutboxApiStub.Json(
@@ -249,6 +235,7 @@ public sealed class OutboxDispatcherTests : IAsyncLifetime
         await DispatchAsync();
 
         (await _outbox.GetConflictsAsync()).ShouldHaveSingleItem().ErrorCode.ShouldBe("WorkOrder.TechnicianHasWorkInProgress");
+        _api.Calls.ShouldBe([$"POST /api/v1/work-orders/{WorkOrderId}/start"]);
     }
 
     [Fact]
