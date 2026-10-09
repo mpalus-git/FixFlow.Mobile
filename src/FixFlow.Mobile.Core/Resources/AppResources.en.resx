@@ -429,6 +429,9 @@
   <data name="CompleteConfirmTitle" xml:space="preserve">
     <value>Complete work order?</value>
   </data>
+  <data name="SignatureInvalid" xml:space="preserve">
+    <value>The signature could not be saved. Clear the field and try again.</value>
+  </data>
   <data name="CompleteConfirmMessage" xml:space="preserve">
     <value>Work order {0} will move to Completed. Entries cannot be added afterwards.</value>
   </data>

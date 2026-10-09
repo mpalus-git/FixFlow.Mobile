@@ -429,6 +429,9 @@
   <data name="CompleteConfirmTitle" xml:space="preserve">
     <value>Zakończyć zlecenie?</value>
   </data>
+  <data name="SignatureInvalid" xml:space="preserve">
+    <value>Nie udało się zapisać podpisu. Wyczyść pole i spróbuj ponownie.</value>
+  </data>
   <data name="CompleteConfirmMessage" xml:space="preserve">
     <value>Zlecenie {0} przejdzie w status Zakończone. Po zakończeniu nie można dodawać wpisów.</value>
   </data>
