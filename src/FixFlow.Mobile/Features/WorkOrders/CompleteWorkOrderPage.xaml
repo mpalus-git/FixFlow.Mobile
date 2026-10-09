@@ -9,7 +9,8 @@
              x:DataType="viewModels:CompleteWorkOrderViewModel"
              Title="{x:Static resources:AppResources.CompleteTitle}">
     <Grid>
-        <Grid Padding="16"
+        <Grid Style="{StaticResource ReadableContent}"
+              Padding="16"
               RowSpacing="8"
               VerticalOptions="{OnIdiom Default=Fill, Desktop=Start}"
               RowDefinitions="Auto,Auto,Auto,*,Auto,Auto,Auto">

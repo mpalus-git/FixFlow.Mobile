@@ -17,7 +17,7 @@
                      Command="{Binding RefreshCommand}"
                      IsRefreshing="{Binding IsRefreshing}">
             <ScrollView>
-                <VerticalStackLayout
+                <VerticalStackLayout Style="{StaticResource ReadableContent}"
                                      Padding="16"
                                      Spacing="12">
                     <Border Style="{StaticResource CardBorder}">

@@ -16,7 +16,8 @@
                      Command="{Binding SynchronizeCommand}"
                      IsRefreshing="{Binding IsRefreshing}">
             <ScrollView>
-                <VerticalStackLayout Padding="16"
+                <VerticalStackLayout Style="{StaticResource ReadableContent}"
+                                     Padding="16"
                                      Spacing="12">
                     <Label Text="{Binding LastSyncText}"
                            Style="{StaticResource SecondaryLabel}" />

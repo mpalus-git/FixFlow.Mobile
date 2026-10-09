@@ -24,7 +24,8 @@
         <RefreshView Grid.Row="1"
                      Command="{Binding RefreshCommand}"
                      IsRefreshing="{Binding IsRefreshing}">
-            <CollectionView ItemsSource="{Binding Groups}"
+            <CollectionView Style="{StaticResource ReadableContent}"
+                            ItemsSource="{Binding Groups}"
                             IsGrouped="True"
                             SelectionMode="Single"
                             SelectedItem="{Binding SelectedWorkOrder}"
