@@ -1,8 +1,9 @@
+using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Formatting;
 using FixFlow.Mobile.Core.Notifications;
 using FixFlow.Mobile.Core.Resources;
 
-namespace FixFlow.Mobile.Core.Features.WorkOrders;
+namespace FixFlow.Mobile.Core.Notifications;
 
 public sealed class DueDateReminderPlanner(BusinessClock clock, DisplayFormatter formatter)
 {

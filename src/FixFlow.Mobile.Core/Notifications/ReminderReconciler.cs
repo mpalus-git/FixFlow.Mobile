@@ -1,8 +1,9 @@
 using FixFlow.Mobile.Core.Features.Sync.Outbox;
+using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Notifications;
 using FixFlow.Mobile.Core.Storage;
 
-namespace FixFlow.Mobile.Core.Features.WorkOrders;
+namespace FixFlow.Mobile.Core.Notifications;
 
 public sealed class ReminderReconciler(
     UserDatabase userDatabase,

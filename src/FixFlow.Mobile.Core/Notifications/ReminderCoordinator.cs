@@ -3,7 +3,7 @@ using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Notifications;
 
-namespace FixFlow.Mobile.Core.Features.WorkOrders;
+namespace FixFlow.Mobile.Core.Notifications;
 
 public sealed class ReminderCoordinator(
     SessionStore session,
