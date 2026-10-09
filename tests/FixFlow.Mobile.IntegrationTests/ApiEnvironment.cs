@@ -29,7 +29,7 @@ public sealed class ApiEnvironment : IAsyncLifetime
     {
         _network = new NetworkBuilder().Build();
         await _network.CreateAsync();
-        _database = new PostgreSqlBuilder("postgres:18")
+        _database = new PostgreSqlBuilder("mirror.gcr.io/library/postgres:18")
             .WithNetwork(_network)
             .WithNetworkAliases(DatabaseAlias)
             .WithDatabase("fixflow")
