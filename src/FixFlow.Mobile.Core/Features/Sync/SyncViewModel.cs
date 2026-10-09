@@ -79,15 +79,9 @@ public sealed partial class SyncViewModel
     [ObservableProperty]
     public partial bool IsRefreshing { get; set; }
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasNotice))]
-    public partial string? Notice { get; private set; }
-
     public bool HasConflicts => Conflicts.Count > 0;
 
     public bool HasPendingOperations => PendingOperations.Count > 0;
-
-    public bool HasNotice => Notice is not null;
 
     [RelayCommand]
     private async Task LoadAsync()
@@ -101,16 +95,17 @@ public sealed partial class SyncViewModel
     {
         try
         {
-            Notice = null;
+            Screen.ClearNotice();
             if (!await ShowConnectivityAsync())
             {
                 return;
             }
 
             var result = await _coordinator.SynchronizeAsync(refreshPartCatalog: true);
-            Notice = result.IsServerUnavailable || result.Pull?.Outcome == PullOutcome.Failed
-                ? AppResources.SyncFailedNotice
-                : null;
+            if (result.IsServerUnavailable || result.Pull?.Outcome == PullOutcome.Failed)
+            {
+                Screen.ShowNotice(ScreenNotice.Problem(AppResources.SyncFailedNotice));
+            }
             await ShowLocalAsync();
         }
         finally
@@ -123,13 +118,13 @@ public sealed partial class SyncViewModel
     private async Task CopyAsync(ConflictView conflict)
     {
         await _clipboard.SetTextAsync(conflict.Content);
-        Notice = AppResources.ChangeCopied;
+        Screen.ShowNotice(ScreenNotice.Info(AppResources.ChangeCopied));
     }
 
     [RelayCommand]
     private async Task RetryAsync(ConflictView conflict)
     {
-        Notice = null;
+        Screen.ClearNotice();
         await _resolver.RetryAsync(conflict.OperationId);
         await ShowLocalAsync();
     }
@@ -146,7 +141,7 @@ public sealed partial class SyncViewModel
             return;
         }
 
-        Notice = null;
+        Screen.ClearNotice();
         await _resolver.DiscardAsync(conflict.OperationId);
         await ShowLocalAsync();
     }
@@ -163,7 +158,7 @@ public sealed partial class SyncViewModel
             return;
         }
 
-        Notice = null;
+        Screen.ClearNotice();
         await _resolver.DiscardWorkOrderChangesAsync(conflict.WorkOrderId);
         await ShowLocalAsync();
     }
@@ -173,7 +168,7 @@ public sealed partial class SyncViewModel
     public void Receive(ServerStartingMessage message) =>
         _ui.Post(() =>
         {
-            Notice = AppResources.ServerStartingNotice;
+            Screen.ShowNotice(ScreenNotice.Info(AppResources.ServerStartingNotice));
             return Task.CompletedTask;
         });
 

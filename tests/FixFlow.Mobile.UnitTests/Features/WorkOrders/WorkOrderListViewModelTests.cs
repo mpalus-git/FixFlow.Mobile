@@ -115,7 +115,7 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
         await _viewModel.AppearCommand.ExecuteAsync(null);
 
         _handler.Requests.Count.ShouldBe(requestsBefore);
-        _viewModel.SyncStatus.ShouldBe("Do wysłania: 1");
+        _viewModel.Screen.Banner.ShouldNotBeNull().Text.ShouldContain("Do wysłania: 1");
         _viewModel.Groups.ShouldNotBeSameAs(groups);
     }
 
@@ -167,7 +167,10 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
         var item = _viewModel.Groups.SelectMany(group => group).ShouldHaveSingleItem();
         item.StatusTone.ShouldBe(BadgeTone.Warning);
         item.IsPending.ShouldBeTrue();
-        _viewModel.SyncStatus.ShouldBe("Do wysłania: 1");
+        var banner = _viewModel.Screen.Banner.ShouldNotBeNull();
+        banner.Text.ShouldContain("Do wysłania: 1");
+        banner.Text.ShouldContain(_viewModel.Screen.OfflineMessage!);
+        banner.HasQueueAction.ShouldBeTrue();
     }
 
     [Fact]
@@ -205,7 +208,7 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
         await _viewModel.LoadCommand.ExecuteAsync(null);
 
         _viewModel.Screen.Status.ShouldBe(ScreenStatus.Content);
-        _viewModel.Notice.ShouldBe(AppResources.RefreshFailedNotice);
+        _viewModel.Screen.Notice.ShouldBe(ScreenNotice.Problem(AppResources.RefreshFailedNotice));
         _viewModel.IsRefreshing.ShouldBeFalse();
     }
 
@@ -236,10 +239,10 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
         }
 
         await Task.Delay(10, TestContext.Current.CancellationToken);
-        _viewModel.Notice.ShouldBe(AppResources.ServerStartingNotice);
+        _viewModel.Screen.Notice.ShouldBe(ScreenNotice.Info(AppResources.ServerStartingNotice));
         ready.SetResult(new HttpResponseMessage(HttpStatusCode.OK));
         await load;
-        _viewModel.Notice.ShouldBeNull();
+        _viewModel.Screen.Notice.ShouldBeNull();
         _viewModel.Screen.Status.ShouldBe(ScreenStatus.Content);
     }
 

@@ -9,6 +9,7 @@ using FixFlow.Mobile.Core.Features.Settings;
 using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Formatting;
+using FixFlow.Mobile.Core.Resources;
 using FixFlow.Mobile.Core.Screens;
 using FixFlow.Mobile.UnitTests.Features.WorkOrders;
 using FixFlow.Mobile.UnitTests.Storage;
@@ -103,7 +104,7 @@ public sealed class SyncViewModelTests : IAsyncLifetime
         await _viewModel.CopyCommand.ExecuteAsync(conflict);
 
         await _clipboard.Received(1).SetTextAsync(conflict.Content);
-        _viewModel.HasNotice.ShouldBeTrue();
+        _viewModel.Screen.Notice.ShouldBe(ScreenNotice.Info(AppResources.ChangeCopied));
     }
 
     [Fact]

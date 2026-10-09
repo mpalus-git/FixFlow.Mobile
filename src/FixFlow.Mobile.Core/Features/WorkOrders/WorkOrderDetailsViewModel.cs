@@ -56,12 +56,6 @@ public sealed partial class WorkOrderDetailsViewModel(
     public partial bool IsRefreshing { get; set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasNotice))]
-    public partial string? Notice { get; private set; }
-
-    public bool HasNotice => Notice is not null;
-
-    [ObservableProperty]
     public partial bool CanStartWork { get; private set; }
 
     [ObservableProperty]
@@ -137,7 +131,7 @@ public sealed partial class WorkOrderDetailsViewModel(
     {
         try
         {
-            Notice = null;
+            Screen.ClearNotice();
             if (!connectivity.IsOnline)
             {
                 await ShowConnectionAsync(isOnline: false);
@@ -333,7 +327,7 @@ public sealed partial class WorkOrderDetailsViewModel(
     private async Task ApplySyncResultAsync(SyncResult result)
     {
         await ShowConnectionAsync(!result.IsOffline);
-        if (result.Pull?.Outcome == PullOutcome.Succeeded && (HasNotice || (_hasPendingOperations && result.Dispatch?.Sent > 0)))
+        if (result.Pull?.Outcome == PullOutcome.Succeeded && (Screen.Notice is not null || (_hasPendingOperations && result.Dispatch?.Sent > 0)))
         {
             await RefreshCommand.ExecuteAsync(null);
             return;
@@ -423,7 +417,7 @@ public sealed partial class WorkOrderDetailsViewModel(
 
         if (Details is not null)
         {
-            Notice = AppResources.DetailsRefreshFailed;
+            Screen.ShowNotice(ScreenNotice.Problem(AppResources.DetailsRefreshFailed));
         }
         else
         {
