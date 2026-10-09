@@ -41,6 +41,8 @@ public sealed class WorkOrderListPresenterTests : IDisposable
         item.PriorityText.ShouldBe("Krytyczny priorytet");
         item.IsInProgress.ShouldBeTrue();
         item.IsUrgent.ShouldBeTrue();
+        item.StatusTone.ShouldBe(BadgeTone.Warning);
+        item.PriorityTone.ShouldBe(BadgeTone.Destructive);
     }
 
     [Fact]

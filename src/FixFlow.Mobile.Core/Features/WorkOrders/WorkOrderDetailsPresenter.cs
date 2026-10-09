@@ -7,7 +7,7 @@ using FixFlow.Mobile.Core.Resources;
 
 namespace FixFlow.Mobile.Core.Features.WorkOrders;
 
-public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, SessionStore session, ApiAddress apiAddress)
+public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, WorkOrderSectionClassifier classifier, SessionStore session, ApiAddress apiAddress)
 {
     public WorkOrderDetailsView Present(
         WorkOrder workOrder,
@@ -33,8 +33,11 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, Sessio
         return new WorkOrderDetailsView(
             workOrder.Number,
             WorkOrderTexts.Status(workOrder.Status),
+            WorkOrderBadges.ForStatus(workOrder.Status),
             WorkOrderTexts.Priority(workOrder.Priority),
+            WorkOrderBadges.ForPriority(workOrder.Priority),
             workOrder.Priority is WorkOrderPriority.High or WorkOrderPriority.Critical && WorkOrderTexts.IsActive(workOrder.Status),
+            classifier.Classify(workOrder) == WorkOrderSection.Overdue,
             WorkOrderTexts.Format(AppResources.WorkOrderDueAt, formatter.FormatDateTime(workOrder.DueDate)),
             workOrder.Description,
             workOrder.ClientContact.IsEmpty ? null : ToClientView(workOrder.ClientName, workOrder.ClientContact),
@@ -166,6 +169,7 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, Sessio
         item.WorkOrderId,
         item.Number,
         WorkOrderTexts.Status(item.Status),
+        WorkOrderBadges.ForStatus(item.Status),
         formatter.FormatDateTime(item.CompletedAt ?? item.CreatedAt),
         item.TechnicianName,
         WorkOrderTexts.Format(AppResources.DetailsEntryCount, item.ServiceEntryCount));
