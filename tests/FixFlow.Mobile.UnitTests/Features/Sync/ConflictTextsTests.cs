@@ -30,6 +30,7 @@ public sealed class ConflictTextsTests : IDisposable
     [InlineData("ServiceEntry.ReturnExceedsConsumption")]
     [InlineData("Photo.ContentTooLarge")]
     [InlineData("Photo.IdConflict")]
+    [InlineData("Photo.DailyLimitExceeded")]
     [InlineData(OutboxDispatcher.MissingPhotoFileCode)]
     public void Should_Translate_Reason_When_Error_Code_Is_Known(string errorCode)
     {

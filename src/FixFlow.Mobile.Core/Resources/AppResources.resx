@@ -495,6 +495,9 @@
   <data name="ConflictReasonPhotoIdConflict" xml:space="preserve">
     <value>Zdjęcie o tym identyfikatorze wysłał już inny technik.</value>
   </data>
+  <data name="ConflictReasonPhotoDailyLimitExceeded" xml:space="preserve">
+    <value>Przekroczono limit 100 zdjęć na dobę. Ponów wysłanie później.</value>
+  </data>
   <data name="ConflictReasonLocalPhotoFileMissing" xml:space="preserve">
     <value>Plik zdjęcia nie istnieje już na urządzeniu.</value>
   </data>
