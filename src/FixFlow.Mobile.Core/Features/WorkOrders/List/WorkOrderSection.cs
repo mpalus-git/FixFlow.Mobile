@@ -1,4 +1,4 @@
-namespace FixFlow.Mobile.Core.Features.WorkOrders;
+namespace FixFlow.Mobile.Core.Features.WorkOrders.List;
 
 public enum WorkOrderSection
 {

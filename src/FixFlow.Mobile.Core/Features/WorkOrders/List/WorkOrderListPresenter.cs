@@ -1,7 +1,7 @@
 using FixFlow.Mobile.Core.Formatting;
 using FixFlow.Mobile.Core.Resources;
 
-namespace FixFlow.Mobile.Core.Features.WorkOrders;
+namespace FixFlow.Mobile.Core.Features.WorkOrders.List;
 
 public sealed class WorkOrderListPresenter(WorkOrderSectionClassifier classifier, DisplayFormatter formatter)
 {

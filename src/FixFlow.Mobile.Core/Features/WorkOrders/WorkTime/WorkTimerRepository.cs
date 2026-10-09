@@ -1,7 +1,7 @@
 using FixFlow.Mobile.Core.Storage;
 using SQLite;
 
-namespace FixFlow.Mobile.Core.Features.WorkOrders;
+namespace FixFlow.Mobile.Core.Features.WorkOrders.WorkTime;
 
 public sealed class WorkTimerRepository(UserDatabase userDatabase)
 {

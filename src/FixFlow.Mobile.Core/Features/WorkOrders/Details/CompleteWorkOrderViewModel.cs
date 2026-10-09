@@ -10,7 +10,7 @@ using FixFlow.Mobile.Core.Photos;
 using FixFlow.Mobile.Core.Resources;
 using FixFlow.Mobile.Core.Screens;
 
-namespace FixFlow.Mobile.Core.Features.WorkOrders;
+namespace FixFlow.Mobile.Core.Features.WorkOrders.Details;
 
 public sealed partial class CompleteWorkOrderViewModel(
     ScreenState screen,

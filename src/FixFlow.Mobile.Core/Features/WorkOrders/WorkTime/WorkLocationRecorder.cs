@@ -2,7 +2,7 @@ using FixFlow.Mobile.Core.Dialogs;
 using FixFlow.Mobile.Core.Location;
 using FixFlow.Mobile.Core.Resources;
 
-namespace FixFlow.Mobile.Core.Features.WorkOrders;
+namespace FixFlow.Mobile.Core.Features.WorkOrders.WorkTime;
 
 public sealed class WorkLocationRecorder(ILocationService location, IDialogService dialogs, WorkTimerRepository timers)
 {

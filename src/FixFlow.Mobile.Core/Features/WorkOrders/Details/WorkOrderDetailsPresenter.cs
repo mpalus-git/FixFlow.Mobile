@@ -2,10 +2,12 @@ using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Sync.Outbox;
+using FixFlow.Mobile.Core.Features.WorkOrders.List;
+using FixFlow.Mobile.Core.Features.WorkOrders.WorkTime;
 using FixFlow.Mobile.Core.Formatting;
 using FixFlow.Mobile.Core.Resources;
 
-namespace FixFlow.Mobile.Core.Features.WorkOrders;
+namespace FixFlow.Mobile.Core.Features.WorkOrders.Details;
 
 public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, WorkOrderSectionClassifier classifier, SessionStore session, ApiAddress apiAddress)
 {

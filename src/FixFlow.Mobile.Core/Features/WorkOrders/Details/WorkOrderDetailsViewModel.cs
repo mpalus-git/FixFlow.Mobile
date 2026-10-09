@@ -10,13 +10,14 @@ using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Sync.Outbox;
 using FixFlow.Mobile.Core.Features.Sync.Pull;
 using FixFlow.Mobile.Core.Features.Sync;
+using FixFlow.Mobile.Core.Features.WorkOrders.WorkTime;
 using FixFlow.Mobile.Core.Launching;
 using FixFlow.Mobile.Core.Location;
 using FixFlow.Mobile.Core.Navigation;
 using FixFlow.Mobile.Core.Resources;
 using FixFlow.Mobile.Core.Screens;
 
-namespace FixFlow.Mobile.Core.Features.WorkOrders;
+namespace FixFlow.Mobile.Core.Features.WorkOrders.Details;
 
 public sealed partial class WorkOrderDetailsViewModel(
     ScreenState screen,

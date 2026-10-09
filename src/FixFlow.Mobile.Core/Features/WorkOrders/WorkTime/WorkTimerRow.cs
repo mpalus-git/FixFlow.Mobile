@@ -1,6 +1,6 @@
 using SQLite;
 
-namespace FixFlow.Mobile.Core.Features.WorkOrders;
+namespace FixFlow.Mobile.Core.Features.WorkOrders.WorkTime;
 
 [Table("work_timers")]
 internal sealed class WorkTimerRow

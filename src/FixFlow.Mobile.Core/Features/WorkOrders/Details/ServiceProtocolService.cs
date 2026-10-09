@@ -2,7 +2,7 @@ using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Api.Errors;
 using FixFlow.Mobile.Core.Launching;
 
-namespace FixFlow.Mobile.Core.Features.WorkOrders;
+namespace FixFlow.Mobile.Core.Features.WorkOrders.Details;
 
 public sealed class ServiceProtocolService(IFixFlowApi api, IDocumentLauncher documents)
 {

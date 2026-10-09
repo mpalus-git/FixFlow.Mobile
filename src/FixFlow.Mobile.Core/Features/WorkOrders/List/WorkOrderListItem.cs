@@ -1,7 +1,7 @@
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Resources;
 
-namespace FixFlow.Mobile.Core.Features.WorkOrders;
+namespace FixFlow.Mobile.Core.Features.WorkOrders.List;
 
 public sealed record WorkOrderListItem(
     Guid Id,

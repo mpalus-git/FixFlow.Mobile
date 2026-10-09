@@ -1,4 +1,4 @@
-using FixFlow.Mobile.Core.Features.WorkOrders;
+using FixFlow.Mobile.Core.Features.WorkOrders.Details;
 
 namespace FixFlow.Mobile.Features.WorkOrders;
 

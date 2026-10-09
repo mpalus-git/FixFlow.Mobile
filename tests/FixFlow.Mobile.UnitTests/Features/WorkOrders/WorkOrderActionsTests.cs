@@ -1,6 +1,6 @@
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
-using FixFlow.Mobile.Core.Features.WorkOrders;
+using FixFlow.Mobile.Core.Features.WorkOrders.Details;
 using FixFlow.Mobile.Core.Resources;
 
 namespace FixFlow.Mobile.UnitTests.Features.WorkOrders;

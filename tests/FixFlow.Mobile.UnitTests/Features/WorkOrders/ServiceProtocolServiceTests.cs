@@ -1,8 +1,9 @@
-using System.Net;
 using System.Net.Http.Headers;
+using System.Net;
 using System.Text;
-using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Api.Errors;
+using FixFlow.Mobile.Core.Api;
+using FixFlow.Mobile.Core.Features.WorkOrders.Details;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Launching;
 using FixFlow.Mobile.UnitTests.Api;

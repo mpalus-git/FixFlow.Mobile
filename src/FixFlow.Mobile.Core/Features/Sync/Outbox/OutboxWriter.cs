@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.Messaging;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
-using FixFlow.Mobile.Core.Features.WorkOrders;
+using FixFlow.Mobile.Core.Features.WorkOrders.WorkTime;
 using SQLite;
 
 namespace FixFlow.Mobile.Core.Features.Sync.Outbox;

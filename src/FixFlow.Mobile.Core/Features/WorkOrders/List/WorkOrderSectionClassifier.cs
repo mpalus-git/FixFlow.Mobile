@@ -1,7 +1,7 @@
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Formatting;
 
-namespace FixFlow.Mobile.Core.Features.WorkOrders;
+namespace FixFlow.Mobile.Core.Features.WorkOrders.List;
 
 public sealed class WorkOrderSectionClassifier(BusinessClock clock)
 {
