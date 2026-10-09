@@ -77,6 +77,7 @@ public static partial class MauiProgram
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<WorkOrderListPage>();
         builder.Services.AddTransient<WorkOrderDetailsPage>();
+        builder.Services.AddTransient<CompleteWorkOrderPage>();
         builder.Services.AddTransient<ServiceEntryPage>();
         builder.Services.AddTransient<CorrectionEntryPage>();
         builder.Services.AddTransient<SyncPage>();

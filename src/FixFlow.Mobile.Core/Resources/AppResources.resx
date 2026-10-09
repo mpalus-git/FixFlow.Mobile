@@ -426,9 +426,6 @@
   <data name="CompleteWorkOrderButton" xml:space="preserve">
     <value>Zakończ zlecenie</value>
   </data>
-  <data name="CompleteConfirmTitle" xml:space="preserve">
-    <value>Zakończyć zlecenie?</value>
-  </data>
   <data name="SignatureInvalid" xml:space="preserve">
     <value>Nie udało się zapisać podpisu. Wyczyść pole i spróbuj ponownie.</value>
   </data>
@@ -746,5 +743,20 @@
   </data>
   <data name="EventSystemActor" xml:space="preserve">
     <value>System</value>
+  </data>
+  <data name="CompleteTitle" xml:space="preserve">
+    <value>Zakończenie zlecenia</value>
+  </data>
+  <data name="SignatureLabel" xml:space="preserve">
+    <value>Podpis klienta (opcjonalnie)</value>
+  </data>
+  <data name="SignatureHint" xml:space="preserve">
+    <value>Poproś klienta o podpis w polu poniżej.</value>
+  </data>
+  <data name="SignaturePadDescription" xml:space="preserve">
+    <value>Pole podpisu klienta</value>
+  </data>
+  <data name="SignatureClearButton" xml:space="preserve">
+    <value>Wyczyść podpis</value>
   </data>
 </root>

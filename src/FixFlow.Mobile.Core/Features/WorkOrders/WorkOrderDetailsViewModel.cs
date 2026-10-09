@@ -209,18 +209,10 @@ public sealed partial class WorkOrderDetailsViewModel(
     [RelayCommand]
     private async Task CompleteAsync()
     {
-        if (Details is not { } details || !CanComplete
-            || !await dialogs.ConfirmAsync(
-                AppResources.CompleteConfirmTitle,
-                WorkOrderTexts.Format(AppResources.CompleteConfirmMessage, details.Number),
-                AppResources.CompleteWorkOrderButton,
-                AppResources.CancelButton))
+        if (CanComplete)
         {
-            return;
+            await navigation.NavigateToAsync<CompleteWorkOrderViewModel, Guid>(_workOrderId);
         }
-
-        await outboxWriter.CompleteWorkOrderAsync(_workOrderId);
-        await ShowLocalAsync();
     }
 
     [RelayCommand]

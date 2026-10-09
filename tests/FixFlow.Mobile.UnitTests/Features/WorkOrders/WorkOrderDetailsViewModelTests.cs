@@ -378,37 +378,36 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Should_Queue_Completion_And_Remove_Work_Timer_When_Technician_Confirms()
+    public async Task Should_Open_Completion_Screen_When_Work_Order_Can_Be_Completed()
     {
         ConfirmStart();
-        _dialogs.ConfirmAsync(AppResources.CompleteConfirmTitle, Arg.Any<string>(), AppResources.CompleteWorkOrderButton, AppResources.CancelButton).Returns(true);
         await ShowOfflineAsync();
         await _viewModel.StartWorkCommand.ExecuteAsync(null);
         await AddPendingEntryAsync(new PendingServiceEntryPart(Guid.NewGuid(), "Filtr", "FP-100", 1, 12m));
-        _viewModel.CanAddCorrection.ShouldBeTrue();
 
         await _viewModel.CompleteCommand.ExecuteAsync(null);
 
-        (await _sources.Outbox.GetAllAsync())[^1].Kind.ShouldBe(OutboxOperationKind.CompleteWorkOrder);
-        (await _sources.WorkTimers.GetAsync(_api.WorkOrderId)).ShouldBeNull();
-        _viewModel.Details.ShouldNotBeNull().StatusText.ShouldBe(WorkOrderTexts.Status(WorkOrderStatus.Completed));
-        _viewModel.CanComplete.ShouldBeFalse();
-        _viewModel.CanAddEntry.ShouldBeFalse();
-        _viewModel.HasWorkTimer.ShouldBeFalse();
+        await _navigation.Received(1).NavigateToAsync<CompleteWorkOrderViewModel, Guid>(_api.WorkOrderId);
+        (await _sources.Outbox.GetAllAsync()).ShouldNotContain(operation => operation.Kind == OutboxOperationKind.CompleteWorkOrder);
     }
 
     [Fact]
-    public async Task Should_Not_Queue_Completion_When_Technician_Cancels()
+    public async Task Should_Show_Completed_Work_Order_Without_Timer_When_Completion_Waits_In_Queue()
     {
         ConfirmStart();
         await ShowOfflineAsync();
         await _viewModel.StartWorkCommand.ExecuteAsync(null);
         await AddPendingEntryAsync();
+        _viewModel.Pause();
+        await new OutboxWriter(_sources.Outbox, _timeProvider, new WeakReferenceMessenger()).CompleteWorkOrderAsync(_api.WorkOrderId);
 
-        await _viewModel.CompleteCommand.ExecuteAsync(null);
+        _viewModel.Resume();
+        await WaitUntilAsync(() => _viewModel.Details?.StatusText == WorkOrderTexts.Status(WorkOrderStatus.Completed));
 
-        (await _sources.Outbox.GetAllAsync()).ShouldNotContain(operation => operation.Kind == OutboxOperationKind.CompleteWorkOrder);
-        _viewModel.CanComplete.ShouldBeTrue();
+        _viewModel.CanComplete.ShouldBeFalse();
+        _viewModel.CanAddEntry.ShouldBeFalse();
+        _viewModel.HasWorkTimer.ShouldBeFalse();
+        _viewModel.Pause();
     }
 
     [Fact]

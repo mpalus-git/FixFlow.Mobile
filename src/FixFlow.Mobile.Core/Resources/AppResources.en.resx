@@ -426,9 +426,6 @@
   <data name="CompleteWorkOrderButton" xml:space="preserve">
     <value>Complete work order</value>
   </data>
-  <data name="CompleteConfirmTitle" xml:space="preserve">
-    <value>Complete work order?</value>
-  </data>
   <data name="SignatureInvalid" xml:space="preserve">
     <value>The signature could not be saved. Clear the field and try again.</value>
   </data>
@@ -746,5 +743,20 @@
   </data>
   <data name="EventSystemActor" xml:space="preserve">
     <value>System</value>
+  </data>
+  <data name="CompleteTitle" xml:space="preserve">
+    <value>Complete work order</value>
+  </data>
+  <data name="SignatureLabel" xml:space="preserve">
+    <value>Client signature (optional)</value>
+  </data>
+  <data name="SignatureHint" xml:space="preserve">
+    <value>Ask the client to sign in the field below.</value>
+  </data>
+  <data name="SignaturePadDescription" xml:space="preserve">
+    <value>Client signature field</value>
+  </data>
+  <data name="SignatureClearButton" xml:space="preserve">
+    <value>Clear signature</value>
   </data>
 </root>
