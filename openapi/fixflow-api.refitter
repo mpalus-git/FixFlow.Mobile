@@ -12,7 +12,7 @@
     "^/api/v1/users/me$",
     "^/api/v1/work-orders$",
     "^/api/v1/work-orders/[{]workOrderId[}]$",
-    "^/api/v1/work-orders/[{]workOrderId[}]/(start|complete|protocol|service-entries)$",
+    "^/api/v1/work-orders/[{]workOrderId[}]/(start|complete|protocol|service-entries|events)$",
     "^/api/v1/parts$",
     "^/api/v1/parts/[{]partId[}]$",
     "^/api/v1/devices/[{]deviceId[}]$",
