@@ -15,6 +15,8 @@ public static class OutboxPayload
 
     public static string Serialize(PendingPhotoUpload upload) => JsonSerializer.Serialize(upload, Options);
 
+    public static string Serialize(PendingCompletion completion) => JsonSerializer.Serialize(completion, Options);
+
     public static Guid PhotoId(OutboxOperation operation)
     {
         ArgumentNullException.ThrowIfNull(operation);
@@ -28,6 +30,13 @@ public static class OutboxPayload
         ArgumentNullException.ThrowIfNull(operation);
 
         return JsonSerializer.Deserialize<PendingStart>(operation.Payload, Options)?.StartedAt ?? operation.CreatedAt;
+    }
+
+    public static DateTimeOffset CompletedAt(OutboxOperation operation)
+    {
+        ArgumentNullException.ThrowIfNull(operation);
+
+        return JsonSerializer.Deserialize<PendingCompletion>(operation.Payload, Options)?.CompletedAt ?? operation.CreatedAt;
     }
 
     public static PendingServiceEntry ToServiceEntry(OutboxOperation operation)

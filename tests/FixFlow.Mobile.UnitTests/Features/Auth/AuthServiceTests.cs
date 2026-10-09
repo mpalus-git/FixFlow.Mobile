@@ -116,6 +116,19 @@ public sealed class AuthServiceTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task Should_Revoke_Without_Refreshing_Tokens_When_Access_Token_Has_Expired()
+    {
+        await _service.LoginAsync("jan@fixflow.test", "secret", TestContext.Current.CancellationToken);
+        _timeProvider.Advance(TimeSpan.FromMinutes(20));
+
+        await _service.LogoutAsync();
+
+        _revokedTokens.ShouldBe(["refresh-1"]);
+        _handler.Requests.ShouldNotContain(request => request.RequestUri!.AbsolutePath == "/api/v1/auth/refresh");
+        _handler.Requests.Single(request => request.RequestUri!.AbsolutePath == "/api/v1/auth/logout").Headers.Authorization.ShouldBeNull();
+    }
+
+    [Fact]
     public async Task Should_Delete_Local_Database_And_Photos_When_User_Logs_Out()
     {
         await _service.LoginAsync("jan@fixflow.test", "secret", TestContext.Current.CancellationToken);

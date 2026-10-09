@@ -87,7 +87,7 @@ public sealed class AuthService(
         using var timeout = new CancellationTokenSource(RevokeTimeout, timeProvider);
         try
         {
-            using var response = await api.LogoutAsync(new LogoutRequest(refreshToken), timeout.Token);
+            using var response = await anonymousApi.LogoutAsync(new LogoutRequest(refreshToken), timeout.Token);
         }
         catch (OperationCanceledException) when (timeout.IsCancellationRequested)
         {

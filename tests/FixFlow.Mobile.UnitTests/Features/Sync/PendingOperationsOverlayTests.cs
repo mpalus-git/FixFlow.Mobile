@@ -41,6 +41,18 @@ public sealed class PendingOperationsOverlayTests
     }
 
     [Fact]
+    public void Should_Show_Completion_Time_From_Device_When_Completion_Waits_In_Queue()
+    {
+        var workOrder = TestWorkOrders.Create("ZL-1", Now, WorkOrderStatus.InProgress);
+        var complete = Operation(workOrder.Id, OutboxOperationKind.CompleteWorkOrder, Now) with
+        {
+            Payload = OutboxPayload.Serialize(new PendingCompletion(Now.AddMinutes(-5))),
+        };
+
+        PendingOperationsOverlay.Apply(workOrder, [complete]).CompletedAt.ShouldBe(Now.AddMinutes(-5));
+    }
+
+    [Fact]
     public void Should_Keep_Server_State_When_Server_Already_Moved_Further()
     {
         var invoiced = TestWorkOrders.Create("ZL-1", Now, WorkOrderStatus.Invoiced, Now.AddDays(-1));

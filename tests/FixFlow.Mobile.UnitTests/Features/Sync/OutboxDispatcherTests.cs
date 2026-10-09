@@ -130,6 +130,31 @@ public sealed class OutboxDispatcherTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Should_Send_Completion_Time_From_Device_When_Completion_Is_Sent_Later()
+    {
+        var completedOffline = _timeProvider.GetUtcNow();
+        await QueueAsync(_writer.CompleteWorkOrderAsync(WorkOrderId));
+        _timeProvider.Advance(TimeSpan.FromHours(2));
+
+        await DispatchAsync();
+
+        _api.SentCompletions.ShouldHaveSingleItem().RootElement.GetProperty("completedAt").GetDateTimeOffset().ShouldBe(completedOffline);
+    }
+
+    [Fact]
+    public async Task Should_Send_Queue_Time_As_Completion_Time_When_Queued_Completion_Has_No_Time()
+    {
+        var queuedAt = _timeProvider.GetUtcNow();
+        await _outbox.EnqueueAsync(
+            new OutboxOperation(Guid.CreateVersion7(), WorkOrderId, OutboxOperationKind.CompleteWorkOrder, OutboxPayload.Empty, queuedAt, 0, null, null));
+        _timeProvider.Advance(TimeSpan.FromHours(2));
+
+        await DispatchAsync();
+
+        _api.SentCompletions.ShouldHaveSingleItem().RootElement.GetProperty("completedAt").GetDateTimeOffset().ShouldBe(queuedAt);
+    }
+
+    [Fact]
     public async Task Should_Keep_Operation_And_Hold_Later_Ones_When_Server_Is_Unavailable()
     {
         await QueueAsync(_writer.StartWorkAsync(WorkOrderId));
@@ -201,21 +226,7 @@ public sealed class OutboxDispatcherTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Should_Treat_Start_As_Sent_When_Api_Returns_409_And_Work_Order_Is_Already_In_Progress()
-    {
-        await QueueAsync(_writer.StartWorkAsync(WorkOrderId));
-        _api.Overrides[$"POST /api/v1/work-orders/{WorkOrderId}/start"] = () => OutboxApiStub.Json(
-            HttpStatusCode.Conflict, """{"status":409,"errorCode":"WorkOrder.InvalidStatusTransition"}""");
-        _api.RemoteStatus = "InProgress";
-
-        var summary = await DispatchAsync();
-
-        summary.Sent.ShouldBe(1);
-        (await _outbox.GetConflictsAsync()).ShouldBeEmpty();
-    }
-
-    [Fact]
-    public async Task Should_Report_Conflict_When_Api_Returns_409_And_Work_Order_Is_Not_In_Target_Status()
+    public async Task Should_Move_Start_To_Conflicts_Without_Reading_Work_Order_When_Api_Returns_409()
     {
         await QueueAsync(_writer.StartWorkAsync(WorkOrderId));
         _api.Overrides[$"POST /api/v1/work-orders/{WorkOrderId}/start"] = () => OutboxApiStub.Json(
@@ -224,6 +235,7 @@ public sealed class OutboxDispatcherTests : IAsyncLifetime
         await DispatchAsync();
 
         (await _outbox.GetConflictsAsync()).ShouldHaveSingleItem().ErrorCode.ShouldBe("WorkOrder.TechnicianHasWorkInProgress");
+        _api.Calls.ShouldBe([$"POST /api/v1/work-orders/{WorkOrderId}/start"]);
     }
 
     [Fact]

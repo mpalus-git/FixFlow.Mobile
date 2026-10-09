@@ -38,7 +38,7 @@ public sealed class OutboxWriter(OutboxRepository outbox, TimeProvider timeProvi
         EnqueueAsync(
             workOrderId,
             OutboxOperationKind.CompleteWorkOrder,
-            OutboxPayload.Empty,
+            OutboxPayload.Serialize(new PendingCompletion(timeProvider.GetUtcNow())),
             connection => connection.Execute("DELETE FROM work_timers WHERE work_order_id = ?", workOrderId));
 
     private static void RestartTimer(SQLiteConnection connection, Guid workOrderId, DateTimeOffset startedAt) =>

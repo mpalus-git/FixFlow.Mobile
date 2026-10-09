@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Net;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Api.Errors;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
@@ -110,35 +109,17 @@ public sealed class OutboxDispatcher(
             return null;
         }
 
-        var error = ApiErrorMapper.FromResponse(response);
-        return error.StatusCode == HttpStatusCode.Conflict && await IsAlreadyAppliedAsync(operation, cancellationToken)
-            ? null
-            : error;
+        return ApiErrorMapper.FromResponse(response);
     }
 
     private async Task<IApiResponse> CallAsync(OutboxOperation operation, CancellationToken cancellationToken) => operation.Kind switch
     {
         OutboxOperationKind.StartWork => await api.StartWorkAsync(
             operation.WorkOrderId, new StartWorkRequest(OutboxPayload.StartedAt(operation)), cancellationToken),
-        OutboxOperationKind.CompleteWorkOrder => await api.CompleteWorkOrderAsync(operation.WorkOrderId, cancellationToken),
+        OutboxOperationKind.CompleteWorkOrder => await api.CompleteWorkOrderAsync(
+            operation.WorkOrderId, new CompleteWorkOrderRequest(null, OutboxPayload.CompletedAt(operation)), cancellationToken),
         _ => await api.AddServiceEntryAsync(operation.WorkOrderId, ToRequest(OutboxPayload.ToServiceEntry(operation)), cancellationToken),
     };
-
-    private async Task<bool> IsAlreadyAppliedAsync(OutboxOperation operation, CancellationToken cancellationToken)
-    {
-        if (operation.Kind == OutboxOperationKind.AddServiceEntry)
-        {
-            return false;
-        }
-
-        using var response = await api.GetWorkOrderAsync(operation.WorkOrderId, cancellationToken);
-        return (operation.Kind, response.Content?.Status) switch
-        {
-            (OutboxOperationKind.StartWork, WorkOrderStatus.InProgress) => true,
-            (OutboxOperationKind.CompleteWorkOrder, WorkOrderStatus.Completed or WorkOrderStatus.Invoiced) => true,
-            _ => false,
-        };
-    }
 
     private static AddServiceEntryRequest ToRequest(PendingServiceEntry entry) => new(
         entry.Id,

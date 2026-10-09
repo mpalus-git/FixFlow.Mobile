@@ -99,6 +99,7 @@ public sealed class OutboxWriterTests : IAsyncLifetime
         await _writer.CompleteWorkOrderAsync(WorkOrderId);
 
         (await new WorkTimerRepository(_userDatabase.Database).GetAsync(WorkOrderId)).ShouldBeNull();
+        OutboxPayload.CompletedAt((await _outbox.GetAllAsync())[^1]).ShouldBe(Now);
         (await _outbox.GetAllAsync()).Select(operation => operation.Kind).ShouldBe([OutboxOperationKind.StartWork, OutboxOperationKind.CompleteWorkOrder]);
     }
 

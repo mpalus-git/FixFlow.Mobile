@@ -74,7 +74,7 @@
           "Auth"
         ],
         "summary": "Exchange a refresh token for a new token pair",
-        "description": "Rotates the refresh token: the submitted token is revoked and a new access token and refresh token are returned. Submitting a refresh token that was already used revokes every token of that session, which forces the user to log in again. Requests are rate limited per client IP address.",
+        "description": "Rotates the refresh token: the submitted token is revoked and a new access token and refresh token are returned. A refresh token that was already used can be exchanged again within a short grace period after its rotation (30 seconds by default) while its session is active, for example by a second browser tab or by a mobile client that lost the previous response; the earlier replacement stays valid. Submitting an already used refresh token after the grace period revokes every token of that session, which forces the user to log in again. A refresh token of a deactivated account is rejected and its session is revoked. Requests are rate limited per client IP address.",
         "operationId": "RefreshTokens",
         "requestBody": {
           "content": {
@@ -136,7 +136,7 @@
           "Auth"
         ],
         "summary": "Log out and revoke the current session",
-        "description": "Revokes the submitted refresh token together with every token of its session. The access token stays valid until it expires. The response is 204 also when the refresh token is unknown or belongs to another user.",
+        "description": "Revokes the submitted refresh token together with every token of its session. An access token is not required, so a client whose access token has already expired can still end its session. Access tokens issued before stay valid until they expire. The response is 204 also when the refresh token is unknown. Requests are rate limited per client IP address.",
         "operationId": "Logout",
         "requestBody": {
           "content": {
@@ -162,8 +162,8 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized",
+          "429": {
+            "description": "Too Many Requests",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -172,12 +172,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
+        }
       }
     },
     "/api/v1/users": {
@@ -356,7 +351,7 @@
           "Users"
         ],
         "summary": "Get the current user account",
-        "description": "Returns the identifier, email and role of the account that owns the access token. Available to every signed-in user.",
+        "description": "Returns the identifier, email, full name, role and active status of the account that owns the access token. Available to every signed-in user.",
         "operationId": "GetCurrentUser",
         "responses": {
           "200": {
@@ -737,6 +732,72 @@
               }
             }
           },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get a user account",
+        "description": "Returns the identifier, email, full name, role and active status of any account, for example to fill the form for editing the account. Available to dispatchers and administrators.",
+        "operationId": "GetUser",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
           "200": {
             "description": "OK",
             "content": {
@@ -1841,7 +1902,7 @@
           "WorkOrders"
         ],
         "summary": "List work orders",
-        "description": "Returns one page of work orders sorted by the requested field and direction, by default by due date ascending, with ties ordered by identifier so that pages neither skip nor repeat work orders. Each work order comes with the serial number and model of the device, the client name and the technician email. The list can be filtered by status, technician, device, client, overdue flag and due date range, and searched by a fragment of the work order number, description, serial number or client name. Technicians only see work orders assigned to them.",
+        "description": "Returns one page of work orders sorted by the requested field and direction, by default by due date ascending, with ties ordered by identifier so that pages neither skip nor repeat work orders. Each work order comes with the serial number and model of the device, the client name, address and contact details, and the technician name and email. The list can be filtered by one or more statuses, technician, device, client, overdue flag and due date range, and searched by a fragment of the work order number, description, serial number or client name. Technicians only see work orders assigned to them.",
         "operationId": "ListWorkOrders",
         "parameters": [
           {
@@ -1867,9 +1928,12 @@
           {
             "name": "status",
             "in": "query",
-            "description": "Status of the listed work orders.",
+            "description": "Statuses of the listed work orders. Repeat the parameter to list work orders in any of several statuses, for example status=Assigned&status=InProgress.",
             "schema": {
-              "$ref": "#/components/schemas/WorkOrderStatus"
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/WorkOrderStatus"
+              }
             }
           },
           {
@@ -2505,7 +2569,7 @@
           "WorkOrders"
         ],
         "summary": "Start work on a work order",
-        "description": "Moves a work order assigned to the calling technician from Assigned to InProgress. A technician can have only one work order in progress at a time. The body is optional: without it the work starts at the server time, with startedAt the work starts at the time given by the client, for example recorded offline. Work orders of other technicians are reported as not found. Available to technicians only.",
+        "description": "Moves a work order assigned to the calling technician from Assigned to InProgress. A technician can have only one work order in progress at a time. The body is optional: without it the work starts at the server time, with startedAt the work starts at the time given by the client, for example recorded offline. Starting a work order that the same technician has already started, completed or invoiced returns its current state without changes, so a queued start can be safely sent again; startedAt is then not compared. Work orders of other technicians are reported as not found. Available to technicians only.",
         "operationId": "StartWork",
         "parameters": [
           {
@@ -2617,7 +2681,7 @@
           "WorkOrders"
         ],
         "summary": "Complete a work order",
-        "description": "Moves a work order from InProgress to Completed. The work order must have at least one service entry. After completion no service entries can be added and the work order cannot be edited. Available to the assigned technician and, as a fallback, to dispatchers and administrators; work orders of other technicians are reported as not found.",
+        "description": "Moves a work order from InProgress to Completed. The work order must have at least one service entry. The body is optional: without it the work order is completed at the server time, with completedAt at the time given by the client, for example recorded offline. Completing a work order that is already completed or invoiced returns its current state without changes, so a queued completion can be safely sent again; completedAt is then not compared. After completion no service entries can be added and the work order cannot be edited. Available to the assigned technician and, as a fallback, to dispatchers and administrators; work orders of other technicians are reported as not found.",
         "operationId": "CompleteWorkOrder",
         "parameters": [
           {
@@ -2630,6 +2694,22 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CompleteWorkOrderRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -2645,6 +2725,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/WorkOrderResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
                 }
               }
             }
@@ -2779,7 +2869,7 @@
           "WorkOrders"
         ],
         "summary": "Download the service protocol",
-        "description": "Returns the service protocol of a completed or invoiced work order as a PDF document in Polish, named after the work order number, for example protokol-ZL-2026-0042.pdf. The protocol lists the client, the device, all service entries with work time, the net used parts with amounts in PLN and fields for signatures. Technicians can only download protocols of work orders assigned to them; other work orders are reported as not found.",
+        "description": "Returns the service protocol of a completed or invoiced work order as a PDF document in Polish, named after the work order number, for example protokol-ZL-2026-0042.pdf. The protocol lists the client, the device, all service entries with work time, the net used parts with amounts in PLN and fields for signatures, with the client's signature image when it was given at completion. Technicians can only download protocols of work orders assigned to them; other work orders are reported as not found.",
         "operationId": "GetServiceProtocol",
         "parameters": [
           {
@@ -2825,6 +2915,67 @@
           },
           "409": {
             "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/work-orders/{workOrderId}/events": {
+      "get": {
+        "tags": [
+          "WorkOrders"
+        ],
+        "summary": "List the history of a work order",
+        "description": "Returns the changes of a work order, oldest first: creation, edits, assignment, reassignment and unassignment of the technician, start, completion and invoicing, each with the time, the user who made the change and the technician and deadline after the change. Repeated start or completion requests do not add events. Technicians can only get the history of work orders assigned to them; other work orders are reported as not found.",
+        "operationId": "ListWorkOrderEvents",
+        "parameters": [
+          {
+            "name": "workOrderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WorkOrderEventResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2930,7 +3081,7 @@
           "Parts"
         ],
         "summary": "List active parts",
-        "description": "Returns one page of active parts with their current stock quantities, ordered by name and catalog number. Archived parts are not listed. The optional search matches a fragment of the name or catalog number regardless of letter case.",
+        "description": "Returns one page of active parts with their current stock quantities, ordered by name and catalog number. Archived parts are not listed. The optional search matches a fragment of the name or catalog number regardless of letter case, and the optional stock filter limits the list to parts in stock or out of stock.",
         "operationId": "ListParts",
         "parameters": [
           {
@@ -2959,6 +3110,14 @@
             "description": "Case-insensitive fragment of the name or catalog number.",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "inStock",
+            "in": "query",
+            "description": "When true, lists only parts with at least one unit in stock, for example when a technician picks used parts; when false, only parts that are out of stock.",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -3617,7 +3776,7 @@
           "Photos"
         ],
         "summary": "Upload a photo",
-        "description": "Stores a JPEG photo under an identifier chosen by the client, so the photo address /api/v1/photos/{photoId} is known before the upload and can be put in photoUrls of a service entry created offline. The body is the raw image/jpeg content of at most 1048576 bytes. Available to technicians only. When the identifier was already used by the same technician, the stored photo is kept and returned with status 200, so a queued upload can be safely sent again; the content is not compared. An identifier used by another technician is rejected with a conflict.",
+        "description": "Stores a JPEG photo under an identifier chosen by the client, so the photo address /api/v1/photos/{photoId} is known before the upload and can be put in photoUrls of a service entry created offline. The body is the raw image/jpeg content of at most 1048576 bytes. Available to technicians only. When the identifier was already used by the same technician, the stored photo is kept and returned with status 200, so a queued upload can be safely sent again; the content is not compared. An identifier used by another technician is rejected with a conflict. A technician can upload at most 100 new photos within any 24 hours; further uploads are rejected with a conflict, while resending an already stored photo is still accepted.",
         "operationId": "UploadPhoto",
         "parameters": [
           {
@@ -3779,7 +3938,7 @@
           "Dashboard"
         ],
         "summary": "Get dashboard summary",
-        "description": "Returns aggregated work order counts read from a single consistent database snapshot: the number of work orders in each status in lifecycle order (including zeros), the number of work orders flagged as overdue (the same criterion as the isOverdue=true filter of the work order list), and the workload of every active technician sorted by email, including technicians without work orders. The current week runs from Monday to Sunday in the Europe/Warsaw time zone; its bounds are returned as calendar dates usable as dueFrom and dueTo of the work order list. Available to dispatchers and administrators.",
+        "description": "Returns aggregated work order counts read from a single consistent database snapshot: the number of work orders in each status in lifecycle order (including zeros), the number of work orders flagged as overdue (the same criterion as the isOverdue=true filter of the work order list), the number of active parts out of stock (the same criterion as the inStock=false filter of the part list), and the workload of every active technician sorted by full name and email, including technicians without work orders. The current week runs from Monday to Sunday in the Europe/Warsaw time zone; its bounds are returned as calendar dates usable as dueFrom and dueTo of the work order list. Available to dispatchers and administrators.",
         "operationId": "GetDashboardSummary",
         "responses": {
           "200": {
@@ -4106,6 +4265,28 @@
         },
         "description": "Client of the service company."
       },
+      "CompleteWorkOrderRequest": {
+        "type": "object",
+        "properties": {
+          "completedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Time when the work order was completed, for example recorded offline by the mobile client. Cannot be earlier than the start of the work order or the end of its last work entry and cannot be later than the server time plus the allowed clock skew; a time within the skew is stored as the server time. When omitted, the server time is used.",
+            "format": "date-time"
+          },
+          "clientSignaturePhotoId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Identifier of a JPEG photo of the client's signature, uploaded beforehand through PUT /api/v1/photos/{photoId} by the technician assigned to the work order. The signature is shown in the service protocol. Optional.",
+            "format": "uuid"
+          }
+        },
+        "description": "Optional details of completing a work order."
+      },
       "CreateClientRequest": {
         "required": [
           "name",
@@ -4270,6 +4451,7 @@
           "weekEnd",
           "statusCounts",
           "overdueCount",
+          "outOfStockPartCount",
           "technicians"
         ],
         "type": "object",
@@ -4299,6 +4481,11 @@
           "overdueCount": {
             "type": "integer",
             "description": "Number of work orders flagged as overdue.",
+            "format": "int32"
+          },
+          "outOfStockPartCount": {
+            "type": "integer",
+            "description": "Number of active parts with no units in stock, the same criterion as the inStock=false filter of the part list.",
             "format": "int32"
           },
           "technicians": {
@@ -5342,6 +5529,85 @@
         },
         "description": "User account."
       },
+      "WorkOrderEventResponse": {
+        "required": [
+          "id",
+          "type",
+          "occurredAt",
+          "actorId",
+          "actorName",
+          "technicianId",
+          "technicianName",
+          "dueDate"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier of the event.",
+            "format": "uuid"
+          },
+          "type": {
+            "description": "Kind of the change.",
+            "$ref": "#/components/schemas/WorkOrderEventType"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "UTC time of the change; for start and completion the time given by the technician.",
+            "format": "date-time"
+          },
+          "actorId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Identifier of the user who made the change; null for changes made by the system, for example demo data.",
+            "format": "uuid"
+          },
+          "actorName": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "First and last name of the user who made the change; null for changes made by the system."
+          },
+          "technicianId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Identifier of the technician assigned after the change; null when no technician is assigned.",
+            "format": "uuid"
+          },
+          "technicianName": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "First and last name of the technician assigned after the change; null when no technician is assigned."
+          },
+          "dueDate": {
+            "type": "string",
+            "description": "UTC deadline of the work order after the change.",
+            "format": "date-time"
+          }
+        },
+        "description": "Change recorded in the history of a work order."
+      },
+      "WorkOrderEventType": {
+        "enum": [
+          "Created",
+          "Updated",
+          "Assigned",
+          "Reassigned",
+          "Unassigned",
+          "Started",
+          "Completed",
+          "Invoiced"
+        ],
+        "type": "string",
+        "description": "Kind of change recorded in the history of a work order."
+      },
       "WorkOrderListItemResponse": {
         "required": [
           "id",
@@ -5351,6 +5617,9 @@
           "deviceModel",
           "clientId",
           "clientName",
+          "clientAddress",
+          "clientContactPerson",
+          "clientPhone",
           "description",
           "priority",
           "status",
@@ -5396,6 +5665,18 @@
           "clientName": {
             "type": "string",
             "description": "Name of the client owning the device."
+          },
+          "clientAddress": {
+            "description": "Postal address of the client, where the device is serviced.",
+            "$ref": "#/components/schemas/ClientAddress"
+          },
+          "clientContactPerson": {
+            "type": "string",
+            "description": "Contact person at the client."
+          },
+          "clientPhone": {
+            "type": "string",
+            "description": "Contact phone number of the client."
           },
           "description": {
             "type": "string",
@@ -5491,6 +5772,9 @@
           "deviceModel",
           "clientId",
           "clientName",
+          "clientAddress",
+          "clientContactPerson",
+          "clientPhone",
           "description",
           "priority",
           "status",
@@ -5502,7 +5786,8 @@
           "createdAt",
           "startedAt",
           "completedAt",
-          "invoicedAt"
+          "invoicedAt",
+          "clientSignaturePhotoId"
         ],
         "type": "object",
         "properties": {
@@ -5536,6 +5821,18 @@
           "clientName": {
             "type": "string",
             "description": "Name of the client owning the device."
+          },
+          "clientAddress": {
+            "description": "Postal address of the client, where the device is serviced.",
+            "$ref": "#/components/schemas/ClientAddress"
+          },
+          "clientContactPerson": {
+            "type": "string",
+            "description": "Contact person at the client."
+          },
+          "clientPhone": {
+            "type": "string",
+            "description": "Contact phone number of the client."
           },
           "description": {
             "type": "string",
@@ -5608,6 +5905,14 @@
             ],
             "description": "UTC time when the work order was invoiced; null before invoicing.",
             "format": "date-time"
+          },
+          "clientSignaturePhotoId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Identifier of the photo of the client's signature given at completion, available at /api/v1/photos/{photoId}; null when no signature was given.",
+            "format": "uuid"
           }
         },
         "description": "Service work order with basic details of its device, client and technician."

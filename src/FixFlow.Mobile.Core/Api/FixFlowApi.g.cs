@@ -54,7 +54,7 @@ namespace FixFlow.Mobile.Core.Api
 
         [Headers("Accept: application/json, application/problem+json")]
         [Get("/api/v1/work-orders")]
-        Task<IApiResponse<PagedResponseOfWorkOrderListItemResponse>> ListWorkOrdersAsync([Query] int? page, [Query] int? pageSize, [Query] WorkOrderStatus? status, [Query] System.Guid? technicianId, [Query] System.Guid? deviceId, [Query] System.Guid? clientId, [Query] bool? isOverdue, [Query(Format = "yyyy-MM-dd")] System.DateOnly? dueFrom, [Query(Format = "yyyy-MM-dd")] System.DateOnly? dueTo, [Query] string? search, [Query] SortBy? sortBy, [Query] SortDirection? sortDirection, CancellationToken cancellationToken = default);
+        Task<IApiResponse<PagedResponseOfWorkOrderListItemResponse>> ListWorkOrdersAsync([Query] int? page, [Query] int? pageSize, [Query(CollectionFormat.Multi)] IEnumerable<WorkOrderStatus>? status, [Query] System.Guid? technicianId, [Query] System.Guid? deviceId, [Query] System.Guid? clientId, [Query] bool? isOverdue, [Query(Format = "yyyy-MM-dd")] System.DateOnly? dueFrom, [Query(Format = "yyyy-MM-dd")] System.DateOnly? dueTo, [Query] string? search, [Query] SortBy? sortBy, [Query] SortDirection? sortDirection, CancellationToken cancellationToken = default);
 
         [Headers("Accept: application/json, application/problem+json")]
         [Get("/api/v1/work-orders/{workOrderId}")]
@@ -68,9 +68,9 @@ namespace FixFlow.Mobile.Core.Api
         [Post("/api/v1/work-orders/{workOrderId}/start")]
         Task<IApiResponse<WorkOrderResponse>> StartWorkAsync(System.Guid workOrderId, [Body] StartWorkRequest? body, CancellationToken cancellationToken = default);
 
-        [Headers("Accept: application/json, application/problem+json")]
+        [Headers("Accept: application/json, application/problem+json", "Content-Type: application/json")]
         [Post("/api/v1/work-orders/{workOrderId}/complete")]
-        Task<IApiResponse<WorkOrderResponse>> CompleteWorkOrderAsync(System.Guid workOrderId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<WorkOrderResponse>> CompleteWorkOrderAsync(System.Guid workOrderId, [Body] CompleteWorkOrderRequest? body, CancellationToken cancellationToken = default);
 
         [Headers("Accept: application/pdf, application/problem+json")]
         [Get("/api/v1/work-orders/{workOrderId}/protocol")]
@@ -82,7 +82,7 @@ namespace FixFlow.Mobile.Core.Api
 
         [Headers("Accept: application/json, application/problem+json")]
         [Get("/api/v1/parts")]
-        Task<IApiResponse<PagedResponseOfPartResponse>> ListPartsAsync([Query] int? page, [Query] int? pageSize, [Query] string? search, CancellationToken cancellationToken = default);
+        Task<IApiResponse<PagedResponseOfPartResponse>> ListPartsAsync([Query] int? page, [Query] int? pageSize, [Query] string? search, [Query] bool? inStock, CancellationToken cancellationToken = default);
 
         [Headers("Accept: application/json, application/problem+json")]
         [Get("/api/v1/parts/{partId}")]
@@ -316,6 +316,33 @@ namespace FixFlow.Mobile.Core.Api
 
         [JsonPropertyName("archivedAt")]
         public System.DateTimeOffset? ArchivedAt { get; init; }
+
+        private IDictionary<string, object>? _additionalProperties;
+
+        [JsonExtensionData]
+        public IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial record CompleteWorkOrderRequest
+    {
+        [JsonConstructor]
+        public CompleteWorkOrderRequest(System.Guid? @clientSignaturePhotoId, System.DateTimeOffset? @completedAt)
+        {
+            this.CompletedAt = @completedAt;
+            this.ClientSignaturePhotoId = @clientSignaturePhotoId;
+        }
+
+        [JsonPropertyName("completedAt")]
+        public System.DateTimeOffset? CompletedAt { get; init; }
+
+        [JsonPropertyName("clientSignaturePhotoId")]
+        public System.Guid? ClientSignaturePhotoId { get; init; }
 
         private IDictionary<string, object>? _additionalProperties;
 
@@ -1249,7 +1276,7 @@ public WorkOrderPriority Priority { get; init; }
     public partial record WorkOrderListItemResponse
     {
         [JsonConstructor]
-        public WorkOrderListItemResponse(System.Guid @clientId, string @clientName, System.DateTimeOffset? @completedAt, System.DateTimeOffset @createdAt, string @description, System.Guid @deviceId, string @deviceModel, string @deviceSerialNumber, System.DateTimeOffset @dueDate, System.Guid @id, System.DateTimeOffset? @invoicedAt, bool @isOverdue, string @number, WorkOrderPriority @priority, System.DateTimeOffset? @startedAt, WorkOrderStatus @status, string? @technicianEmail, System.Guid? @technicianId, string? @technicianName)
+        public WorkOrderListItemResponse(ClientAddress @clientAddress, string @clientContactPerson, System.Guid @clientId, string @clientName, string @clientPhone, System.DateTimeOffset? @completedAt, System.DateTimeOffset @createdAt, string @description, System.Guid @deviceId, string @deviceModel, string @deviceSerialNumber, System.DateTimeOffset @dueDate, System.Guid @id, System.DateTimeOffset? @invoicedAt, bool @isOverdue, string @number, WorkOrderPriority @priority, System.DateTimeOffset? @startedAt, WorkOrderStatus @status, string? @technicianEmail, System.Guid? @technicianId, string? @technicianName)
         {
             this.Id = @id;
             this.Number = @number;
@@ -1258,6 +1285,9 @@ public WorkOrderPriority Priority { get; init; }
             this.DeviceModel = @deviceModel;
             this.ClientId = @clientId;
             this.ClientName = @clientName;
+            this.ClientAddress = @clientAddress;
+            this.ClientContactPerson = @clientContactPerson;
+            this.ClientPhone = @clientPhone;
             this.Description = @description;
             this.Priority = @priority;
             this.Status = @status;
@@ -1299,6 +1329,18 @@ public WorkOrderPriority Priority { get; init; }
         [JsonPropertyName("clientName")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string ClientName { get; init; }
+
+        [JsonPropertyName("clientAddress")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public ClientAddress ClientAddress { get; init; }
+
+        [JsonPropertyName("clientContactPerson")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string ClientContactPerson { get; init; }
+
+        [JsonPropertyName("clientPhone")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string ClientPhone { get; init; }
 
         [JsonPropertyName("description")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
@@ -1375,7 +1417,7 @@ public WorkOrderStatus Status { get; init; }
     public partial record WorkOrderResponse
     {
         [JsonConstructor]
-        public WorkOrderResponse(System.Guid @clientId, string @clientName, System.DateTimeOffset? @completedAt, System.DateTimeOffset @createdAt, string @description, System.Guid @deviceId, string @deviceModel, string @deviceSerialNumber, System.DateTimeOffset @dueDate, System.Guid @id, System.DateTimeOffset? @invoicedAt, bool @isOverdue, string @number, WorkOrderPriority @priority, System.DateTimeOffset? @startedAt, WorkOrderStatus @status, string? @technicianEmail, System.Guid? @technicianId, string? @technicianName)
+        public WorkOrderResponse(ClientAddress @clientAddress, string @clientContactPerson, System.Guid @clientId, string @clientName, string @clientPhone, System.Guid? @clientSignaturePhotoId, System.DateTimeOffset? @completedAt, System.DateTimeOffset @createdAt, string @description, System.Guid @deviceId, string @deviceModel, string @deviceSerialNumber, System.DateTimeOffset @dueDate, System.Guid @id, System.DateTimeOffset? @invoicedAt, bool @isOverdue, string @number, WorkOrderPriority @priority, System.DateTimeOffset? @startedAt, WorkOrderStatus @status, string? @technicianEmail, System.Guid? @technicianId, string? @technicianName)
         {
             this.Id = @id;
             this.Number = @number;
@@ -1384,6 +1426,9 @@ public WorkOrderStatus Status { get; init; }
             this.DeviceModel = @deviceModel;
             this.ClientId = @clientId;
             this.ClientName = @clientName;
+            this.ClientAddress = @clientAddress;
+            this.ClientContactPerson = @clientContactPerson;
+            this.ClientPhone = @clientPhone;
             this.Description = @description;
             this.Priority = @priority;
             this.Status = @status;
@@ -1396,6 +1441,7 @@ public WorkOrderStatus Status { get; init; }
             this.StartedAt = @startedAt;
             this.CompletedAt = @completedAt;
             this.InvoicedAt = @invoicedAt;
+            this.ClientSignaturePhotoId = @clientSignaturePhotoId;
         }
 
         [JsonPropertyName("id")]
@@ -1425,6 +1471,18 @@ public WorkOrderStatus Status { get; init; }
         [JsonPropertyName("clientName")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string ClientName { get; init; }
+
+        [JsonPropertyName("clientAddress")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public ClientAddress ClientAddress { get; init; }
+
+        [JsonPropertyName("clientContactPerson")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string ClientContactPerson { get; init; }
+
+        [JsonPropertyName("clientPhone")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string ClientPhone { get; init; }
 
         [JsonPropertyName("description")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
@@ -1466,6 +1524,9 @@ public WorkOrderStatus Status { get; init; }
 
         [JsonPropertyName("invoicedAt")]
         public System.DateTimeOffset? InvoicedAt { get; init; }
+
+        [JsonPropertyName("clientSignaturePhotoId")]
+        public System.Guid? ClientSignaturePhotoId { get; init; }
 
         private IDictionary<string, object>? _additionalProperties;
 

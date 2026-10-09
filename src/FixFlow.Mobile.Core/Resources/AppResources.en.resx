@@ -495,6 +495,9 @@
   <data name="ConflictReasonPhotoIdConflict" xml:space="preserve">
     <value>A photo with this identifier was already uploaded by another technician.</value>
   </data>
+  <data name="ConflictReasonPhotoDailyLimitExceeded" xml:space="preserve">
+    <value>The limit of 100 photos per day has been reached. Retry the upload later.</value>
+  </data>
   <data name="ConflictReasonLocalPhotoFileMissing" xml:space="preserve">
     <value>The photo file no longer exists on this device.</value>
   </data>
@@ -524,6 +527,9 @@
   </data>
   <data name="ChangeStartedAt" xml:space="preserve">
     <value>Started: {0}</value>
+  </data>
+  <data name="ChangeCompletedAt" xml:space="preserve">
+    <value>Completed: {0}</value>
   </data>
   <data name="ChangeWorkTime" xml:space="preserve">
     <value>Work time: {0} – {1}</value>
