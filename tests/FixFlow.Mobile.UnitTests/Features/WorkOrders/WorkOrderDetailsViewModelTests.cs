@@ -485,6 +485,22 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Should_Pull_Details_Again_When_Background_Sync_Sent_Pending_Changes()
+    {
+        await _viewModel.OnNavigatedToAsync(_api.WorkOrderId);
+        var start = await new OutboxWriter(_sources.Outbox, _timeProvider, new WeakReferenceMessenger()).StartWorkAsync(_api.WorkOrderId);
+        _viewModel.Resume();
+        await WaitUntilAsync(() => _viewModel.Details?.Events.Any(item => item.IsPending) == true);
+        await _sources.Outbox.RemoveAsync(start.Id);
+
+        _messenger.Send(new SyncCompletedMessage(new SyncResult(false, false, new DispatchSummary(1, 0, 0, false), PullResult.Succeeded)));
+        await WaitUntilAsync(() => EventRequests() == 2);
+
+        EventRequests().ShouldBe(2);
+        _viewModel.Pause();
+    }
+
+    [Fact]
     public async Task Should_Ignore_Connection_Changes_When_Page_Is_Hidden()
     {
         await ShowOfflineAsync();
@@ -519,6 +535,9 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
 
     private void ConfirmStart() =>
         _dialogs.ConfirmAsync(AppResources.StartWorkConfirmTitle, Arg.Any<string>(), AppResources.StartWorkButton, AppResources.CancelButton).Returns(true);
+
+    private int EventRequests() =>
+        _handler.Requests.Count(request => request.RequestUri!.AbsolutePath == $"/api/v1/work-orders/{_api.WorkOrderId}/events");
 
     private async Task ShowOfflineAsync(params WorkOrder[] otherWorkOrders)
     {

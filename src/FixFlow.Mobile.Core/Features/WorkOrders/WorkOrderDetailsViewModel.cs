@@ -45,6 +45,7 @@ public sealed partial class WorkOrderDetailsViewModel(
     private ITimer? _clock;
     private int _localVersion;
     private int _connectionVersion;
+    private bool _hasPendingOperations;
 
     public ScreenState Screen { get; } = screen;
 
@@ -340,7 +341,7 @@ public sealed partial class WorkOrderDetailsViewModel(
     private async Task ApplySyncResultAsync(SyncResult result)
     {
         await ShowConnectionAsync(!result.IsOffline);
-        if (result.Pull?.Outcome == PullOutcome.Succeeded && HasNotice)
+        if (result.Pull?.Outcome == PullOutcome.Succeeded && (HasNotice || (_hasPendingOperations && result.Dispatch?.Sent > 0)))
         {
             await RefreshCommand.ExecuteAsync(null);
             return;
@@ -410,6 +411,7 @@ public sealed partial class WorkOrderDetailsViewModel(
         _workTimer = workTimer;
         await ShowWorkTimerAsync();
         Details = details;
+        _hasPendingOperations = pendingOperations.Count > 0;
         HasRejectedChanges = hasRejectedChanges;
         var inProgress = workOrder.Status == WorkOrderStatus.InProgress;
         var hasEntries = storedEntries.Count > 0 || pendingEntries.Count > 0;
