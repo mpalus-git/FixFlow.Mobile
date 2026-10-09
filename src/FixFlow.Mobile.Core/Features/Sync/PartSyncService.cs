@@ -16,7 +16,7 @@ public sealed class PartSyncService(IFixFlowApi api, PartRepository parts, SyncS
         var pulled = new List<Part>();
         for (var page = 1; ; page++)
         {
-            using var response = await api.ListPartsAsync(page, PageSize, null, cancellationToken);
+            using var response = await api.ListPartsAsync(page, PageSize, null, null, cancellationToken);
             if (response is not { IsSuccessful: true, Content: { } content })
             {
                 return PullResult.Failed(ApiErrorMapper.FromResponse(response));
