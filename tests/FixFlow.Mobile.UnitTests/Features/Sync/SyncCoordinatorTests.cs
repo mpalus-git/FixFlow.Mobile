@@ -17,6 +17,7 @@ namespace FixFlow.Mobile.UnitTests.Features.Sync;
 public sealed class SyncCoordinatorTests : IAsyncLifetime
 {
     private const string ListCall = "GET /api/v1/work-orders";
+    private const string ReadyCall = "GET /api/v1/system/ready";
     private static readonly Guid WorkOrderId = Guid.NewGuid();
 
     private readonly TestUserDatabase _userDatabase = new();
@@ -43,7 +44,7 @@ public sealed class SyncCoordinatorTests : IAsyncLifetime
             warmup,
             () => new ServerReadinessProbe(httpClient, _timeProvider),
             () => new OutboxDispatcher(client, _outbox, new ServiceEntryRepository(_userDatabase.Database), new PhotoUploadClient(httpClient), new PhotoStore(_userDatabase.Options, _userDatabase.Database), new OutboxRetryPolicy(() => 0.5), _timeProvider),
-            () => new WorkOrderSyncService(client, new ServerReadinessProbe(httpClient, _timeProvider), warmup, new WorkOrderRepository(database), new SyncStateRepository(database, _timeProvider)),
+            () => new WorkOrderSyncService(client, new WorkOrderRepository(database), new SyncStateRepository(database, _timeProvider)),
             () => new PartSyncService(client, new PartRepository(database), new SyncStateRepository(database, _timeProvider)),
             _messenger);
     }
@@ -140,6 +141,37 @@ public sealed class SyncCoordinatorTests : IAsyncLifetime
 
         result.Pull.ShouldBeNull();
         _api.Calls.ShouldNotContain(ListCall);
+    }
+
+    [Fact]
+    public async Task Should_Check_Server_Readiness_Only_Before_First_Sync()
+    {
+        await _coordinator.SynchronizeAsync();
+        await _coordinator.SynchronizeAsync();
+
+        _api.Calls.Count(call => call == ReadyCall).ShouldBe(1);
+        _api.Calls.Count(call => call == ListCall).ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task Should_Report_Server_Unavailable_Without_Requests_When_Server_Does_Not_Start()
+    {
+        await new OutboxWriter(_outbox, _timeProvider, new WeakReferenceMessenger()).StartWorkAsync(WorkOrderId);
+        _api.Overrides[ReadyCall] = () => new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
+        var startingNotices = 0;
+        _messenger.Register<ServerStartingMessage>(this, (_, _) => startingNotices++);
+
+        var sync = _coordinator.SynchronizeAsync();
+        while (!sync.IsCompleted)
+        {
+            _timeProvider.Advance(TimeSpan.FromSeconds(3));
+            await Task.Delay(10, TestContext.Current.CancellationToken);
+        }
+
+        (await sync).ShouldBe(SyncResult.ServerUnavailable);
+        startingNotices.ShouldBe(1);
+        _api.Calls.ShouldAllBe(call => call == ReadyCall);
+        (await _outbox.GetAllAsync()).ShouldHaveSingleItem();
     }
 
     public async ValueTask DisposeAsync()

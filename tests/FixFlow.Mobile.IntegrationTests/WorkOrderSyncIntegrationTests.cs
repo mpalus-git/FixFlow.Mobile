@@ -15,7 +15,7 @@ public sealed class WorkOrderSyncIntegrationTests(ApiEnvironment environment)
         var workOrderId = await admin.CreateAssignedWorkOrderAsync(technicianId);
         await using var device = await TechnicianDevice.LogInAsync(environment.BaseAddress, email, password);
 
-        var result = await device.Get<WorkOrderSyncService>().PullAsync(() => { }, CancellationToken.None);
+        var result = await device.Get<WorkOrderSyncService>().PullAsync(CancellationToken.None);
 
         result.ShouldBe(PullResult.Succeeded);
         (await device.Get<WorkOrderRepository>().GetAllAsync()).ShouldHaveSingleItem().Id.ShouldBe(workOrderId);

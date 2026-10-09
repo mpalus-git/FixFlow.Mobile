@@ -108,7 +108,7 @@ public sealed partial class SyncViewModel
             }
 
             var result = await _coordinator.SynchronizeAsync();
-            Notice = result.IsServerUnavailable || result.Pull?.Outcome is PullOutcome.ServerUnavailable or PullOutcome.Failed
+            Notice = result.IsServerUnavailable || result.Pull?.Outcome == PullOutcome.Failed
                 ? AppResources.SyncFailedNotice
                 : null;
             await ShowLocalAsync();

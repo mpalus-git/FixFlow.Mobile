@@ -50,7 +50,7 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
         _workOrders = new WorkOrderRepository(_userDatabase.Database);
         var warmup = new ServerWarmup();
         var syncStates = new SyncStateRepository(_userDatabase.Database, _timeProvider);
-        var sync = new WorkOrderSyncService(api, new ServerReadinessProbe(httpClient, _timeProvider), warmup, _workOrders, syncStates);
+        var sync = new WorkOrderSyncService(api, _workOrders, syncStates);
         _outbox = new OutboxRepository(_userDatabase.Database);
         var coordinator = new SyncCoordinator(
             _userDatabase.Database,

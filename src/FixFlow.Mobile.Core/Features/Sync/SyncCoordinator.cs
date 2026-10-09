@@ -131,7 +131,7 @@ public sealed class SyncCoordinator : IRecipient<ConnectivityChangedMessage>, IR
             return new SyncResult(false, false, dispatch, null);
         }
 
-        var pull = await _workOrderSync().PullAsync(() => _messenger.Send(new ServerStartingMessage()), CancellationToken.None);
+        var pull = await _workOrderSync().PullAsync(CancellationToken.None);
         if (pull.Outcome == PullOutcome.Succeeded)
         {
             await _partSync().PullAsync(CancellationToken.None);
