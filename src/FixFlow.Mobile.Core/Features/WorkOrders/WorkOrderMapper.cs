@@ -30,23 +30,6 @@ public static class WorkOrderMapper
         };
     }
 
-    public static Client ToClient(ClientResponse client)
-    {
-        ArgumentNullException.ThrowIfNull(client);
-
-        return new Client(
-            client.Id,
-            client.Name,
-            client.Address.Street,
-            client.Address.BuildingNumber,
-            client.Address.PostalCode,
-            client.Address.City,
-            client.ContactPerson,
-            client.Phone,
-            client.Email,
-            client.ArchivedAt);
-    }
-
     public static Device ToDevice(DeviceResponse device)
     {
         ArgumentNullException.ThrowIfNull(device);

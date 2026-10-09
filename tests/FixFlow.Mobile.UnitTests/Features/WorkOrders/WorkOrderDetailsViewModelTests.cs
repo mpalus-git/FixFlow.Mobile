@@ -48,7 +48,6 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
         var database = _userDatabase.Database;
         _sources = new WorkOrderDetailsSources(
             new WorkOrderRepository(database),
-            new ClientRepository(database),
             new DeviceRepository(database),
             new ServiceEntryRepository(database),
             new DeviceHistoryRepository(database),
@@ -59,7 +58,7 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
         _viewModel = new WorkOrderDetailsViewModel(
             new ScreenState(formatter),
             _sources,
-            new WorkOrderDetailsSyncService(api, _sources.WorkOrders, _sources.Clients, _sources.Devices, _sources.ServiceEntries, _sources.DeviceHistory),
+            new WorkOrderDetailsSyncService(api, _sources.WorkOrders, _sources.Devices, _sources.ServiceEntries, _sources.DeviceHistory),
             new SyncStateRepository(database, timeProvider),
             new WorkOrderDetailsPresenter(formatter, new SessionStore(Substitute.For<ISecureStore>(), timeProvider)),
             new ServiceProtocolService(api, _documents),
@@ -94,14 +93,19 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Should_Show_Local_Details_Without_Request_When_Device_Is_Offline()
+    public async Task Should_Show_Local_Details_With_Client_Contact_From_List_When_Device_Is_Offline()
     {
-        await _sources.WorkOrders.ReplaceAllAsync([TestWorkOrders.Create("ZL-LOCAL", DetailsApiStub.Now) with { Id = _api.WorkOrderId }]);
+        await _sources.WorkOrders.ReplaceAllAsync([TestWorkOrders.Create("ZL-LOCAL", DetailsApiStub.Now) with
+        {
+            Id = _api.WorkOrderId,
+            ClientContact = new ClientContact("Długa", "12A", "31-147", "Kraków", "Anna Kowalska", "+48 600 100 200"),
+        }]);
         _connectivity.IsOnline.Returns(false);
 
         await _viewModel.OnNavigatedToAsync(_api.WorkOrderId);
 
         _viewModel.Details.ShouldNotBeNull().Number.ShouldBe("ZL-LOCAL");
+        _viewModel.Details.Client.ShouldNotBeNull().Phone.ShouldBe("+48 600 100 200");
         _viewModel.Screen.IsOffline.ShouldBeTrue();
         _handler.Requests.ShouldBeEmpty();
     }

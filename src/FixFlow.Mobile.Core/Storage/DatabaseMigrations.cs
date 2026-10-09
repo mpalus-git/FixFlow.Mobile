@@ -168,5 +168,9 @@ public static class DatabaseMigrations
             "ALTER TABLE work_orders ADD COLUMN client_contact_person TEXT NOT NULL DEFAULT ''",
             "ALTER TABLE work_orders ADD COLUMN client_phone TEXT NOT NULL DEFAULT ''",
         ]),
+        new(11, "drop_clients",
+        [
+            "DROP TABLE clients",
+        ]),
     ];
 }

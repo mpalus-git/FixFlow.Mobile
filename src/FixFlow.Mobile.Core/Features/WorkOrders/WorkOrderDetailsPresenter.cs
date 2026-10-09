@@ -11,7 +11,6 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, Sessio
 {
     public WorkOrderDetailsView Present(
         WorkOrder workOrder,
-        Client? client,
         Device? device,
         IReadOnlyList<ServiceEntry> entries,
         IReadOnlyList<DeviceHistoryItem> history,
@@ -36,7 +35,7 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, Sessio
             workOrder.Priority is WorkOrderPriority.High or WorkOrderPriority.Critical && WorkOrderTexts.IsActive(workOrder.Status),
             WorkOrderTexts.Format(AppResources.WorkOrderDueAt, formatter.FormatDateTime(workOrder.DueDate)),
             workOrder.Description,
-            client is null ? null : ToClientView(client),
+            workOrder.ClientContact.IsEmpty ? null : ToClientView(workOrder.ClientName, workOrder.ClientContact),
             device is null ? null : ToDeviceView(device),
             [
                 .. entries.Select(entry => ToEntryView(entry, isPending: false, [.. entry.PhotoUrls.Select(url => new EntryPhotoView(url, false))])),
@@ -67,8 +66,8 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, Sessio
             !isLocating && timer.LocationStatus == WorkLocationStatus.Denied);
     }
 
-    private static ClientView ToClientView(Client client) => new(
-        client.Name,
+    private static ClientView ToClientView(string name, ClientContact client) => new(
+        name,
         WorkOrderTexts.Format(AppResources.DetailsContactPerson, client.ContactPerson),
         client.Phone,
         $"{client.Street} {client.BuildingNumber}, {client.PostalCode} {client.City}",

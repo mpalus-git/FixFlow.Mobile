@@ -43,11 +43,6 @@ internal sealed class DetailsApiStub
                 clientAddress = new { street = "Długa", buildingNumber = "12A", postalCode = "31-147", city = "Kraków" }, description = "Przegląd", priority = "High", status = Status,
                 dueDate = Now, isOverdue = false, createdAt = Now.AddDays(-2), startedAt = Now.AddHours(-1),
             },
-            _ when path == $"/api/v1/clients/{ClientId}" => new
-            {
-                id = ClientId, name = "Piekarnia", contactPerson = "Anna Kowalska", phone = "+48 600 100 200", createdAt = Now,
-                address = new { street = "Długa", buildingNumber = "12A", postalCode = "31-147", city = "Kraków" },
-            },
             _ when path == $"/api/v1/devices/{DeviceId}" => new
             {
                 id = DeviceId, clientId = ClientId, serialNumber = "SN-1", model = "Altherma 3", manufacturer = "Daikin",

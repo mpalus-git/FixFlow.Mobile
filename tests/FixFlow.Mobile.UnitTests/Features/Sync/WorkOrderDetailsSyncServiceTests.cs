@@ -17,7 +17,6 @@ public sealed class WorkOrderDetailsSyncServiceTests : IAsyncLifetime
     private readonly TestUserDatabase _userDatabase = new();
     private readonly StubHttpMessageHandler _handler;
     private readonly WorkOrderRepository _workOrders;
-    private readonly ClientRepository _clients;
     private readonly DeviceRepository _devices;
     private readonly ServiceEntryRepository _serviceEntries;
     private readonly DeviceHistoryRepository _deviceHistory;
@@ -28,14 +27,12 @@ public sealed class WorkOrderDetailsSyncServiceTests : IAsyncLifetime
     {
         _handler = new StubHttpMessageHandler(_api.Route);
         _workOrders = new WorkOrderRepository(_userDatabase.Database);
-        _clients = new ClientRepository(_userDatabase.Database);
         _devices = new DeviceRepository(_userDatabase.Database);
         _serviceEntries = new ServiceEntryRepository(_userDatabase.Database);
         _deviceHistory = new DeviceHistoryRepository(_userDatabase.Database);
         _service = new WorkOrderDetailsSyncService(
             RestService.ForGenerated<IFixFlowApi>(new HttpClient(_handler, disposeHandler: false) { BaseAddress = new Uri("https://api.test") }),
             _workOrders,
-            _clients,
             _devices,
             _serviceEntries,
             _deviceHistory);
@@ -44,7 +41,7 @@ public sealed class WorkOrderDetailsSyncServiceTests : IAsyncLifetime
     public async ValueTask InitializeAsync() => await _userDatabase.Database.OpenAsync(Guid.NewGuid());
 
     [Fact]
-    public async Task Should_Store_Work_Order_With_Client_Device_Entries_And_History_When_Pull_Succeeds()
+    public async Task Should_Store_Work_Order_With_Client_Contact_Device_Entries_And_History_When_Pull_Succeeds()
     {
         var result = await PullAsync();
 
@@ -52,7 +49,7 @@ public sealed class WorkOrderDetailsSyncServiceTests : IAsyncLifetime
         var workOrder = (await _workOrders.GetAsync(_api.WorkOrderId)).ShouldNotBeNull();
         workOrder.Number.ShouldBe("ZL-2026-0042");
         workOrder.ClientContact.City.ShouldBe("Kraków");
-        (await _clients.GetAsync(_api.ClientId)).ShouldNotBeNull().City.ShouldBe("Kraków");
+        _handler.Requests.ShouldNotContain(request => request.RequestUri!.AbsolutePath.StartsWith("/api/v1/clients", StringComparison.Ordinal));
         (await _devices.GetAsync(_api.DeviceId)).ShouldNotBeNull().InstallationDate.ShouldBe(new DateOnly(2021, 3, 14));
         var entry = (await _serviceEntries.GetForWorkOrderAsync(_api.WorkOrderId)).ShouldHaveSingleItem();
         entry.Parts.ShouldHaveSingleItem().UnitPrice.ShouldBe(12.34m);
@@ -93,7 +90,7 @@ public sealed class WorkOrderDetailsSyncServiceTests : IAsyncLifetime
         var result = await PullAsync();
 
         result.Outcome.ShouldBe(PullOutcome.Failed);
-        (await _clients.GetAsync(_api.ClientId)).ShouldNotBeNull();
+        (await _devices.GetAsync(_api.DeviceId)).ShouldNotBeNull();
         (await _serviceEntries.GetForWorkOrderAsync(_api.WorkOrderId)).ShouldNotBeEmpty();
         (await _deviceHistory.GetForDeviceAsync(_api.DeviceId)).ShouldBeEmpty();
     }
