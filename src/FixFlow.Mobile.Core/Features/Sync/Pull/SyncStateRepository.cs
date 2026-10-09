@@ -1,7 +1,7 @@
 using FixFlow.Mobile.Core.Storage;
 using SQLite;
 
-namespace FixFlow.Mobile.Core.Features.Sync;
+namespace FixFlow.Mobile.Core.Features.Sync.Pull;
 
 public sealed class SyncStateRepository(UserDatabase userDatabase, TimeProvider timeProvider)
 {

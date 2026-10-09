@@ -1,16 +1,13 @@
 using System.Globalization;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Api.Errors;
-using FixFlow.Mobile.Core.Features.WorkOrders;
+using FixFlow.Mobile.Core.Features.Parts;
 
-namespace FixFlow.Mobile.Core.Features.Sync;
+namespace FixFlow.Mobile.Core.Features.Sync.Pull;
 
-public sealed class WorkOrderSyncService(
-    IFixFlowApi api,
-    WorkOrderRepository workOrders,
-    SyncStateRepository syncStates)
+public sealed class PartSyncService(IFixFlowApi api, PartRepository parts, SyncStateRepository syncStates)
 {
-    public const string SyncStateKey = "work-orders";
+    public const string SyncStateKey = "parts";
 
     public const int PageSize = 100;
 
@@ -18,24 +15,23 @@ public sealed class WorkOrderSyncService(
 
     public async Task<PullResult> PullAsync(CancellationToken cancellationToken)
     {
-        var pulled = new List<WorkOrder>();
+        var pulled = new List<Part>();
         for (var page = 1; ; page++)
         {
-            using var response = await api.ListWorkOrdersAsync(
-                page, PageSize, null, null, null, null, null, null, null, null, SortBy.DueDate, SortDirection.Asc, cancellationToken);
+            using var response = await api.ListPartsAsync(page, PageSize, null, null, cancellationToken);
             if (response is not { IsSuccessful: true, Content: { } content })
             {
                 return PullResult.Failed(ApiErrorMapper.FromResponse(response));
             }
 
-            pulled.AddRange(content.Items.Select(WorkOrderMapper.FromListItem));
+            pulled.AddRange(content.Items.Select(PartMapper.FromResponse));
             if (content.Items.Count == 0 || page * PageSize >= content.TotalCount)
             {
                 break;
             }
         }
 
-        await workOrders.ReplaceAllAsync(pulled);
+        await parts.ReplaceAllAsync(pulled);
         await syncStates.SetAsync(SyncStateKey, pulled.Count.ToString(CultureInfo.InvariantCulture));
         return PullResult.Succeeded;
     }

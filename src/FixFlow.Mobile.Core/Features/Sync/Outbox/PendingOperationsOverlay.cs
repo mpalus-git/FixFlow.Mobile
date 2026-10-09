@@ -2,7 +2,7 @@ using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 
-namespace FixFlow.Mobile.Core.Features.Sync;
+namespace FixFlow.Mobile.Core.Features.Sync.Outbox;
 
 public static class PendingOperationsOverlay
 {

@@ -1,6 +1,6 @@
 using SQLite;
 
-namespace FixFlow.Mobile.Core.Features.Sync;
+namespace FixFlow.Mobile.Core.Features.Sync.Pull;
 
 [Table("sync_states")]
 internal sealed class SyncStateRow

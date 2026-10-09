@@ -7,6 +7,8 @@ using FixFlow.Mobile.Core.Connectivity;
 using FixFlow.Mobile.Core.Dialogs;
 using FixFlow.Mobile.Core.Dispatching;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
+using FixFlow.Mobile.Core.Features.Sync.Pull;
 using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Launching;
 using FixFlow.Mobile.Core.Location;

@@ -1,6 +1,7 @@
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
 using FixFlow.Mobile.Core.Resources;
 
-namespace FixFlow.Mobile.Core.Features.Sync;
+namespace FixFlow.Mobile.Core.Features.Sync.Conflicts;
 
 public static class ConflictTexts
 {

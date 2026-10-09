@@ -1,7 +1,8 @@
 using System.Net;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
 using SQLite;
 
-namespace FixFlow.Mobile.Core.Features.Sync;
+namespace FixFlow.Mobile.Core.Features.Sync.Conflicts;
 
 [Table("sync_conflicts")]
 internal sealed class SyncConflictRow

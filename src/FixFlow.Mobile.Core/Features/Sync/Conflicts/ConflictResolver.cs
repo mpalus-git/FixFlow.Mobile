@@ -1,8 +1,9 @@
 using CommunityToolkit.Mvvm.Messaging;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
 using SQLite;
 
-namespace FixFlow.Mobile.Core.Features.Sync;
+namespace FixFlow.Mobile.Core.Features.Sync.Conflicts;
 
 public sealed class ConflictResolver(OutboxRepository outbox, PhotoStore photos, IMessenger messenger)
 {

@@ -1,4 +1,4 @@
-using FixFlow.Mobile.Core.Features.Sync;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
 using FixFlow.Mobile.Core.Notifications;
 using FixFlow.Mobile.Core.Storage;
 

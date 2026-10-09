@@ -1,6 +1,7 @@
 using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Settings;
-using FixFlow.Mobile.Core.Features.Sync;
+using FixFlow.Mobile.Core.Features.Sync.Conflicts;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
 using FixFlow.Mobile.Core.Formatting;
 using Microsoft.Extensions.Time.Testing;
 using NSubstitute;

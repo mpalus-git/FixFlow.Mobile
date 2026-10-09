@@ -1,5 +1,5 @@
 using CommunityToolkit.Mvvm.Messaging;
-using FixFlow.Mobile.Core.Features.Sync;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.UnitTests.Storage;
 using Microsoft.Extensions.Time.Testing;

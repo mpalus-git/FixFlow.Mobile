@@ -1,6 +1,7 @@
 using System.Net;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
 
-namespace FixFlow.Mobile.Core.Features.Sync;
+namespace FixFlow.Mobile.Core.Features.Sync.Conflicts;
 
 public sealed record SyncConflict(
     Guid OperationId,

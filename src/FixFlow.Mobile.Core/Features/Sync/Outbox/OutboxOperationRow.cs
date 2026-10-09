@@ -1,6 +1,6 @@
 using SQLite;
 
-namespace FixFlow.Mobile.Core.Features.Sync;
+namespace FixFlow.Mobile.Core.Features.Sync.Outbox;
 
 [Table("outbox_operations")]
 internal sealed class OutboxOperationRow

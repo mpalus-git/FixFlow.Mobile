@@ -1,6 +1,6 @@
 using FixFlow.Mobile.Core.Api.Errors;
 
-namespace FixFlow.Mobile.Core.Features.Sync;
+namespace FixFlow.Mobile.Core.Features.Sync.Pull;
 
 public sealed record PullResult(PullOutcome Outcome, ApiError? Error)
 {

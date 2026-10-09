@@ -1,10 +1,11 @@
 using System.Globalization;
-using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Api.Errors;
+using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
+using FixFlow.Mobile.Core.Features.Sync.Conflicts;
 using Refit;
 
-namespace FixFlow.Mobile.Core.Features.Sync;
+namespace FixFlow.Mobile.Core.Features.Sync.Outbox;
 
 public sealed class OutboxDispatcher(
     IFixFlowApi api,

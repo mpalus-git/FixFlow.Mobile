@@ -5,6 +5,8 @@ using FixFlow.Mobile.Core.Api.Errors;
 using FixFlow.Mobile.Core.Connectivity;
 using FixFlow.Mobile.Core.Dispatching;
 using FixFlow.Mobile.Core.Features.Settings;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
+using FixFlow.Mobile.Core.Features.Sync.Pull;
 using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Navigation;
 using FixFlow.Mobile.Core.Resources;

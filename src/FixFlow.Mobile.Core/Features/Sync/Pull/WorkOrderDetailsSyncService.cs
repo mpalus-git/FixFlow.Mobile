@@ -5,7 +5,7 @@ using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using Refit;
 
-namespace FixFlow.Mobile.Core.Features.Sync;
+namespace FixFlow.Mobile.Core.Features.Sync.Pull;
 
 public sealed class WorkOrderDetailsSyncService(
     IFixFlowApi api,

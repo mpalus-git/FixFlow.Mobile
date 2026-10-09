@@ -1,7 +1,7 @@
 using System.Text.Json;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
 
-namespace FixFlow.Mobile.Core.Features.Sync;
+namespace FixFlow.Mobile.Core.Features.Sync.Outbox;
 
 public static class OutboxPayload
 {

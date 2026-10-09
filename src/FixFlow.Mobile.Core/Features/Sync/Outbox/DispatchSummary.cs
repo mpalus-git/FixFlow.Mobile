@@ -1,4 +1,4 @@
-namespace FixFlow.Mobile.Core.Features.Sync;
+namespace FixFlow.Mobile.Core.Features.Sync.Outbox;
 
 public sealed record DispatchSummary(int Sent, int Rejected, int Remaining, bool SessionRejected)
 {

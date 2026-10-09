@@ -1,3 +1,5 @@
+using FixFlow.Mobile.Core.Features.Sync.Conflicts;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
 using FixFlow.Mobile.Core.Formatting;
 using FixFlow.Mobile.Core.Resources;
 

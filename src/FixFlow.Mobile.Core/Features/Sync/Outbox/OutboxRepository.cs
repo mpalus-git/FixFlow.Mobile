@@ -1,7 +1,8 @@
+using FixFlow.Mobile.Core.Features.Sync.Conflicts;
 using FixFlow.Mobile.Core.Storage;
 using SQLite;
 
-namespace FixFlow.Mobile.Core.Features.Sync;
+namespace FixFlow.Mobile.Core.Features.Sync.Outbox;
 
 public sealed class OutboxRepository(UserDatabase userDatabase)
 {
