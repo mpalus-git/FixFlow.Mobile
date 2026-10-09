@@ -58,7 +58,7 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
         _viewModel = new WorkOrderDetailsViewModel(
             new ScreenState(formatter),
             _sources,
-            new WorkOrderDetailsSyncService(api, _sources.WorkOrders, _sources.Devices, _sources.ServiceEntries, _sources.DeviceHistory),
+            new WorkOrderDetailsSyncService(api, _sources.WorkOrders, _sources.Devices, _sources.ServiceEntries, _sources.DeviceHistory, new WorkOrderEventRepository(database)),
             new SyncStateRepository(database, timeProvider),
             new WorkOrderDetailsPresenter(formatter, new SessionStore(Substitute.For<ISecureStore>(), timeProvider)),
             new ServiceProtocolService(api, _documents),

@@ -20,6 +20,7 @@ public sealed class WorkOrderDetailsSyncServiceTests : IAsyncLifetime
     private readonly DeviceRepository _devices;
     private readonly ServiceEntryRepository _serviceEntries;
     private readonly DeviceHistoryRepository _deviceHistory;
+    private readonly WorkOrderEventRepository _events;
     private readonly WorkOrderDetailsSyncService _service;
     private readonly DetailsApiStub _api = new();
 
@@ -30,12 +31,14 @@ public sealed class WorkOrderDetailsSyncServiceTests : IAsyncLifetime
         _devices = new DeviceRepository(_userDatabase.Database);
         _serviceEntries = new ServiceEntryRepository(_userDatabase.Database);
         _deviceHistory = new DeviceHistoryRepository(_userDatabase.Database);
+        _events = new WorkOrderEventRepository(_userDatabase.Database);
         _service = new WorkOrderDetailsSyncService(
             RestService.ForGenerated<IFixFlowApi>(new HttpClient(_handler, disposeHandler: false) { BaseAddress = new Uri("https://api.test") }),
             _workOrders,
             _devices,
             _serviceEntries,
-            _deviceHistory);
+            _deviceHistory,
+            _events);
     }
 
     public async ValueTask InitializeAsync() => await _userDatabase.Database.OpenAsync(Guid.NewGuid());
@@ -54,6 +57,9 @@ public sealed class WorkOrderDetailsSyncServiceTests : IAsyncLifetime
         var entry = (await _serviceEntries.GetForWorkOrderAsync(_api.WorkOrderId)).ShouldHaveSingleItem();
         entry.Parts.ShouldHaveSingleItem().UnitPrice.ShouldBe(12.34m);
         (await _deviceHistory.GetForDeviceAsync(_api.DeviceId)).ShouldHaveSingleItem().ServiceEntryCount.ShouldBe(3);
+        var events = await _events.GetForWorkOrderAsync(_api.WorkOrderId);
+        events.Select(item => item.Type).ShouldBe([WorkOrderEventType.Created, WorkOrderEventType.Assigned]);
+        events[1].ActorName.ShouldBe("Anna Nowak");
     }
 
     [Fact]
@@ -67,6 +73,7 @@ public sealed class WorkOrderDetailsSyncServiceTests : IAsyncLifetime
         result.ShouldBe(PullResult.NotFound);
         (await _workOrders.GetAsync(_api.WorkOrderId)).ShouldBeNull();
         (await _serviceEntries.GetForWorkOrderAsync(_api.WorkOrderId)).ShouldBeEmpty();
+        (await _events.GetForWorkOrderAsync(_api.WorkOrderId)).ShouldBeEmpty();
     }
 
     [Fact]

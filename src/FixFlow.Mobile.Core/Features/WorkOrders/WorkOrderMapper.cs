@@ -55,6 +55,13 @@ public static class WorkOrderMapper
             item.ServiceEntryCount);
     }
 
+    public static WorkOrderEvent ToEvent(Guid workOrderId, WorkOrderEventResponse item)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+
+        return new WorkOrderEvent(item.Id, workOrderId, item.Type, item.OccurredAt, item.ActorName, item.TechnicianName, item.DueDate);
+    }
+
     public static WorkOrder FromListItem(WorkOrderListItemResponse item)
     {
         ArgumentNullException.ThrowIfNull(item);

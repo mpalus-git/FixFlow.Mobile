@@ -2,6 +2,7 @@ using System.Net;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Sync;
+using FixFlow.Mobile.Core.Features.WorkOrders;
 
 namespace FixFlow.Mobile.IntegrationTests;
 
@@ -23,6 +24,10 @@ public sealed class OutboxIntegrationTests(ApiEnvironment environment)
         summary.ShouldBe(new DispatchSummary(Sent: 3, Rejected: 0, Remaining: 0, SessionRejected: false));
         (await admin.GetAsync($"api/v1/work-orders/{scenario.WorkOrderId}")).GetProperty("status").GetString().ShouldBe("Completed");
         (await admin.GetAsync($"api/v1/parts/{scenario.PartId}")).GetProperty("stockQuantity").GetInt32().ShouldBe(TechnicianScenario.InitialStock - 2);
+        await device.Get<WorkOrderDetailsSyncService>().PullAsync(scenario.WorkOrderId, CancellationToken.None);
+        var events = await device.Get<WorkOrderEventRepository>().GetForWorkOrderAsync(scenario.WorkOrderId);
+        events.Select(item => item.Type).ShouldBe([WorkOrderEventType.Created, WorkOrderEventType.Assigned, WorkOrderEventType.Started, WorkOrderEventType.Completed]);
+        events[2].OccurredAt.ShouldBe(OutboxPayload.StartedAt(start), TimeSpan.FromSeconds(5));
     }
 
     [Fact]
