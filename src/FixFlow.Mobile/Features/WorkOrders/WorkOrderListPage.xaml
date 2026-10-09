@@ -9,6 +9,7 @@
              Title="{x:Static resources:AppResources.WorkOrderListTitle}">
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="{x:Static resources:AppResources.SyncTitle}"
+                     IconImageSource="{AppThemeBinding Light=sync_light.png, Dark=sync_dark.png}"
                      Command="{Binding OpenSyncCommand}" />
         <ToolbarItem Text="{x:Static resources:AppResources.SettingsTitle}"
                      Command="{Binding OpenSettingsCommand}"

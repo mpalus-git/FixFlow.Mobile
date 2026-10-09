@@ -36,6 +36,8 @@
     <MauiIcon Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'" Include="Resources\AppIcon\Windows\appicon.svg" />
     <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#0D736A" BaseSize="128,128" />
     <MauiImage Include="Resources\Images\brandmark.svg" BaseSize="40,40" />
+    <MauiImage Include="Resources\Images\sync_dark.svg" BaseSize="24,24" />
+    <MauiImage Include="Resources\Images\sync_light.svg" BaseSize="24,24" />
   </ItemGroup>
   <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
     <AndroidResource Include="Platforms\Android\NetworkSecurity\$(Configuration)\network_security_config.xml"
