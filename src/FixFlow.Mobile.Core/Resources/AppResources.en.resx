@@ -795,4 +795,13 @@
   <data name="HidePasswordDescription" xml:space="preserve">
     <value>Hide password</value>
   </data>
+  <data name="ConnectionLostAnnouncement" xml:space="preserve">
+    <value>No connection. Changes will be sent once it is restored.</value>
+  </data>
+  <data name="ConnectionRestoredAnnouncement" xml:space="preserve">
+    <value>Connection restored.</value>
+  </data>
+  <data name="SyncCompletedAnnouncement" xml:space="preserve">
+    <value>Synchronization finished.</value>
+  </data>
 </root>

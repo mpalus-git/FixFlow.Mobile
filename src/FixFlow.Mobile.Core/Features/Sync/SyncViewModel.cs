@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using FixFlow.Mobile.Core.Accessibility;
 using FixFlow.Mobile.Core.Clipboard;
 using FixFlow.Mobile.Core.Connectivity;
 using FixFlow.Mobile.Core.Dialogs;
@@ -28,6 +29,7 @@ public sealed partial class SyncViewModel
     private readonly IClipboardService _clipboard;
     private readonly IDialogService _dialogs;
     private readonly IUiDispatcher _ui;
+    private readonly IScreenReaderAnnouncer _announcer;
     private int _localVersion;
 
     public SyncViewModel(
@@ -44,6 +46,7 @@ public sealed partial class SyncViewModel
         IClipboardService clipboard,
         IDialogService dialogs,
         IUiDispatcher ui,
+        IScreenReaderAnnouncer announcer,
         IMessenger messenger)
     {
         ArgumentNullException.ThrowIfNull(messenger);
@@ -60,6 +63,7 @@ public sealed partial class SyncViewModel
         _clipboard = clipboard;
         _dialogs = dialogs;
         _ui = ui;
+        _announcer = announcer;
         messenger.RegisterAll(this);
     }
 
@@ -105,8 +109,12 @@ public sealed partial class SyncViewModel
             if (result.IsServerUnavailable || result.Pull?.Outcome == PullOutcome.Failed)
             {
                 Screen.ShowNotice(ScreenNotice.Problem(AppResources.SyncFailedNotice));
+                await ShowLocalAsync();
+                return;
             }
+
             await ShowLocalAsync();
+            _announcer.Announce(SyncPresenter.DescribeCompletion(PendingOperations.Count, Conflicts.Count));
         }
         finally
         {

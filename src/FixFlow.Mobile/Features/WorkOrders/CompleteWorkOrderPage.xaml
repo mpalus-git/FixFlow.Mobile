@@ -13,16 +13,17 @@
               Padding="16"
               RowSpacing="8"
               VerticalOptions="{OnIdiom Default=Fill, Desktop=Start}"
-              RowDefinitions="Auto,Auto,Auto,*,Auto,Auto,Auto">
-            <Label Text="{Binding Message}" />
-
-            <Label Grid.Row="1"
-                   Text="{x:Static resources:AppResources.SignatureLabel}"
-                   Style="{StaticResource SectionLabel}" />
-            <Label Grid.Row="2"
-                   Text="{x:Static resources:AppResources.SignatureHint}"
-                   Style="{StaticResource SecondaryLabel}" />
-            <Border Grid.Row="3"
+              RowDefinitions="Auto,*,Auto,Auto,Auto">
+            <ScrollView MaximumHeightRequest="{OnIdiom Default=Infinity, Phone=160}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding Message}" />
+                    <Label Text="{x:Static resources:AppResources.SignatureLabel}"
+                           Style="{StaticResource SectionLabel}" />
+                    <Label Text="{x:Static resources:AppResources.SignatureHint}"
+                           Style="{StaticResource SecondaryLabel}" />
+                </VerticalStackLayout>
+            </ScrollView>
+            <Border Grid.Row="1"
                     Style="{StaticResource InputBorder}"
                     BackgroundColor="White"
                     Padding="0"
@@ -37,16 +38,16 @@
                                          ShouldClearOnFinish="False"
                                          SemanticProperties.Description="{x:Static resources:AppResources.SignaturePadDescription}" />
             </Border>
-            <Button Grid.Row="4"
+            <Button Grid.Row="2"
                     Text="{x:Static resources:AppResources.SignatureClearButton}"
                     Command="{Binding ClearCommand, Source={x:Reference Signature}, x:DataType=workOrders:SignaturePad}"
                     Style="{StaticResource OutlineButton}" />
 
-            <Label Grid.Row="5"
+            <Label Grid.Row="3"
                    Text="{Binding ValidationMessage}"
                    IsVisible="{Binding HasValidationMessage}"
                    Style="{StaticResource ErrorLabel}" />
-            <Button Grid.Row="6"
+            <Button Grid.Row="4"
                     Text="{x:Static resources:AppResources.CompleteWorkOrderButton}"
                     Command="{Binding CompleteCommand}"
                     CommandParameter="{x:Reference Signature}" />

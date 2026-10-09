@@ -2,6 +2,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using CommunityToolkit.Mvvm.Messaging;
+using FixFlow.Mobile.Core.Accessibility;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Connectivity;
 using FixFlow.Mobile.Core.Features.Parts;
@@ -63,7 +64,7 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
             _messenger,
             _timeProvider);
         _viewModel = new WorkOrderListViewModel(
-            new ScreenState(formatter),
+            new ScreenState(formatter, Substitute.For<IScreenReaderAnnouncer>()),
             _userDatabase.Database,
             _workOrders,
             _outbox,

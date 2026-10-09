@@ -88,6 +88,7 @@ public static partial class MauiProgram
         app.Services.GetRequiredService<ThemeService>().ApplySavedTheme();
         app.Services.GetRequiredService<SessionEndNavigator>().Start();
         app.Services.GetRequiredService<SyncCoordinator>().Start();
+        app.Services.GetRequiredService<ConnectivityAnnouncer>().Start();
         app.Services.GetRequiredService<ReminderCoordinator>().Start();
 
         return app;

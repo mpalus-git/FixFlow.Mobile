@@ -40,7 +40,7 @@ public sealed class CompleteWorkOrderViewModelTests : IAsyncLifetime
         _writer = new OutboxWriter(_outbox, _timeProvider, new WeakReferenceMessenger());
         _photos = new PhotoStore(_userDatabase.Options, database);
         _viewModel = new CompleteWorkOrderViewModel(
-            new ScreenState(formatter),
+            new ScreenState(formatter, Substitute.For<IScreenReaderAnnouncer>()),
             new WorkOrderRepository(database),
             new ServiceEntryRepository(database),
             _outbox,

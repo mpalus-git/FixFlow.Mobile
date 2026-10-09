@@ -26,6 +26,13 @@ public sealed class SyncPresenterTests : IDisposable
         _presenter = new SyncPresenter(new LocalChangeDescriber(formatter), formatter);
     }
 
+    [Theory]
+    [InlineData(0, 0, "Synchronizacja zakończona.")]
+    [InlineData(2, 0, "Synchronizacja zakończona. Do wysłania: 2.")]
+    [InlineData(1, 3, "Synchronizacja zakończona. Do wysłania: 1. Do wyjaśnienia: 3.")]
+    public void Should_Describe_Remaining_Changes_When_Manual_Sync_Completes(int pending, int rejected, string expected) =>
+        SyncPresenter.DescribeCompletion(pending, rejected).ShouldBe(expected);
+
     [Fact]
     public void Should_Show_Reason_Rejection_Time_And_Held_Changes_When_Conflict_Is_Presented()
     {

@@ -50,11 +50,16 @@
                                 <Grid ColumnDefinitions="*,Auto"
                                       RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
                                       RowSpacing="2">
-                                    <Label Text="{Binding Number}"
-                                           FontAttributes="Bold" />
-                                    <controls:Badge Grid.Column="1"
-                                                    Text="{Binding StatusText}"
-                                                    Tone="{Binding StatusTone}" />
+                                    <FlexLayout Grid.ColumnSpan="2"
+                                                Style="{StaticResource HeaderWithBadge}">
+                                        <Label Text="{Binding Number}"
+                                               FontAttributes="Bold"
+                                               Margin="0,0,8,0"
+                                               FlexLayout.Shrink="0" />
+                                        <controls:Badge Text="{Binding StatusText}"
+                                                        Tone="{Binding StatusTone}"
+                                                        FlexLayout.Shrink="0" />
+                                    </FlexLayout>
                                     <Label Grid.Row="1"
                                            Grid.ColumnSpan="2"
                                            Text="{Binding ClientName}" />

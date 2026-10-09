@@ -1,5 +1,6 @@
 using System.Net;
 using CommunityToolkit.Mvvm.Messaging;
+using FixFlow.Mobile.Core.Accessibility;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Clipboard;
 using FixFlow.Mobile.Core.Connectivity;
@@ -50,7 +51,7 @@ public sealed class SyncViewModelTests : IAsyncLifetime
             _messenger,
             _timeProvider);
         _viewModel = new SyncViewModel(
-            new ScreenState(formatter),
+            new ScreenState(formatter, Substitute.For<IScreenReaderAnnouncer>()),
             _userDatabase.Database,
             _outbox,
             new WorkOrderRepository(_userDatabase.Database),
@@ -63,6 +64,7 @@ public sealed class SyncViewModelTests : IAsyncLifetime
             _clipboard,
             _dialogs,
             _ui,
+            Substitute.For<IScreenReaderAnnouncer>(),
             _messenger);
     }
 

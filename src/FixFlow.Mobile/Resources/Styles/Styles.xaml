@@ -130,6 +130,12 @@
         <Setter Property="Padding" Value="16,12" />
     </Style>
 
+    <Style x:Key="HeaderWithBadge" TargetType="FlexLayout">
+        <Setter Property="Wrap" Value="Wrap" />
+        <Setter Property="JustifyContent" Value="SpaceBetween" />
+        <Setter Property="AlignItems" Value="Center" />
+    </Style>
+
     <Style x:Key="ReadableContent" TargetType="View">
         <Setter Property="MaximumWidthRequest" Value="{OnIdiom Default=Infinity, Desktop=720}" />
     </Style>
