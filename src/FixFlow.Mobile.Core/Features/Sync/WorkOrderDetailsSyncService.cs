@@ -10,7 +10,6 @@ namespace FixFlow.Mobile.Core.Features.Sync;
 public sealed class WorkOrderDetailsSyncService(
     IFixFlowApi api,
     WorkOrderRepository workOrders,
-    ClientRepository clients,
     DeviceRepository devices,
     ServiceEntryRepository serviceEntries,
     DeviceHistoryRepository deviceHistory)
@@ -36,21 +35,14 @@ public sealed class WorkOrderDetailsSyncService(
         var workOrder = WorkOrderMapper.FromResponse(content);
         await workOrders.UpsertAsync(workOrder);
 
-        var clientTask = api.GetClientAsync(workOrder.ClientId, cancellationToken);
         var deviceTask = api.GetDeviceAsync(workOrder.DeviceId, cancellationToken);
         var entriesTask = api.ListServiceEntriesAsync(workOrderId, cancellationToken);
         var historyTask = api.ListDeviceWorkOrdersAsync(workOrder.DeviceId, 1, HistoryPageSize, cancellationToken);
-        await Task.WhenAll(clientTask, deviceTask, entriesTask, historyTask);
+        await Task.WhenAll(deviceTask, entriesTask, historyTask);
 
-        using var clientResponse = await clientTask;
         using var deviceResponse = await deviceTask;
         using var entriesResponse = await entriesTask;
         using var historyResponse = await historyTask;
-
-        if (clientResponse.Content is { } client)
-        {
-            await clients.UpsertAsync(WorkOrderMapper.ToClient(client));
-        }
 
         if (deviceResponse.Content is { } device)
         {
@@ -69,7 +61,7 @@ public sealed class WorkOrderDetailsSyncService(
                 [.. history.Items.Select(item => WorkOrderMapper.ToHistoryItem(workOrder.DeviceId, item))]);
         }
 
-        IApiResponse[] responses = [clientResponse, deviceResponse, entriesResponse, historyResponse];
+        IApiResponse[] responses = [deviceResponse, entriesResponse, historyResponse];
         return responses.FirstOrDefault(response => !response.IsSuccessful) is { } failed
             ? PullResult.Failed(ApiErrorMapper.FromResponse(failed))
             : PullResult.Succeeded;

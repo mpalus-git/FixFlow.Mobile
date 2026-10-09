@@ -24,24 +24,10 @@ public static class WorkOrderMapper
             item.CreatedAt,
             item.StartedAt,
             item.CompletedAt,
-            item.InvoicedAt);
-    }
-
-    public static Client ToClient(ClientResponse client)
-    {
-        ArgumentNullException.ThrowIfNull(client);
-
-        return new Client(
-            client.Id,
-            client.Name,
-            client.Address.Street,
-            client.Address.BuildingNumber,
-            client.Address.PostalCode,
-            client.Address.City,
-            client.ContactPerson,
-            client.Phone,
-            client.Email,
-            client.ArchivedAt);
+            item.InvoicedAt)
+        {
+            ClientContact = ToClientContact(item.ClientAddress, item.ClientContactPerson, item.ClientPhone),
+        };
     }
 
     public static Device ToDevice(DeviceResponse device)
@@ -89,6 +75,12 @@ public static class WorkOrderMapper
             item.CreatedAt,
             item.StartedAt,
             item.CompletedAt,
-            item.InvoicedAt);
+            item.InvoicedAt)
+        {
+            ClientContact = ToClientContact(item.ClientAddress, item.ClientContactPerson, item.ClientPhone),
+        };
     }
+
+    private static ClientContact ToClientContact(ClientAddress address, string contactPerson, string phone) =>
+        new(address.Street, address.BuildingNumber, address.PostalCode, address.City, contactPerson, phone);
 }

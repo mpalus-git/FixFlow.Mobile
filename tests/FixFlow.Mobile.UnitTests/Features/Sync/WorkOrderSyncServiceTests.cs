@@ -55,6 +55,7 @@ public sealed class WorkOrderSyncServiceTests : IAsyncLifetime
         var local = await _workOrders.GetAllAsync();
         local.Count.ShouldBe(150);
         local.ShouldNotContain(workOrder => workOrder.Number == "ZL-OLD");
+        local[0].ClientContact.ShouldBe(new ClientContact("Długa", "12A", "31-147", "Kraków", "Anna Kowalska", "+48 600 100 200"));
         ListRequests().Select(query => query["page"]).ShouldBe(["1", "2"]);
         ListRequests().ShouldAllBe(query => query["pageSize"] == "100" && query["sortBy"] == "DueDate");
         (await _service.GetLastPulledAtAsync()).ShouldBe(Now);
@@ -141,6 +142,9 @@ public sealed class WorkOrderSyncServiceTests : IAsyncLifetime
                 deviceModel = "Daikin",
                 clientId = Guid.NewGuid(),
                 clientName = "Piekarnia",
+                clientAddress = new { street = "Długa", buildingNumber = "12A", postalCode = "31-147", city = "Kraków" },
+                clientContactPerson = "Anna Kowalska",
+                clientPhone = "+48 600 100 200",
                 description = "Przegląd",
                 priority = "High",
                 status = "Assigned",

@@ -55,6 +55,24 @@ internal sealed class WorkOrderRow
     [Column("invoiced_at")]
     public DateTimeOffset? InvoicedAt { get; set; }
 
+    [Column("client_street")]
+    public string ClientStreet { get; set; } = string.Empty;
+
+    [Column("client_building_number")]
+    public string ClientBuildingNumber { get; set; } = string.Empty;
+
+    [Column("client_postal_code")]
+    public string ClientPostalCode { get; set; } = string.Empty;
+
+    [Column("client_city")]
+    public string ClientCity { get; set; } = string.Empty;
+
+    [Column("client_contact_person")]
+    public string ClientContactPerson { get; set; } = string.Empty;
+
+    [Column("client_phone")]
+    public string ClientPhone { get; set; } = string.Empty;
+
     public static WorkOrderRow From(WorkOrder workOrder) => new()
     {
         Id = workOrder.Id,
@@ -73,6 +91,12 @@ internal sealed class WorkOrderRow
         StartedAt = workOrder.StartedAt,
         CompletedAt = workOrder.CompletedAt,
         InvoicedAt = workOrder.InvoicedAt,
+        ClientStreet = workOrder.ClientContact.Street,
+        ClientBuildingNumber = workOrder.ClientContact.BuildingNumber,
+        ClientPostalCode = workOrder.ClientContact.PostalCode,
+        ClientCity = workOrder.ClientContact.City,
+        ClientContactPerson = workOrder.ClientContact.ContactPerson,
+        ClientPhone = workOrder.ClientContact.Phone,
     };
 
     public WorkOrder ToWorkOrder() => new(
@@ -91,5 +115,8 @@ internal sealed class WorkOrderRow
         CreatedAt,
         StartedAt,
         CompletedAt,
-        InvoicedAt);
+        InvoicedAt)
+    {
+        ClientContact = new ClientContact(ClientStreet, ClientBuildingNumber, ClientPostalCode, ClientCity, ClientContactPerson, ClientPhone),
+    };
 }

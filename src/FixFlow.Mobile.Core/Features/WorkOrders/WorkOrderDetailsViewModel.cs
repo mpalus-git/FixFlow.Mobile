@@ -393,7 +393,6 @@ public sealed partial class WorkOrderDetailsViewModel(
         var pendingEntries = PendingOperationsOverlay.PendingEntries(pendingOperations);
         var details = presenter.Present(
             workOrder,
-            await sources.Clients.GetAsync(workOrder.ClientId),
             await sources.Devices.GetAsync(workOrder.DeviceId),
             storedEntries,
             await sources.DeviceHistory.GetForDeviceAsync(workOrder.DeviceId),

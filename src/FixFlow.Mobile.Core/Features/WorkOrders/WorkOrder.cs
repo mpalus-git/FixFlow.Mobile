@@ -18,4 +18,7 @@ public sealed record WorkOrder(
     DateTimeOffset CreatedAt,
     DateTimeOffset? StartedAt,
     DateTimeOffset? CompletedAt,
-    DateTimeOffset? InvoicedAt);
+    DateTimeOffset? InvoicedAt)
+{
+    public ClientContact ClientContact { get; init; } = ClientContact.Empty;
+}

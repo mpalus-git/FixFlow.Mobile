@@ -3,31 +3,17 @@ using FixFlow.Mobile.UnitTests.Storage;
 
 namespace FixFlow.Mobile.UnitTests.Features.WorkOrders;
 
-public sealed class ClientAndDeviceRepositoryTests : IAsyncLifetime
+public sealed class DeviceRepositoryTests : IAsyncLifetime
 {
     private readonly TestUserDatabase _userDatabase = new();
-    private readonly ClientRepository _clients;
     private readonly DeviceRepository _devices;
 
-    public ClientAndDeviceRepositoryTests()
+    public DeviceRepositoryTests()
     {
-        _clients = new ClientRepository(_userDatabase.Database);
         _devices = new DeviceRepository(_userDatabase.Database);
     }
 
     public async ValueTask InitializeAsync() => await _userDatabase.Database.OpenAsync(Guid.NewGuid());
-
-    [Fact]
-    public async Task Should_Overwrite_Client_When_Server_Returns_Newer_Data()
-    {
-        var client = new Client(Guid.NewGuid(), "Piekarnia Kowalscy", "Długa", "12A", "31-147", "Kraków", "Anna Kowalska", "+48 600 100 200", null, null);
-        await _clients.UpsertAsync(client);
-
-        var updated = client with { Phone = "+48 600 999 888", Email = "biuro@piekarnia.test" };
-        await _clients.UpsertAsync(updated);
-
-        (await _clients.GetAsync(client.Id)).ShouldBe(updated);
-    }
 
     [Fact]
     public async Task Should_Keep_Installation_Day_And_Archive_Time_When_Device_Is_Stored()
