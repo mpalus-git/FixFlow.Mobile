@@ -56,34 +56,13 @@ public sealed partial class WorkOrderDetailsViewModel(
     public partial bool IsRefreshing { get; set; }
 
     [ObservableProperty]
-    public partial bool CanStartWork { get; private set; }
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasStartBlockedText))]
-    public partial string? StartBlockedText { get; private set; }
-
-    public bool HasStartBlockedText => StartBlockedText is not null;
+    public partial WorkOrderActions Actions { get; private set; } = WorkOrderActions.None;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasWorkTimer))]
     public partial WorkTimerView? WorkTimer { get; private set; }
 
     public bool HasWorkTimer => WorkTimer is not null;
-
-    [ObservableProperty]
-    public partial bool CanAddEntry { get; private set; }
-
-    [ObservableProperty]
-    public partial bool CanAddCorrection { get; private set; }
-
-    [ObservableProperty]
-    public partial bool CanComplete { get; private set; }
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasCompleteBlockedText))]
-    public partial string? CompleteBlockedText { get; private set; }
-
-    public bool HasCompleteBlockedText => CompleteBlockedText is not null;
 
     [ObservableProperty]
     public partial bool HasRejectedChanges { get; private set; }
@@ -152,12 +131,7 @@ public sealed partial class WorkOrderDetailsViewModel(
                     break;
                 case PullOutcome.NotFound:
                     Details = null;
-                    CanStartWork = false;
-                    CanAddEntry = false;
-                    CanAddCorrection = false;
-                    CanComplete = false;
-                    CompleteBlockedText = null;
-                    StartBlockedText = null;
+                    Actions = WorkOrderActions.None;
                     WorkTimer = null;
                     Screen.ShowError(AppResources.WorkOrderNoLongerAssigned);
                     break;
@@ -176,7 +150,7 @@ public sealed partial class WorkOrderDetailsViewModel(
     [RelayCommand]
     private async Task StartWorkAsync(CancellationToken cancellationToken)
     {
-        if (Details is not { } details || !CanStartWork
+        if (Details is not { } details || !Actions.CanStartWork
             || !await dialogs.ConfirmAsync(
                 AppResources.StartWorkConfirmTitle,
                 AppText.Format(AppResources.StartWorkConfirmMessage, details.Number),
@@ -187,7 +161,7 @@ public sealed partial class WorkOrderDetailsViewModel(
         }
 
         await ShowLocalAsync();
-        if (!CanStartWork)
+        if (!Actions.CanStartWork)
         {
             return;
         }
@@ -203,7 +177,7 @@ public sealed partial class WorkOrderDetailsViewModel(
     [RelayCommand]
     private async Task CompleteAsync()
     {
-        if (CanComplete)
+        if (Actions.CanComplete)
         {
             await navigation.NavigateToAsync<CompleteWorkOrderViewModel, Guid>(_workOrderId);
         }
@@ -374,7 +348,7 @@ public sealed partial class WorkOrderDetailsViewModel(
         var allOperations = await sources.Outbox.GetAllAsync();
         var pendingOperations = allOperations.Where(operation => operation.WorkOrderId == _workOrderId).ToList();
         var workOrder = PendingOperationsOverlay.Apply(storedWorkOrder, pendingOperations);
-        var availability = WorkOrderStartPolicy.Evaluate(workOrder, PendingOperationsOverlay.Apply(await sources.WorkOrders.GetAllAsync(), allOperations));
+        var technicianWorkOrders = PendingOperationsOverlay.Apply(await sources.WorkOrders.GetAllAsync(), allOperations);
         var workTimer = workOrder.Status == WorkOrderStatus.InProgress ? await sources.WorkTimers.GetAsync(_workOrderId) : null;
         var storedEntries = await sources.ServiceEntries.GetForWorkOrderAsync(workOrder.Id);
         var pendingEntries = PendingOperationsOverlay.PendingEntries(pendingOperations);
@@ -392,19 +366,12 @@ public sealed partial class WorkOrderDetailsViewModel(
             return;
         }
 
-        CanStartWork = availability.CanStart;
-        StartBlockedText = availability.BlockingWorkOrderNumber is { } number ? AppText.Format(AppResources.StartWorkBlocked, number) : null;
+        Actions = WorkOrderActions.Evaluate(workOrder, technicianWorkOrders, storedEntries, pendingEntries);
         _workTimer = workTimer;
         await ShowWorkTimerAsync();
         Details = details;
         _hasPendingOperations = pendingOperations.Count > 0;
         HasRejectedChanges = hasRejectedChanges;
-        var inProgress = workOrder.Status == WorkOrderStatus.InProgress;
-        var hasEntries = storedEntries.Count > 0 || pendingEntries.Count > 0;
-        CanAddEntry = inProgress;
-        CanAddCorrection = inProgress && NetPartUsage.Calculate(storedEntries, pendingEntries).Count > 0;
-        CanComplete = inProgress && hasEntries;
-        CompleteBlockedText = inProgress && !hasEntries ? AppResources.CompleteRequiresEntry : null;
         Screen.ShowContent(hasItems: true);
     }
 

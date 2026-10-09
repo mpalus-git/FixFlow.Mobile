@@ -63,9 +63,9 @@
 
                     <Button Text="{x:Static resources:AppResources.StartWorkButton}"
                             Command="{Binding StartWorkCommand}"
-                            IsVisible="{Binding CanStartWork}" />
-                    <Label Text="{Binding StartBlockedText}"
-                           IsVisible="{Binding HasStartBlockedText}"
+                            IsVisible="{Binding Actions.CanStartWork}" />
+                    <Label Text="{Binding Actions.StartBlockedText}"
+                           IsVisible="{Binding Actions.HasStartBlockedText}"
                            Style="{StaticResource SecondaryLabel}" />
 
                     <Label Text="{x:Static resources:AppResources.WorkTimerSection}"
@@ -103,17 +103,17 @@
                     </Border>
                     <Button Text="{x:Static resources:AppResources.AddEntryButton}"
                             Command="{Binding AddEntryCommand}"
-                            IsVisible="{Binding CanAddEntry}" />
+                            IsVisible="{Binding Actions.CanAddEntry}" />
                     <Button Text="{x:Static resources:AppResources.AddCorrectionButton}"
                             Command="{Binding AddCorrectionCommand}"
-                            IsVisible="{Binding CanAddCorrection}"
+                            IsVisible="{Binding Actions.CanAddCorrection}"
                             Style="{StaticResource OutlineButton}" />
                     <Button Text="{x:Static resources:AppResources.CompleteWorkOrderButton}"
                             Command="{Binding CompleteCommand}"
-                            IsVisible="{Binding CanComplete}"
+                            IsVisible="{Binding Actions.CanComplete}"
                             Style="{StaticResource OutlineButton}" />
-                    <Label Text="{Binding CompleteBlockedText}"
-                           IsVisible="{Binding HasCompleteBlockedText}"
+                    <Label Text="{Binding Actions.CompleteBlockedText}"
+                           IsVisible="{Binding Actions.HasCompleteBlockedText}"
                            Style="{StaticResource SecondaryLabel}" />
 
                     <Label Text="{x:Static resources:AppResources.DetailsClientSection}"

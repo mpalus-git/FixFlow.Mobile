@@ -263,8 +263,8 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
     {
         await ShowOfflineAsync(TestWorkOrders.Create("ZL-2", DetailsApiStub.Now, WorkOrderStatus.Completed, DetailsApiStub.Now));
 
-        _viewModel.CanStartWork.ShouldBeTrue();
-        _viewModel.HasStartBlockedText.ShouldBeFalse();
+        _viewModel.Actions.CanStartWork.ShouldBeTrue();
+        _viewModel.Actions.HasStartBlockedText.ShouldBeFalse();
         _viewModel.HasWorkTimer.ShouldBeFalse();
     }
 
@@ -273,8 +273,8 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
     {
         await ShowOfflineAsync(TestWorkOrders.Create("ZL-2", DetailsApiStub.Now, WorkOrderStatus.InProgress));
 
-        _viewModel.CanStartWork.ShouldBeFalse();
-        _viewModel.StartBlockedText.ShouldBe(AppText.Format(AppResources.StartWorkBlocked, "ZL-2"));
+        _viewModel.Actions.CanStartWork.ShouldBeFalse();
+        _viewModel.Actions.StartBlockedText.ShouldBe(AppText.Format(AppResources.StartWorkBlocked, "ZL-2"));
     }
 
     [Fact]
@@ -285,7 +285,7 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
         await _viewModel.StartWorkCommand.ExecuteAsync(null);
 
         (await _sources.Outbox.GetAllAsync()).ShouldBeEmpty();
-        _viewModel.CanStartWork.ShouldBeTrue();
+        _viewModel.Actions.CanStartWork.ShouldBeTrue();
     }
 
     [Fact]
@@ -300,7 +300,7 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
 
         (await _sources.Outbox.GetAllAsync()).ShouldHaveSingleItem().Kind.ShouldBe(OutboxOperationKind.StartWork);
         _viewModel.Details.ShouldNotBeNull().StatusText.ShouldBe(WorkOrderTexts.Status(WorkOrderStatus.InProgress));
-        _viewModel.CanStartWork.ShouldBeFalse();
+        _viewModel.Actions.CanStartWork.ShouldBeFalse();
         var timer = _viewModel.WorkTimer.ShouldNotBeNull();
         timer.LocationText.ShouldBe(AppResources.WorkLocationCaptured);
         timer.CanRetryLocation.ShouldBeFalse();
@@ -356,12 +356,12 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
     {
         ConfirmStart();
         await ShowOfflineAsync();
-        _viewModel.CanAddEntry.ShouldBeFalse();
+        _viewModel.Actions.CanAddEntry.ShouldBeFalse();
         await _viewModel.StartWorkCommand.ExecuteAsync(null);
 
         await _viewModel.AddEntryCommand.ExecuteAsync(null);
 
-        _viewModel.CanAddEntry.ShouldBeTrue();
+        _viewModel.Actions.CanAddEntry.ShouldBeTrue();
         await _navigation.Received(1).NavigateToAsync<ServiceEntryViewModel, Guid>(_api.WorkOrderId);
     }
 
@@ -373,9 +373,9 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
 
         await _viewModel.StartWorkCommand.ExecuteAsync(null);
 
-        _viewModel.CanComplete.ShouldBeFalse();
-        _viewModel.CompleteBlockedText.ShouldBe(AppResources.CompleteRequiresEntry);
-        _viewModel.CanAddCorrection.ShouldBeFalse();
+        _viewModel.Actions.CanComplete.ShouldBeFalse();
+        _viewModel.Actions.CompleteBlockedText.ShouldBe(AppResources.CompleteRequiresEntry);
+        _viewModel.Actions.CanAddCorrection.ShouldBeFalse();
     }
 
     [Fact]
@@ -405,8 +405,8 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
         _viewModel.Resume();
         await WaitUntilAsync(() => _viewModel.Details?.StatusText == WorkOrderTexts.Status(WorkOrderStatus.Completed));
 
-        _viewModel.CanComplete.ShouldBeFalse();
-        _viewModel.CanAddEntry.ShouldBeFalse();
+        _viewModel.Actions.CanComplete.ShouldBeFalse();
+        _viewModel.Actions.CanAddEntry.ShouldBeFalse();
         _viewModel.HasWorkTimer.ShouldBeFalse();
         _viewModel.Pause();
     }
@@ -436,7 +436,7 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
         await new OutboxWriter(_sources.Outbox, _timeProvider, new WeakReferenceMessenger()).StartWorkAsync(_api.WorkOrderId);
 
         _messenger.Send(new SyncCompletedMessage(SyncResult.Offline));
-        await WaitUntilAsync(() => _viewModel.CanAddEntry);
+        await WaitUntilAsync(() => _viewModel.Actions.CanAddEntry);
 
         _viewModel.Details!.StatusText.ShouldBe(WorkOrderTexts.Status(WorkOrderStatus.InProgress));
         _viewModel.Pause();
