@@ -759,4 +759,10 @@
   <data name="SignatureClearButton" xml:space="preserve">
     <value>Clear signature</value>
   </data>
+  <data name="DetailsSignatureSection" xml:space="preserve">
+    <value>Client signature</value>
+  </data>
+  <data name="DetailsSignatureDescription" xml:space="preserve">
+    <value>Client signature given when the work order was completed</value>
+  </data>
 </root>

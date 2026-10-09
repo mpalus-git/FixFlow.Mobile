@@ -14,6 +14,14 @@ public sealed class WorkOrderRepository(UserDatabase userDatabase)
         var rows = workOrders.Select(WorkOrderRow.From).ToList();
         await Connection.RunInTransactionAsync(connection =>
         {
+            var signatures = connection
+                .Query<WorkOrderRow>("SELECT * FROM work_orders WHERE client_signature_photo_id IS NOT NULL")
+                .ToDictionary(row => row.Id, row => row.ClientSignaturePhotoId);
+            foreach (var row in rows.Where(row => row.ClientSignaturePhotoId is null))
+            {
+                row.ClientSignaturePhotoId = signatures.GetValueOrDefault(row.Id);
+            }
+
             connection.Execute("DELETE FROM work_orders");
             connection.InsertAll(rows, runInTransaction: false);
         });

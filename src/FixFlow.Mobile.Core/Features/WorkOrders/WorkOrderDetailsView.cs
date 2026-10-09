@@ -15,8 +15,11 @@ public sealed record WorkOrderDetailsView(
     string? PartsTotalText,
     IReadOnlyList<DeviceHistoryView> History,
     IReadOnlyList<WorkOrderEventView> Events,
+    EntryPhotoView? ClientSignature,
     bool CanDownloadProtocol)
 {
+    public bool HasClientSignature => ClientSignature is not null;
+
     public bool HasEvents => Events.Count > 0;
 
     public bool HasClient => Client is not null;

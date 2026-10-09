@@ -759,4 +759,10 @@
   <data name="SignatureClearButton" xml:space="preserve">
     <value>Wyczyść podpis</value>
   </data>
+  <data name="DetailsSignatureSection" xml:space="preserve">
+    <value>Podpis klienta</value>
+  </data>
+  <data name="DetailsSignatureDescription" xml:space="preserve">
+    <value>Podpis klienta złożony przy zakończeniu zlecenia</value>
+  </data>
 </root>

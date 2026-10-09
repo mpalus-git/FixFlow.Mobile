@@ -73,6 +73,9 @@ internal sealed class WorkOrderRow
     [Column("client_phone")]
     public string ClientPhone { get; set; } = string.Empty;
 
+    [Column("client_signature_photo_id")]
+    public Guid? ClientSignaturePhotoId { get; set; }
+
     public static WorkOrderRow From(WorkOrder workOrder) => new()
     {
         Id = workOrder.Id,
@@ -97,6 +100,7 @@ internal sealed class WorkOrderRow
         ClientCity = workOrder.ClientContact.City,
         ClientContactPerson = workOrder.ClientContact.ContactPerson,
         ClientPhone = workOrder.ClientContact.Phone,
+        ClientSignaturePhotoId = workOrder.ClientSignaturePhotoId,
     };
 
     public WorkOrder ToWorkOrder() => new(
@@ -118,5 +122,6 @@ internal sealed class WorkOrderRow
         InvoicedAt)
     {
         ClientContact = new ClientContact(ClientStreet, ClientBuildingNumber, ClientPostalCode, ClientCity, ClientContactPerson, ClientPhone),
+        ClientSignaturePhotoId = ClientSignaturePhotoId,
     };
 }

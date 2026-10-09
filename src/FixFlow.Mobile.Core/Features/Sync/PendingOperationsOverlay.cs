@@ -25,7 +25,13 @@ public static class PendingOperationsOverlay
             OutboxOperationKind.StartWork when current.Status == WorkOrderStatus.Assigned =>
                 current with { Status = WorkOrderStatus.InProgress, StartedAt = current.StartedAt ?? OutboxPayload.StartedAt(operation) },
             OutboxOperationKind.CompleteWorkOrder when current.Status == WorkOrderStatus.InProgress =>
-                current with { Status = WorkOrderStatus.Completed, CompletedAt = OutboxPayload.CompletedAt(operation), IsOverdue = false },
+                current with
+                {
+                    Status = WorkOrderStatus.Completed,
+                    CompletedAt = OutboxPayload.CompletedAt(operation),
+                    IsOverdue = false,
+                    ClientSignaturePhotoId = OutboxPayload.ClientSignaturePhotoId(operation) ?? current.ClientSignaturePhotoId,
+                },
             _ => current,
         });
     }

@@ -27,6 +27,7 @@ public static class WorkOrderMapper
             item.InvoicedAt)
         {
             ClientContact = ToClientContact(item.ClientAddress, item.ClientContactPerson, item.ClientPhone),
+            ClientSignaturePhotoId = item.ClientSignaturePhotoId,
         };
     }
 

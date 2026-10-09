@@ -7,7 +7,7 @@ using FixFlow.Mobile.Core.Resources;
 
 namespace FixFlow.Mobile.Core.Features.WorkOrders;
 
-public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, SessionStore session)
+public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, SessionStore session, ApiAddress apiAddress)
 {
     public WorkOrderDetailsView Present(
         WorkOrder workOrder,
@@ -46,6 +46,7 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, Sessio
             usedParts.Count == 0 ? null : WorkOrderTexts.Format(AppResources.DetailsPartsTotal, formatter.FormatMoney(usedParts.Sum())),
             [.. history.Where(item => item.WorkOrderId != workOrder.Id).Select(ToHistoryView)],
             [.. events.Select((item, index) => ToEventView(item, index == 0 ? item.DueDate : events[index - 1].DueDate)), .. PendingEventViews(pendingOperations)],
+            workOrder.ClientSignaturePhotoId is { } signatureId ? ToSignatureView(signatureId, localPhotoPath) : null,
             workOrder.Status is WorkOrderStatus.Completed or WorkOrderStatus.Invoiced);
     }
 
@@ -101,6 +102,9 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, Sessio
             operation.CreatedAt,
             [.. pending.Parts.Select(part => new ServiceEntryPart(part.PartId, part.PartName, part.CatalogNumber, part.Quantity, part.UnitPrice))]);
     }
+
+    private EntryPhotoView ToSignatureView(Guid signatureId, Func<Guid, string?>? localPhotoPath) =>
+        localPhotoPath?.Invoke(signatureId) is { } path ? new EntryPhotoView(path, true) : new EntryPhotoView(apiAddress.PhotoUrl(signatureId), false);
 
     private static EntryPhotoView ToPhotoView(PendingPhoto photo, Func<Guid, string?>? localPhotoPath) =>
         localPhotoPath?.Invoke(photo.Id) is { } path ? new EntryPhotoView(path, true) : new EntryPhotoView(photo.Url, false);

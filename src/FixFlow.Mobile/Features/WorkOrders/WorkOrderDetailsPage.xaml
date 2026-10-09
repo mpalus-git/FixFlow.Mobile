@@ -245,6 +245,21 @@
                            HorizontalTextAlignment="End"
                            IsVisible="{Binding Details.HasPartsTotal}" />
 
+                    <Label Text="{x:Static resources:AppResources.DetailsSignatureSection}"
+                           Style="{StaticResource SectionLabel}"
+                           IsVisible="{Binding Details.HasClientSignature}" />
+                    <Border Style="{StaticResource CardBorder}"
+                            BackgroundColor="White"
+                            IsVisible="{Binding Details.HasClientSignature}">
+                        <ImageButton Source="{Binding Details.ClientSignature.Source}"
+                                     Aspect="AspectFit"
+                                     HeightRequest="120"
+                                     BackgroundColor="White"
+                                     Command="{Binding OpenPhotoCommand}"
+                                     CommandParameter="{Binding Details.ClientSignature}"
+                                     SemanticProperties.Description="{x:Static resources:AppResources.DetailsSignatureDescription}" />
+                    </Border>
+
                     <Label Text="{x:Static resources:AppResources.DetailsEventsSection}"
                            Style="{StaticResource SectionLabel}"
                            IsVisible="{Binding Details.HasEvents}" />

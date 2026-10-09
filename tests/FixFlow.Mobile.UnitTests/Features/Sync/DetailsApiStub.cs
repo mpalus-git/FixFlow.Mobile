@@ -14,6 +14,8 @@ internal sealed class DetailsApiStub
 
     public Guid DeviceId { get; } = Guid.NewGuid();
 
+    public Guid SignatureId { get; } = Guid.NewGuid();
+
     public string Status { get; set; } = "InProgress";
 
     public Dictionary<string, HttpStatusCode> Failures { get; } = [];
@@ -40,7 +42,8 @@ internal sealed class DetailsApiStub
             {
                 id = WorkOrderId, number = "ZL-2026-0042", deviceId = DeviceId, deviceSerialNumber = "SN-1", deviceModel = "Altherma 3",
                 clientId = ClientId, clientName = "Piekarnia", clientContactPerson = "Anna Kowalska", clientPhone = "+48 600 100 200",
-                clientAddress = new { street = "Długa", buildingNumber = "12A", postalCode = "31-147", city = "Kraków" }, description = "Przegląd", priority = "High", status = Status,
+                clientAddress = new { street = "Długa", buildingNumber = "12A", postalCode = "31-147", city = "Kraków" }, description = "Przegląd",
+                clientSignaturePhotoId = SignatureId, priority = "High", status = Status,
                 dueDate = Now, isOverdue = false, createdAt = Now.AddDays(-2), startedAt = Now.AddHours(-1),
             },
             _ when path == $"/api/v1/devices/{DeviceId}" => new

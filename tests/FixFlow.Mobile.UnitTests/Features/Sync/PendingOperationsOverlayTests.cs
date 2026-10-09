@@ -53,6 +53,19 @@ public sealed class PendingOperationsOverlayTests
     }
 
     [Fact]
+    public void Should_Show_Client_Signature_When_Completion_With_Signature_Waits_In_Queue()
+    {
+        var workOrder = TestWorkOrders.Create("ZL-1", Now, WorkOrderStatus.InProgress);
+        var signatureId = Guid.NewGuid();
+        var complete = Operation(workOrder.Id, OutboxOperationKind.CompleteWorkOrder, Now) with
+        {
+            Payload = OutboxPayload.Serialize(new PendingCompletion(Now) { ClientSignaturePhotoId = signatureId }),
+        };
+
+        PendingOperationsOverlay.Apply(workOrder, [complete]).ClientSignaturePhotoId.ShouldBe(signatureId);
+    }
+
+    [Fact]
     public void Should_Keep_Server_State_When_Server_Already_Moved_Further()
     {
         var invoiced = TestWorkOrders.Create("ZL-1", Now, WorkOrderStatus.Invoiced, Now.AddDays(-1));
