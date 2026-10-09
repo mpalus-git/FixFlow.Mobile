@@ -15,11 +15,23 @@ public sealed partial class ScreenState(DisplayFormatter formatter) : Observable
     [ObservableProperty]
     public partial string? ErrorMessage { get; private set; }
 
+    private int _pendingChanges;
+    private int _rejectedChanges;
+
     [ObservableProperty]
     public partial bool IsOffline { get; private set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Banner), nameof(HasBanner))]
     public partial string? OfflineMessage { get; private set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Banner), nameof(HasBanner))]
+    public partial ScreenNotice? Notice { get; private set; }
+
+    public StatusBannerView? Banner => StatusBannerView.Compose(OfflineMessage, Notice, _pendingChanges, _rejectedChanges);
+
+    public bool HasBanner => Banner is not null;
 
     public bool IsLoading => Status == ScreenStatus.Loading;
 
@@ -56,6 +68,23 @@ public sealed partial class ScreenState(DisplayFormatter formatter) : Observable
                 formatter.FormatDateTime(syncedAt))
             : AppResources.OfflineNeverSynced;
         IsOffline = true;
+    }
+
+    public void ShowNotice(ScreenNotice notice) => Notice = notice;
+
+    public void ClearNotice() => Notice = null;
+
+    public void SetQueue(int pendingChanges, int rejectedChanges)
+    {
+        if (pendingChanges == _pendingChanges && rejectedChanges == _rejectedChanges)
+        {
+            return;
+        }
+
+        _pendingChanges = pendingChanges;
+        _rejectedChanges = rejectedChanges;
+        OnPropertyChanged(nameof(Banner));
+        OnPropertyChanged(nameof(HasBanner));
     }
 
     public void SetOnline()

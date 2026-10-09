@@ -91,5 +91,73 @@ public sealed class ScreenStateTests : IDisposable
         _state.OfflineMessage.ShouldBeNull();
     }
 
+    [Fact]
+    public void Should_Hide_Banner_When_There_Is_Nothing_To_Report()
+    {
+        _state.SetOnline();
+        _state.SetQueue(pendingChanges: 0, rejectedChanges: 0);
+
+        _state.Banner.ShouldBeNull();
+        _state.HasBanner.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Should_Show_Neutral_Banner_Without_Action_When_Only_Offline()
+    {
+        _state.SetOffline(lastSyncedAt: null);
+
+        _state.Banner.ShouldBe(new StatusBannerView("Brak połączenia. Dane nie były jeszcze synchronizowane.", StatusTone.Neutral, HasQueueAction: false));
+    }
+
+    [Fact]
+    public void Should_Show_Warning_Banner_When_Notice_Reports_Problem()
+    {
+        _state.ShowNotice(ScreenNotice.Problem("Nie udało się odświeżyć listy."));
+
+        _state.Banner.ShouldBe(new StatusBannerView("Nie udało się odświeżyć listy.", StatusTone.Warning, HasQueueAction: false));
+    }
+
+    [Fact]
+    public void Should_Show_Neutral_Banner_With_Queue_Action_When_Changes_Wait()
+    {
+        _state.SetQueue(pendingChanges: 2, rejectedChanges: 0);
+
+        _state.Banner.ShouldBe(new StatusBannerView("Do wysłania: 2", StatusTone.Neutral, HasQueueAction: true));
+    }
+
+    [Fact]
+    public void Should_Combine_All_Lines_In_One_Destructive_Banner_When_Changes_Were_Rejected()
+    {
+        _state.SetOffline(lastSyncedAt: null);
+        _state.ShowNotice(ScreenNotice.Info("Serwer się uruchamia."));
+
+        _state.SetQueue(pendingChanges: 2, rejectedChanges: 1);
+
+        var banner = _state.Banner.ShouldNotBeNull();
+        banner.Text.Split('\n').ShouldBe(
+        [
+            "Brak połączenia. Dane nie były jeszcze synchronizowane.",
+            "Serwer się uruchamia.",
+            "Do wysłania: 2  ·  Do wyjaśnienia: 1",
+        ]);
+        banner.Tone.ShouldBe(StatusTone.Destructive);
+        banner.HasQueueAction.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Should_Notify_Banner_When_Queue_Or_Notice_Changes()
+    {
+        var changed = new List<string?>();
+        _state.PropertyChanged += (_, args) => changed.Add(args.PropertyName);
+
+        _state.SetQueue(pendingChanges: 1, rejectedChanges: 0);
+        _state.SetQueue(pendingChanges: 1, rejectedChanges: 0);
+        _state.ShowNotice(ScreenNotice.Info("Skopiowano."));
+        _state.ClearNotice();
+
+        changed.Count(name => name == nameof(ScreenState.Banner)).ShouldBe(3);
+        changed.ShouldContain(nameof(ScreenState.HasBanner));
+    }
+
     public void Dispose() => _cultureScope.Dispose();
 }

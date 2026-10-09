@@ -14,24 +14,18 @@
                      Command="{Binding OpenSettingsCommand}"
                      Order="Secondary" />
     </ContentPage.ToolbarItems>
-    <Grid RowDefinitions="Auto,Auto,Auto,*">
-        <controls:OfflineBanner IsVisible="{Binding Screen.IsOffline}"
-                                Message="{Binding Screen.OfflineMessage}" />
-        <controls:OfflineBanner Grid.Row="1"
-                                IsVisible="{Binding HasNotice}"
-                                Message="{Binding Notice}" />
-        <controls:OfflineBanner Grid.Row="2"
-                                IsVisible="{Binding HasSyncStatus}"
-                                Message="{Binding SyncStatus}">
-            <controls:OfflineBanner.GestureRecognizers>
-                <TapGestureRecognizer Command="{Binding OpenSyncCommand}" />
-            </controls:OfflineBanner.GestureRecognizers>
-        </controls:OfflineBanner>
+    <Grid RowDefinitions="Auto,*">
+        <controls:StatusBanner IsVisible="{Binding Screen.HasBanner}"
+                               Text="{Binding Screen.Banner.Text}"
+                               Tone="{Binding Screen.Banner.Tone}"
+                               HasAction="{Binding Screen.Banner.HasQueueAction}"
+                               ActionCommand="{Binding OpenSyncCommand}" />
 
-        <RefreshView Grid.Row="3"
+        <RefreshView Grid.Row="1"
                      Command="{Binding RefreshCommand}"
                      IsRefreshing="{Binding IsRefreshing}">
-            <CollectionView ItemsSource="{Binding Groups}"
+            <CollectionView Style="{StaticResource ReadableContent}"
+                            ItemsSource="{Binding Groups}"
                             IsGrouped="True"
                             SelectionMode="Single"
                             SelectedItem="{Binding SelectedWorkOrder}"
@@ -101,10 +95,10 @@
             </CollectionView>
         </RefreshView>
 
-        <controls:LoadingView Grid.Row="3"
+        <controls:LoadingView Grid.Row="1"
                               Style="{StaticResource ScreenOverlay}"
                               IsVisible="{Binding Screen.IsLoading}" />
-        <controls:ErrorView Grid.Row="3"
+        <controls:ErrorView Grid.Row="1"
                             Style="{StaticResource ScreenOverlay}"
                             IsVisible="{Binding Screen.IsError}"
                             Message="{Binding Screen.ErrorMessage}"

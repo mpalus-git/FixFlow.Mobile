@@ -9,7 +9,8 @@
              Title="{x:Static resources:AppResources.CorrectionTitle}">
     <Grid>
         <ScrollView>
-            <VerticalStackLayout Padding="16"
+            <VerticalStackLayout Style="{StaticResource ReadableContent}"
+                                 Padding="16"
                                  Spacing="8">
                 <Label Text="{Binding Number}"
                        Style="{StaticResource HeadlineLabel}"

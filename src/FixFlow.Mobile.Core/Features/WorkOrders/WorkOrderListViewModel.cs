@@ -68,19 +68,7 @@ public sealed partial class WorkOrderListViewModel
     public partial bool IsRefreshing { get; set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasNotice))]
-    public partial string? Notice { get; private set; }
-
-    [ObservableProperty]
     public partial WorkOrderListItem? SelectedWorkOrder { get; set; }
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasSyncStatus))]
-    public partial string? SyncStatus { get; private set; }
-
-    public bool HasNotice => Notice is not null;
-
-    public bool HasSyncStatus => SyncStatus is not null;
 
     [RelayCommand]
     private async Task AppearAsync(CancellationToken cancellationToken)
@@ -127,7 +115,7 @@ public sealed partial class WorkOrderListViewModel
     {
         try
         {
-            Notice = null;
+            Screen.ClearNotice();
             if (!_connectivity.IsOnline)
             {
                 Screen.SetOffline(await _sync.GetLastPulledAtAsync());
@@ -137,7 +125,7 @@ public sealed partial class WorkOrderListViewModel
 
             Screen.SetOnline();
             var result = await _coordinator.SynchronizeAsync(refreshPartCatalog: true);
-            Notice = null;
+            Screen.ClearNotice();
             if (result.Pull?.Outcome == PullOutcome.Succeeded)
             {
                 await ShowLocalAsync(updateScreen: true);
@@ -172,7 +160,7 @@ public sealed partial class WorkOrderListViewModel
     public void Receive(ServerStartingMessage message) =>
         _ui.Post(() =>
         {
-            Notice = AppResources.ServerStartingNotice;
+            Screen.ShowNotice(ScreenNotice.Info(AppResources.ServerStartingNotice));
             return Task.CompletedTask;
         });
 
@@ -206,7 +194,7 @@ public sealed partial class WorkOrderListViewModel
     {
         var operations = await _outbox.GetAllAsync();
         var conflicts = await _outbox.GetConflictsAsync();
-        SyncStatus = DescribeQueue(operations.Count, conflicts.Count);
+        Screen.SetQueue(operations.Count, conflicts.Count);
         var groups = _presenter.Present(
             PendingOperationsOverlay.Apply(await _workOrders.GetAllAsync(), operations),
             operations.Select(operation => operation.WorkOrderId).ToHashSet(),
@@ -222,21 +210,11 @@ public sealed partial class WorkOrderListViewModel
         }
     }
 
-    private static string? DescribeQueue(int pending, int conflicts)
-    {
-        string[] parts =
-        [
-            .. pending > 0 ? [WorkOrderTexts.Format(AppResources.SyncPendingCount, pending)] : Array.Empty<string>(),
-            .. conflicts > 0 ? [WorkOrderTexts.Format(AppResources.SyncConflictCount, conflicts)] : Array.Empty<string>(),
-        ];
-        return parts.Length == 0 ? null : string.Join("  ·  ", parts);
-    }
-
     private void ShowRefreshFailure()
     {
         if (Groups.Count > 0)
         {
-            Notice = AppResources.RefreshFailedNotice;
+            Screen.ShowNotice(ScreenNotice.Problem(AppResources.RefreshFailedNotice));
         }
         else
         {

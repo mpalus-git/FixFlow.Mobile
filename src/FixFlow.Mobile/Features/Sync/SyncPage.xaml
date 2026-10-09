@@ -7,18 +7,17 @@
              x:Class="FixFlow.Mobile.Features.Sync.SyncPage"
              x:DataType="viewModels:SyncViewModel"
              Title="{x:Static resources:AppResources.SyncTitle}">
-    <Grid RowDefinitions="Auto,Auto,*">
-        <controls:OfflineBanner IsVisible="{Binding Screen.IsOffline}"
-                                Message="{Binding Screen.OfflineMessage}" />
-        <controls:OfflineBanner Grid.Row="1"
-                                IsVisible="{Binding HasNotice}"
-                                Message="{Binding Notice}" />
+    <Grid RowDefinitions="Auto,*">
+        <controls:StatusBanner IsVisible="{Binding Screen.HasBanner}"
+                               Text="{Binding Screen.Banner.Text}"
+                               Tone="{Binding Screen.Banner.Tone}" />
 
-        <RefreshView Grid.Row="2"
+        <RefreshView Grid.Row="1"
                      Command="{Binding SynchronizeCommand}"
                      IsRefreshing="{Binding IsRefreshing}">
             <ScrollView>
-                <VerticalStackLayout Padding="16"
+                <VerticalStackLayout Style="{StaticResource ReadableContent}"
+                                     Padding="16"
                                      Spacing="12">
                     <Label Text="{Binding LastSyncText}"
                            Style="{StaticResource SecondaryLabel}" />

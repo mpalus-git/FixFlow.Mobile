@@ -164,7 +164,7 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
         await _viewModel.OnNavigatedToAsync(_api.WorkOrderId);
 
         _viewModel.Details.ShouldNotBeNull().Client.ShouldNotBeNull();
-        _viewModel.Notice.ShouldBe(AppResources.DetailsRefreshFailed);
+        _viewModel.Screen.Notice.ShouldBe(ScreenNotice.Problem(AppResources.DetailsRefreshFailed));
     }
 
     [Fact]
@@ -176,7 +176,7 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
         await _viewModel.RefreshCommand.ExecuteAsync(null);
 
         _viewModel.Details.ShouldNotBeNull();
-        _viewModel.Notice.ShouldBe(AppResources.DetailsRefreshFailed);
+        _viewModel.Screen.Notice.ShouldBe(ScreenNotice.Problem(AppResources.DetailsRefreshFailed));
     }
 
     [Fact]
@@ -472,14 +472,14 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
     {
         _api.Failures[$"/api/v1/devices/{_api.DeviceId}/work-orders"] = HttpStatusCode.ServiceUnavailable;
         await _viewModel.OnNavigatedToAsync(_api.WorkOrderId);
-        _viewModel.HasNotice.ShouldBeTrue();
+        _viewModel.Screen.Notice.ShouldNotBeNull();
         _api.Failures.Clear();
         _viewModel.Resume();
 
         _messenger.Send(new SyncCompletedMessage(new SyncResult(false, false, null, PullResult.Succeeded)));
-        await WaitUntilAsync(() => !_viewModel.HasNotice);
+        await WaitUntilAsync(() => _viewModel.Screen.Notice is null);
 
-        _viewModel.HasNotice.ShouldBeFalse();
+        _viewModel.Screen.Notice.ShouldBeNull();
         _viewModel.Pause();
     }
 
