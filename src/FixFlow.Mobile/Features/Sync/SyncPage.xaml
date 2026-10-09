@@ -50,27 +50,29 @@
                                         <Label Text="{Binding FollowingChangesText}"
                                                IsVisible="{Binding HasFollowingChanges}"
                                                Style="{StaticResource SecondaryLabel}" />
-                                        <Grid ColumnDefinitions="*,*,*"
-                                              ColumnSpacing="8"
-                                              Margin="0,8,0,0">
+                                        <FlexLayout Wrap="Wrap"
+                                                    Margin="-4,4,-4,0">
                                             <Button Text="{x:Static resources:AppResources.CopyChangeButton}"
                                                     Command="{Binding CopyCommand, Source={RelativeSource AncestorType={x:Type viewModels:SyncViewModel}}, x:DataType=viewModels:SyncViewModel}"
                                                     CommandParameter="{Binding .}"
                                                     Style="{StaticResource OutlineButton}"
-                                                    Padding="8,12" />
-                                            <Button Grid.Column="1"
+                                                    Margin="4"
+                                                    FlexLayout.Grow="1" />
+                                            <Button
                                                     Text="{x:Static resources:AppResources.RetryChangeButton}"
                                                     Command="{Binding RetryCommand, Source={RelativeSource AncestorType={x:Type viewModels:SyncViewModel}}, x:DataType=viewModels:SyncViewModel}"
                                                     CommandParameter="{Binding .}"
                                                     Style="{StaticResource OutlineButton}"
-                                                    Padding="8,12" />
-                                            <Button Grid.Column="2"
+                                                    Margin="4"
+                                                    FlexLayout.Grow="1" />
+                                            <Button
                                                     Text="{x:Static resources:AppResources.DiscardChangeButton}"
                                                     Command="{Binding DiscardCommand, Source={RelativeSource AncestorType={x:Type viewModels:SyncViewModel}}, x:DataType=viewModels:SyncViewModel}"
                                                     CommandParameter="{Binding .}"
                                                     Style="{StaticResource OutlineButton}"
-                                                    Padding="8,12" />
-                                        </Grid>
+                                                    Margin="4"
+                                                    FlexLayout.Grow="1" />
+                                        </FlexLayout>
                                         <Button Text="{x:Static resources:AppResources.DiscardAllChangesButton}"
                                                 Command="{Binding DiscardAllCommand, Source={RelativeSource AncestorType={x:Type viewModels:SyncViewModel}}, x:DataType=viewModels:SyncViewModel}"
                                                 CommandParameter="{Binding .}"
