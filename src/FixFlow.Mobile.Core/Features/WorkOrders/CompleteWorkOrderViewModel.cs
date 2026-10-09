@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FixFlow.Mobile.Core.Accessibility;
 using FixFlow.Mobile.Core.Api;
+using FixFlow.Mobile.Core.Dialogs;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Navigation;
@@ -19,9 +20,11 @@ public sealed partial class CompleteWorkOrderViewModel(
     OutboxWriter outboxWriter,
     PhotoStore photos,
     INavigationService navigation,
-    IScreenReaderAnnouncer announcer) : ObservableObject, INavigatedTo<Guid>
+    IDialogService dialogs,
+    IScreenReaderAnnouncer announcer) : ObservableObject, INavigatedTo<Guid>, ILeaveGuard
 {
     private Guid _workOrderId;
+    private bool _saved;
 
     public ScreenState Screen { get; } = screen;
 
@@ -65,6 +68,17 @@ public sealed partial class CompleteWorkOrderViewModel(
         Screen.ShowContent(hasItems: true);
     }
 
+    public ISignatureSource? Signature { get; set; }
+
+    public async Task<bool> CanLeaveAsync() =>
+        _saved
+        || Signature is not { IsEmpty: false }
+        || await dialogs.ConfirmAsync(
+            AppResources.DiscardDraftTitle,
+            AppResources.DiscardDraftMessage,
+            AppResources.DiscardChangeButton,
+            AppResources.KeepEditingButton);
+
     [RelayCommand]
     private Task ReloadAsync() => OnNavigatedToAsync(_workOrderId);
 
@@ -86,6 +100,7 @@ public sealed partial class CompleteWorkOrderViewModel(
         }
 
         await outboxWriter.CompleteWorkOrderAsync(_workOrderId, signaturePhotoId);
+        _saved = true;
         await navigation.GoBackAsync();
     }
 }

@@ -774,4 +774,13 @@
   <data name="StatusBannerShowDescription" xml:space="preserve">
     <value>Pokaż zmiany czekające na wysłanie i do wyjaśnienia</value>
   </data>
+  <data name="DiscardDraftTitle" xml:space="preserve">
+    <value>Odrzucić zmiany?</value>
+  </data>
+  <data name="DiscardDraftMessage" xml:space="preserve">
+    <value>Wprowadzone dane nie zostały zapisane i zostaną utracone.</value>
+  </data>
+  <data name="KeepEditingButton" xml:space="preserve">
+    <value>Zostań</value>
+  </data>
 </root>
