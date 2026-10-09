@@ -23,6 +23,9 @@ public sealed class DisplayFormatter(ILanguageService languageService, BusinessC
     public string FormatTime(DateTimeOffset instant) =>
         clock.ToBusinessTime(instant).ToString("HH:mm", languageService.CurrentCulture);
 
+    public bool IsSameBusinessDay(DateTimeOffset first, DateTimeOffset second) =>
+        clock.ToBusinessDate(first) == clock.ToBusinessDate(second);
+
     public string FormatDate(DateOnly date) =>
         date.ToString(IsEnglish ? EnglishDatePattern : PolishDatePattern, languageService.CurrentCulture);
 

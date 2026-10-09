@@ -175,7 +175,7 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, Sessio
         return WorkOrderTexts.Format(
             AppResources.DetailsWorkTime,
             formatter.FormatDateTime(started),
-            formatter.FormatTime(finished),
+            formatter.IsSameBusinessDay(started, finished) ? formatter.FormatTime(finished) : formatter.FormatDateTime(finished),
             WorkOrderTexts.Format(AppResources.DetailsDuration, (int)duration.TotalHours, duration.Minutes));
     }
 }

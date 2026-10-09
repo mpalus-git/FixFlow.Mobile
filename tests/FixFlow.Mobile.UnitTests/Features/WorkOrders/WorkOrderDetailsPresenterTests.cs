@@ -141,6 +141,22 @@ public sealed class WorkOrderDetailsPresenterTests : IDisposable
         view.Entries.ShouldHaveSingleItem().WorkTimeText.ShouldBe("Czas pracy: 05.10.2026 08:15 – 10:45 (2 h 30 min)");
     }
 
+    [Theory]
+    [InlineData("2026-10-05T21:30:00Z", "2026-10-05T22:30:00Z", "Czas pracy: 05.10.2026 23:30 – 06.10.2026 00:30 (1 h 0 min)")]
+    [InlineData("2026-10-07T10:40:00Z", "2026-10-09T10:49:00Z", "Czas pracy: 07.10.2026 12:40 – 09.10.2026 12:49 (48 h 9 min)")]
+    public void Should_Show_End_Date_When_Work_Ends_On_Another_Day_In_Warsaw(string startedAt, string finishedAt, string expected)
+    {
+        var entry = CreateEntry(isCorrection: false) with
+        {
+            WorkStartedAt = DateTimeOffset.Parse(startedAt, System.Globalization.CultureInfo.InvariantCulture),
+            WorkFinishedAt = DateTimeOffset.Parse(finishedAt, System.Globalization.CultureInfo.InvariantCulture),
+        };
+
+        var view = _presenter.Present(_workOrder, null, [entry], [], [], []);
+
+        view.Entries.ShouldHaveSingleItem().WorkTimeText.ShouldBe(expected);
+    }
+
     [Fact]
     public void Should_Exclude_Current_Work_Order_When_Showing_Device_History()
     {
