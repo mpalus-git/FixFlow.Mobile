@@ -768,4 +768,10 @@
   <data name="DetailsOverdueBadge" xml:space="preserve">
     <value>Overdue</value>
   </data>
+  <data name="StatusBannerShowButton" xml:space="preserve">
+    <value>Show</value>
+  </data>
+  <data name="StatusBannerShowDescription" xml:space="preserve">
+    <value>Show changes waiting to be sent and to be resolved</value>
+  </data>
 </root>

@@ -15,12 +15,11 @@
                      Order="Secondary" />
     </ContentPage.ToolbarItems>
     <Grid RowDefinitions="Auto,*">
-        <controls:OfflineBanner IsVisible="{Binding Screen.HasBanner}"
-                                Message="{Binding Screen.Banner.Text}">
-            <controls:OfflineBanner.GestureRecognizers>
-                <TapGestureRecognizer Command="{Binding OpenSyncCommand}" />
-            </controls:OfflineBanner.GestureRecognizers>
-        </controls:OfflineBanner>
+        <controls:StatusBanner IsVisible="{Binding Screen.HasBanner}"
+                               Text="{Binding Screen.Banner.Text}"
+                               Tone="{Binding Screen.Banner.Tone}"
+                               HasAction="{Binding Screen.Banner.HasQueueAction}"
+                               ActionCommand="{Binding OpenSyncCommand}" />
 
         <RefreshView Grid.Row="1"
                      Command="{Binding RefreshCommand}"

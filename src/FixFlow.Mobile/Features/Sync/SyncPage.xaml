@@ -8,8 +8,9 @@
              x:DataType="viewModels:SyncViewModel"
              Title="{x:Static resources:AppResources.SyncTitle}">
     <Grid RowDefinitions="Auto,*">
-        <controls:OfflineBanner IsVisible="{Binding Screen.HasBanner}"
-                                Message="{Binding Screen.Banner.Text}" />
+        <controls:StatusBanner IsVisible="{Binding Screen.HasBanner}"
+                               Text="{Binding Screen.Banner.Text}"
+                               Tone="{Binding Screen.Banner.Tone}" />
 
         <RefreshView Grid.Row="1"
                      Command="{Binding SynchronizeCommand}"
