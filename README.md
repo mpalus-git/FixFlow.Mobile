@@ -28,21 +28,21 @@ Aplikacja łączy się z instancją demo API na Render. Konto technika (Jan Kowa
 
 ## Zrzuty ekranu
 
-| Moje zlecenia | Szczegóły zlecenia | Wpis serwisowy |
-|---|---|---|
-| ![Lista zleceń z podziałem na zaległe, dziś, nadchodzące i zakończone](docs/screenshots/work-orders.png) | ![Szczegóły zlecenia z klientem i urządzeniem](docs/screenshots/work-order-details.png) | ![Formularz wpisu serwisowego z czasem pracy i zużytą częścią](docs/screenshots/service-entry.png) |
+| Moje zlecenia | Szczegóły (tryb ciemny) | Wpisy i historia | Wpis serwisowy |
+|---|---|---|---|
+| ![Lista zleceń z podziałem na zaległe, nadchodzące i zakończone, z plakietkami statusu i priorytetu](docs/screenshots/work-orders.png) | ![Szczegóły zlecenia w toku z klientem, osobą kontaktową i urządzeniem w trybie ciemnym](docs/screenshots/work-order-details-dark.png) | ![Wpis serwisowy ze zdjęciem i pozycją GPS oraz historia zlecenia](docs/screenshots/work-order-history.png) | ![Formularz wpisu serwisowego z czasem pracy i zużytą częścią](docs/screenshots/service-entry.png) |
 
-| Praca offline z kolejką | Zmiana odrzucona przez serwer | Tryb ciemny |
-|---|---|---|
-| ![Lista bez połączenia z liczbą zmian do wysłania](docs/screenshots/offline-queue.png) | ![Ekran synchronizacji z rozpoczęciem odrzuconym po przekazaniu zlecenia innemu technikowi](docs/screenshots/conflict.png) | ![Szczegóły zlecenia w toku w trybie ciemnym](docs/screenshots/work-order-details-dark.png) |
+| Zakończenie z podpisem | Praca offline z kolejką | Zmiana odrzucona przez serwer | |
+|---|---|---|---|
+| ![Ekran zakończenia zlecenia z podpisem klienta](docs/screenshots/complete-signature.png) | ![Lista bez połączenia z paskiem stanu i liczbą zmian do wysłania](docs/screenshots/offline-queue.png) | ![Ekran synchronizacji z rozpoczęciem odrzuconym po przekazaniu zlecenia innemu technikowi i wstrzymanym wpisem](docs/screenshots/conflict.png) | |
 
 Praca bez sieci: rozpoczęcie zlecenia i wpis serwisowy czekają w kolejce, a po odzyskaniu połączenia trafiają do API w kolejności, w jakiej powstały.
 
 ![Rozpoczęcie zlecenia i wpis serwisowy bez sieci, potem synchronizacja po odzyskaniu połączenia](docs/screenshots/offline-sync.gif)
 
-Wersja Windows:
+Wersja Windows (treść ma ograniczoną szerokość, motyw ciemny):
 
-![Lista zleceń w wersji Windows](docs/screenshots/windows.png)
+![Lista zleceń w wersji Windows w trybie ciemnym](docs/screenshots/windows.png)
 
 ## Opis systemu
 
