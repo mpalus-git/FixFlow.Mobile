@@ -1,4 +1,4 @@
-using FixFlow.Mobile.Core.Features.Sync;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
 
 namespace FixFlow.Mobile.Core.Features.ServiceEntries;
 

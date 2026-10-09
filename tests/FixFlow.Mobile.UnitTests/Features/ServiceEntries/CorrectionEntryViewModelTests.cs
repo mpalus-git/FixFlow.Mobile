@@ -4,7 +4,8 @@ using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Dialogs;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Settings;
-using FixFlow.Mobile.Core.Features.Sync;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
+using FixFlow.Mobile.Core.Features.WorkOrders.WorkTime;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Formatting;
 using FixFlow.Mobile.Core.Navigation;
@@ -68,7 +69,7 @@ public sealed class CorrectionEntryViewModelTests : IAsyncLifetime
         _viewModel.Number.ShouldBe("ZL-1");
         var part = _viewModel.Parts.ShouldHaveSingleItem();
         part.Usage.ShouldBe(new NetPartUsage(FilterId, "Filtr", "FP-100", 3, 12m));
-        part.DetailsText.ShouldBe(WorkOrderTexts.Format(AppResources.CorrectionNetUsed, "FP-100", 3));
+        part.DetailsText.ShouldBe(AppText.Format(AppResources.CorrectionNetUsed, "FP-100", 3));
         part.Quantity.ShouldBe(0);
     }
 

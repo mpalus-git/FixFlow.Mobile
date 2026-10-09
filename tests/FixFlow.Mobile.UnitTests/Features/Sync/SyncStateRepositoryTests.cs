@@ -1,4 +1,4 @@
-using FixFlow.Mobile.Core.Features.Sync;
+using FixFlow.Mobile.Core.Features.Sync.Pull;
 using FixFlow.Mobile.UnitTests.Storage;
 using Microsoft.Extensions.Time.Testing;
 

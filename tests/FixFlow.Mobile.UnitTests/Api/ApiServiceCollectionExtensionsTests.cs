@@ -2,7 +2,7 @@ using System.Net;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
-using FixFlow.Mobile.Core.Features.Sync;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
 using FixFlow.Mobile.Core.Storage;
 using FixFlow.Mobile.UnitTests.Features.Auth;
 using Microsoft.Extensions.DependencyInjection;

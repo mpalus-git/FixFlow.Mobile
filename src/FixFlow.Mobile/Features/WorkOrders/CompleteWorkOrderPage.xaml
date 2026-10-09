@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:FixFlow.Mobile.Controls"
              xmlns:resources="clr-namespace:FixFlow.Mobile.Core.Resources;assembly=FixFlow.Mobile.Core"
-             xmlns:viewModels="clr-namespace:FixFlow.Mobile.Core.Features.WorkOrders;assembly=FixFlow.Mobile.Core"
+             xmlns:viewModels="clr-namespace:FixFlow.Mobile.Core.Features.WorkOrders.Details;assembly=FixFlow.Mobile.Core"
              xmlns:workOrders="clr-namespace:FixFlow.Mobile.Features.WorkOrders"
              x:Class="FixFlow.Mobile.Features.WorkOrders.CompleteWorkOrderPage"
              x:DataType="viewModels:CompleteWorkOrderViewModel"

@@ -4,6 +4,8 @@ using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Connectivity;
 using FixFlow.Mobile.Core.Features.Parts;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
+using FixFlow.Mobile.Core.Features.Sync.Pull;
 using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.UnitTests.Api;

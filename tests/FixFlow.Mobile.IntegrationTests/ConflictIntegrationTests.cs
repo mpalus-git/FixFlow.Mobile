@@ -1,6 +1,7 @@
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
-using FixFlow.Mobile.Core.Features.Sync;
+using FixFlow.Mobile.Core.Features.Sync.Conflicts;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
 
 namespace FixFlow.Mobile.IntegrationTests;
 

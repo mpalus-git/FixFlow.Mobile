@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using FixFlow.Mobile.Core.Accessibility;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Dialogs;
-using FixFlow.Mobile.Core.Features.Sync;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Navigation;
 using FixFlow.Mobile.Core.Resources;
@@ -72,7 +72,7 @@ public sealed partial class CorrectionEntryViewModel(
 
         foreach (var part in usage)
         {
-            Parts.Add(new ReturnedPartDraft(part, WorkOrderTexts.Format(AppResources.CorrectionNetUsed, part.CatalogNumber, part.NetQuantity)));
+            Parts.Add(new ReturnedPartDraft(part, AppText.Format(AppResources.CorrectionNetUsed, part.CatalogNumber, part.NetQuantity)));
         }
 
         Screen.ShowContent(hasItems: true);

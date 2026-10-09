@@ -1,8 +1,8 @@
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Features.Auth;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
-using FixFlow.Mobile.Core.Features.Sync;
-using FixFlow.Mobile.Core.Features.WorkOrders;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
+using FixFlow.Mobile.Core.Features.WorkOrders.List;
 using FixFlow.Mobile.Core.Navigation;
 using FixFlow.Mobile.UnitTests.Storage;
 using NSubstitute;

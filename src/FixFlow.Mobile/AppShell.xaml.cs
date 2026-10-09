@@ -1,7 +1,7 @@
 using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Settings;
 using FixFlow.Mobile.Core.Features.Sync;
-using FixFlow.Mobile.Core.Features.WorkOrders;
+using FixFlow.Mobile.Core.Features.WorkOrders.Details;
 using FixFlow.Mobile.Core.Navigation;
 using FixFlow.Mobile.Features.ServiceEntries;
 using FixFlow.Mobile.Features.Settings;

@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Dialogs;
 using FixFlow.Mobile.Core.Features.Settings;
-using FixFlow.Mobile.Core.Features.Sync;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Formatting;
 using FixFlow.Mobile.Core.Notifications;

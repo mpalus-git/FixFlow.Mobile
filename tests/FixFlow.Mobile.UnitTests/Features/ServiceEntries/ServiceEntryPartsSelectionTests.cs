@@ -1,7 +1,6 @@
 using FixFlow.Mobile.Core.Features.Parts;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Settings;
-using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Formatting;
 using FixFlow.Mobile.Core.Resources;
 using FixFlow.Mobile.UnitTests.Storage;
@@ -50,7 +49,7 @@ public sealed class ServiceEntryPartsSelectionTests : IAsyncLifetime
 
         var filter = _selection.Results.Single(result => result.Part.Id == Filter.Id);
         filter.Available.ShouldBe(2);
-        filter.AvailabilityText.ShouldBe(WorkOrderTexts.Format(AppResources.EntryPartAvailable, 2));
+        filter.AvailabilityText.ShouldBe(AppText.Format(AppResources.EntryPartAvailable, 2));
         var belt = _selection.Results.Single(result => result.Part.Id == Belt.Id);
         belt.CanAdd.ShouldBeFalse();
         belt.AvailabilityText.ShouldBe(AppResources.EntryPartOutOfStock);
@@ -105,7 +104,7 @@ public sealed class ServiceEntryPartsSelectionTests : IAsyncLifetime
 
         await _parts.ReplaceAllAsync([Filter with { StockQuantity = 1 }]);
 
-        (await _selection.ValidateAsync()).ShouldBe(WorkOrderTexts.Format(AppResources.EntryQuantityExceedsStock, Filter.Name, 1));
+        (await _selection.ValidateAsync()).ShouldBe(AppText.Format(AppResources.EntryQuantityExceedsStock, Filter.Name, 1));
     }
 
     public async ValueTask DisposeAsync() => await _userDatabase.DisposeAsync();

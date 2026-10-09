@@ -1,5 +1,5 @@
 using FixFlow.Mobile.Core.Api;
-using FixFlow.Mobile.Core.Features.Sync;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 
 namespace FixFlow.Mobile.UnitTests.Features.WorkOrders;

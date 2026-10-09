@@ -6,6 +6,9 @@ using FixFlow.Mobile.Core.Clipboard;
 using FixFlow.Mobile.Core.Connectivity;
 using FixFlow.Mobile.Core.Dialogs;
 using FixFlow.Mobile.Core.Dispatching;
+using FixFlow.Mobile.Core.Features.Sync.Conflicts;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
+using FixFlow.Mobile.Core.Features.Sync.Pull;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Formatting;
 using FixFlow.Mobile.Core.Resources;
@@ -30,6 +33,7 @@ public sealed partial class SyncViewModel
     private readonly IDialogService _dialogs;
     private readonly IUiDispatcher _ui;
     private readonly IScreenReaderAnnouncer _announcer;
+    private readonly IMessenger _messenger;
     private int _localVersion;
 
     public SyncViewModel(
@@ -49,7 +53,6 @@ public sealed partial class SyncViewModel
         IScreenReaderAnnouncer announcer,
         IMessenger messenger)
     {
-        ArgumentNullException.ThrowIfNull(messenger);
         Screen = screen;
         _userDatabase = userDatabase;
         _outbox = outbox;
@@ -64,10 +67,20 @@ public sealed partial class SyncViewModel
         _dialogs = dialogs;
         _ui = ui;
         _announcer = announcer;
-        messenger.RegisterAll(this);
+        _messenger = messenger;
     }
 
     public ScreenState Screen { get; }
+
+    public void Resume()
+    {
+        if (!_messenger.IsRegistered<SyncCompletedMessage>(this))
+        {
+            _messenger.RegisterAll(this);
+        }
+    }
+
+    public void Pause() => _messenger.UnregisterAll(this);
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasConflicts))]
@@ -159,7 +172,7 @@ public sealed partial class SyncViewModel
     {
         if (!await _dialogs.ConfirmAsync(
                 AppResources.DiscardAllChangesTitle,
-                WorkOrderTexts.Format(AppResources.DiscardAllChangesMessage, conflict.FollowingChangeCount + 1),
+                AppText.Format(AppResources.DiscardAllChangesMessage, conflict.FollowingChangeCount + 1),
                 AppResources.DiscardChangeButton,
                 AppResources.CancelButton))
         {
@@ -188,7 +201,7 @@ public sealed partial class SyncViewModel
     {
         var lastSyncedAt = (await _syncStates.GetAsync(WorkOrderSyncService.SyncStateKey))?.UpdatedAt;
         LastSyncText = lastSyncedAt is { } syncedAt
-            ? WorkOrderTexts.Format(AppResources.SyncLastSync, _formatter.FormatDateTime(syncedAt))
+            ? AppText.Format(AppResources.SyncLastSync, _formatter.FormatDateTime(syncedAt))
             : AppResources.SyncNeverSynced;
         if (_connectivity.IsOnline)
         {

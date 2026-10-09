@@ -1,4 +1,5 @@
-using FixFlow.Mobile.Core.Features.WorkOrders;
+using FixFlow.Mobile.Core.Features.Sync.Conflicts;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
 using FixFlow.Mobile.Core.Formatting;
 using FixFlow.Mobile.Core.Resources;
 
@@ -11,8 +12,8 @@ public sealed class SyncPresenter(LocalChangeDescriber describer, DisplayFormatt
         string[] parts =
         [
             AppResources.SyncCompletedAnnouncement,
-            .. pendingChanges > 0 ? [WorkOrderTexts.Format(AppResources.SyncPendingCount, pendingChanges) + "."] : Array.Empty<string>(),
-            .. rejectedChanges > 0 ? [WorkOrderTexts.Format(AppResources.SyncConflictCount, rejectedChanges) + "."] : Array.Empty<string>(),
+            .. pendingChanges > 0 ? [AppText.Format(AppResources.SyncPendingCount, pendingChanges) + "."] : Array.Empty<string>(),
+            .. rejectedChanges > 0 ? [AppText.Format(AppResources.SyncConflictCount, rejectedChanges) + "."] : Array.Empty<string>(),
         ];
         return string.Join(" ", parts);
     }
@@ -33,10 +34,10 @@ public sealed class SyncPresenter(LocalChangeDescriber describer, DisplayFormatt
                 lines[0],
                 ConflictTexts.Reason(conflict),
                 string.Join(Environment.NewLine, lines.Skip(1)),
-                WorkOrderTexts.Format(AppResources.SyncRejectedAt, formatter.FormatDateTime(conflict.RejectedAt)),
+                AppText.Format(AppResources.SyncRejectedAt, formatter.FormatDateTime(conflict.RejectedAt)),
                 string.Join(Environment.NewLine, lines),
                 following,
-                following > 0 ? WorkOrderTexts.Format(AppResources.SyncFollowingChanges, following) : null);
+                following > 0 ? AppText.Format(AppResources.SyncFollowingChanges, following) : null);
         })];
     }
 
@@ -68,7 +69,7 @@ public sealed class SyncPresenter(LocalChangeDescriber describer, DisplayFormatt
         }
 
         return operation is { AttemptCount: > 0, NextAttemptAt: { } nextAttemptAt }
-            ? WorkOrderTexts.Format(AppResources.SyncPendingRetry, operation.AttemptCount, formatter.FormatDateTime(nextAttemptAt))
+            ? AppText.Format(AppResources.SyncPendingRetry, operation.AttemptCount, formatter.FormatDateTime(nextAttemptAt))
             : AppResources.PendingSyncLabel;
     }
 }

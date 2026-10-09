@@ -4,7 +4,8 @@ using CommunityToolkit.Mvvm.Input;
 using FixFlow.Mobile.Core.Accessibility;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Dialogs;
-using FixFlow.Mobile.Core.Features.Sync;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
+using FixFlow.Mobile.Core.Features.WorkOrders.WorkTime;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Formatting;
 using FixFlow.Mobile.Core.Navigation;
@@ -250,7 +251,7 @@ public sealed partial class ServiceEntryViewModel(
 
         if (_workOrderStartedAt is { } workOrderStartedAt && start < workOrderStartedAt)
         {
-            return WorkOrderTexts.Format(AppResources.EntryStartBeforeWorkOrder, formatter.FormatDateTime(workOrderStartedAt));
+            return AppText.Format(AppResources.EntryStartBeforeWorkOrder, formatter.FormatDateTime(workOrderStartedAt));
         }
 
         if (finish <= start)

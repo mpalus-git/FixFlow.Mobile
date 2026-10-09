@@ -5,7 +5,8 @@ using FixFlow.Mobile.Core.Dialogs;
 using FixFlow.Mobile.Core.Features.Parts;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Settings;
-using FixFlow.Mobile.Core.Features.Sync;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
+using FixFlow.Mobile.Core.Features.WorkOrders.WorkTime;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Formatting;
 using FixFlow.Mobile.Core.Navigation;
@@ -155,7 +156,7 @@ public sealed class ServiceEntryViewModelTests : IAsyncLifetime
 
         await _viewModel.SaveCommand.ExecuteAsync(null);
 
-        _viewModel.ValidationMessage.ShouldBe(WorkOrderTexts.Format(AppResources.EntryStartBeforeWorkOrder, _formatter.FormatDateTime(StartedAt)));
+        _viewModel.ValidationMessage.ShouldBe(AppText.Format(AppResources.EntryStartBeforeWorkOrder, _formatter.FormatDateTime(StartedAt)));
     }
 
     [Theory]

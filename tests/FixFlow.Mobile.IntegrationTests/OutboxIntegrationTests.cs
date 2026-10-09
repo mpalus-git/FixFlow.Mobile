@@ -1,7 +1,8 @@
 using System.Net;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
-using FixFlow.Mobile.Core.Features.Sync;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
+using FixFlow.Mobile.Core.Features.Sync.Pull;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 
 namespace FixFlow.Mobile.IntegrationTests;

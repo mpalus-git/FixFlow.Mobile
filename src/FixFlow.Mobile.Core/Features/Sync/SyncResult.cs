@@ -1,3 +1,6 @@
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
+using FixFlow.Mobile.Core.Features.Sync.Pull;
+
 namespace FixFlow.Mobile.Core.Features.Sync;
 
 public sealed record SyncResult(bool IsOffline, bool IsServerUnavailable, DispatchSummary? Dispatch, PullResult? Pull)

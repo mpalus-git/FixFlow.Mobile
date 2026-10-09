@@ -1,7 +1,8 @@
 using System.Net;
 using CommunityToolkit.Mvvm.Messaging;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
-using FixFlow.Mobile.Core.Features.Sync;
+using FixFlow.Mobile.Core.Features.Sync.Conflicts;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
 using FixFlow.Mobile.UnitTests.Storage;
 
 namespace FixFlow.Mobile.UnitTests.Features.ServiceEntries;

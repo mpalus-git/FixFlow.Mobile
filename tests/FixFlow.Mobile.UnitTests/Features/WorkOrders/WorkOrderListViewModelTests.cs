@@ -1,6 +1,6 @@
 using System.Net;
-using System.Text;
 using System.Text.Json;
+using System.Text;
 using CommunityToolkit.Mvvm.Messaging;
 using FixFlow.Mobile.Core.Accessibility;
 using FixFlow.Mobile.Core.Api;
@@ -8,7 +8,11 @@ using FixFlow.Mobile.Core.Connectivity;
 using FixFlow.Mobile.Core.Features.Parts;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Settings;
+using FixFlow.Mobile.Core.Features.Sync.Outbox;
+using FixFlow.Mobile.Core.Features.Sync.Pull;
 using FixFlow.Mobile.Core.Features.Sync;
+using FixFlow.Mobile.Core.Features.WorkOrders.Details;
+using FixFlow.Mobile.Core.Features.WorkOrders.List;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Formatting;
 using FixFlow.Mobile.Core.Navigation;
@@ -76,6 +80,7 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
             _ui,
             _messenger,
             _timeProvider);
+        _viewModel.Resume();
     }
 
     public async ValueTask InitializeAsync() => await _userDatabase.Database.OpenAsync(Guid.NewGuid());
@@ -141,6 +146,32 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
         await _viewModel.AppearCommand.ExecuteAsync(null);
 
         _handler.Requests.Count(IsListRequest).ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task Should_Ignore_Messages_When_Screen_Is_Hidden()
+    {
+        await _viewModel.AppearCommand.ExecuteAsync(null);
+        _viewModel.Pause();
+
+        _messenger.Send(new ServerStartingMessage());
+        _messenger.Send(new ConnectivityChangedMessage(IsOnline: false));
+
+        _viewModel.Screen.Notice.ShouldBeNull();
+        _viewModel.Screen.IsOffline.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Should_Show_Offline_State_When_Returning_To_List_After_Connection_Was_Lost()
+    {
+        await _viewModel.AppearCommand.ExecuteAsync(null);
+        _viewModel.Pause();
+        _connectivity.IsOnline.Returns(false);
+
+        _viewModel.Resume();
+        await _viewModel.AppearCommand.ExecuteAsync(null);
+
+        _viewModel.Screen.IsOffline.ShouldBeTrue();
     }
 
     [Fact]
