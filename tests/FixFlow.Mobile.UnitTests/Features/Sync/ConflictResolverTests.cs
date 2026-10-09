@@ -130,6 +130,24 @@ public sealed class ConflictResolverTests : IAsyncLifetime
         _photos.ExistingPathFor(photo.Id).ShouldBeNull();
     }
 
+    [Fact]
+    public async Task Should_Complete_Without_Signature_When_Rejected_Signature_Upload_Is_Discarded()
+    {
+        var signatureId = Guid.CreateVersion7();
+        await _photos.SaveAsync(signatureId, Jpeg);
+        var completion = await _writer.CompleteWorkOrderAsync(WorkOrderId, signatureId);
+        var upload = (await _outbox.GetAllAsync())[0];
+        await RejectAsync(upload);
+
+        await _resolver.DiscardAsync(upload.Id);
+
+        var queued = (await _outbox.GetAllAsync()).ShouldHaveSingleItem();
+        queued.Id.ShouldBe(completion.Id);
+        OutboxPayload.ClientSignaturePhotoId(queued).ShouldBeNull();
+        OutboxPayload.CompletedAt(queued).ShouldBe(OutboxPayload.CompletedAt(completion));
+        _photos.ExistingPathFor(signatureId).ShouldBeNull();
+    }
+
     public async ValueTask DisposeAsync() => await _userDatabase.DisposeAsync();
 
     private async Task<OutboxOperation> QueueEntryAsync(IReadOnlyList<PendingPhoto> photos) =>

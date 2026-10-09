@@ -187,5 +187,9 @@ public static class DatabaseMigrations
             """,
             "CREATE INDEX ix_work_order_events_work_order_id ON work_order_events (work_order_id)",
         ]),
+        new(13, "add_work_order_client_signature",
+        [
+            "ALTER TABLE work_orders ADD COLUMN client_signature_photo_id TEXT",
+        ]),
     ];
 }

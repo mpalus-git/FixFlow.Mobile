@@ -22,6 +22,10 @@ public sealed class LocalChangeDescriber(DisplayFormatter formatter)
         else if (operation.Kind == OutboxOperationKind.CompleteWorkOrder)
         {
             lines.Add(WorkOrderTexts.Format(AppResources.ChangeCompletedAt, formatter.FormatDateTime(OutboxPayload.CompletedAt(operation))));
+            if (OutboxPayload.ClientSignaturePhotoId(operation) is not null)
+            {
+                lines.Add(AppResources.ChangeClientSignature);
+            }
         }
         else if (operation.Kind == OutboxOperationKind.AddServiceEntry)
         {

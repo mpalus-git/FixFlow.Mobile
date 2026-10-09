@@ -26,7 +26,7 @@ public sealed class WorkOrderDetailsPresenterTests : IDisposable
         var languageService = new LanguageService(Substitute.For<ISettingsStore>());
         languageService.ChangeLanguage(AppLanguage.Polish);
         _formatter = new DisplayFormatter(languageService, BusinessClock.CreateForWarsaw(new FakeTimeProvider(Now)));
-        _presenter = new WorkOrderDetailsPresenter(_formatter, _session);
+        _presenter = new WorkOrderDetailsPresenter(_formatter, _session, new ApiAddress(new Uri("https://api.test/")));
     }
 
     [Fact]
@@ -81,6 +81,20 @@ public sealed class WorkOrderDetailsPresenterTests : IDisposable
         ]);
         view.Events[0].ShouldBe(new WorkOrderEventView("Utworzono zlecenie", "05.10.2026 08:00", "System", false));
         view.Events[1].ActorText.ShouldBe("Anna Nowak");
+    }
+
+    [Fact]
+    public void Should_Show_Local_Signature_Until_Sent_And_Server_Address_Afterwards()
+    {
+        var signatureId = Guid.NewGuid();
+        var signed = _workOrder with { Status = WorkOrderStatus.Completed, ClientSignaturePhotoId = signatureId };
+
+        var pending = _presenter.Present(signed, null, [], [], [], [], id => id == signatureId ? "/data/photos/signature.jpg" : null);
+        var sent = _presenter.Present(signed, null, [], [], [], [], _ => null);
+
+        pending.ClientSignature.ShouldBe(new EntryPhotoView("/data/photos/signature.jpg", true));
+        sent.ClientSignature.ShouldBe(new EntryPhotoView($"https://api.test/api/v1/photos/{signatureId}", false));
+        _presenter.Present(_workOrder, null, [], [], [], []).HasClientSignature.ShouldBeFalse();
     }
 
     [Fact]

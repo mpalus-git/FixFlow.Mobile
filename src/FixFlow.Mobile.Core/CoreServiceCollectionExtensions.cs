@@ -67,6 +67,7 @@ public static class CoreServiceCollectionExtensions
         services.AddTransient<ServiceEntryPartsSelection>();
         services.AddTransient<ServiceEntryViewModel>();
         services.AddTransient<CorrectionEntryViewModel>();
+        services.AddTransient<CompleteWorkOrderViewModel>();
         services.AddTransient<WorkTimerRepository>();
         services.AddTransient<WorkLocationRecorder>();
         services.AddSingleton<WorkOrderSectionClassifier>();

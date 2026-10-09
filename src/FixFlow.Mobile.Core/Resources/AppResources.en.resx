@@ -426,8 +426,8 @@
   <data name="CompleteWorkOrderButton" xml:space="preserve">
     <value>Complete work order</value>
   </data>
-  <data name="CompleteConfirmTitle" xml:space="preserve">
-    <value>Complete work order?</value>
+  <data name="SignatureInvalid" xml:space="preserve">
+    <value>The signature could not be saved. Clear the field and try again.</value>
   </data>
   <data name="CompleteConfirmMessage" xml:space="preserve">
     <value>Work order {0} will move to Completed. Entries cannot be added afterwards.</value>
@@ -530,6 +530,9 @@
   </data>
   <data name="ChangeCompletedAt" xml:space="preserve">
     <value>Completed: {0}</value>
+  </data>
+  <data name="ChangeClientSignature" xml:space="preserve">
+    <value>Client signature: attached</value>
   </data>
   <data name="ChangeWorkTime" xml:space="preserve">
     <value>Work time: {0} – {1}</value>
@@ -740,5 +743,26 @@
   </data>
   <data name="EventSystemActor" xml:space="preserve">
     <value>System</value>
+  </data>
+  <data name="CompleteTitle" xml:space="preserve">
+    <value>Complete work order</value>
+  </data>
+  <data name="SignatureLabel" xml:space="preserve">
+    <value>Client signature (optional)</value>
+  </data>
+  <data name="SignatureHint" xml:space="preserve">
+    <value>Ask the client to sign in the field below.</value>
+  </data>
+  <data name="SignaturePadDescription" xml:space="preserve">
+    <value>Client signature field</value>
+  </data>
+  <data name="SignatureClearButton" xml:space="preserve">
+    <value>Clear signature</value>
+  </data>
+  <data name="DetailsSignatureSection" xml:space="preserve">
+    <value>Client signature</value>
+  </data>
+  <data name="DetailsSignatureDescription" xml:space="preserve">
+    <value>Client signature given when the work order was completed</value>
   </data>
 </root>

@@ -39,6 +39,13 @@ public static class OutboxPayload
         return JsonSerializer.Deserialize<PendingCompletion>(operation.Payload, Options)?.CompletedAt ?? operation.CreatedAt;
     }
 
+    public static Guid? ClientSignaturePhotoId(OutboxOperation operation)
+    {
+        ArgumentNullException.ThrowIfNull(operation);
+
+        return JsonSerializer.Deserialize<PendingCompletion>(operation.Payload, Options)?.ClientSignaturePhotoId;
+    }
+
     public static PendingServiceEntry ToServiceEntry(OutboxOperation operation)
     {
         ArgumentNullException.ThrowIfNull(operation);

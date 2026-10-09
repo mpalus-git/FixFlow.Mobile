@@ -21,4 +21,6 @@ public sealed record WorkOrder(
     DateTimeOffset? InvoicedAt)
 {
     public ClientContact ClientContact { get; init; } = ClientContact.Empty;
+
+    public Guid? ClientSignaturePhotoId { get; init; }
 }

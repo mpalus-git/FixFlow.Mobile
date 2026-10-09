@@ -1,3 +1,4 @@
+using CommunityToolkit.Maui;
 using FixFlow.Mobile.Accessibility;
 using FixFlow.Mobile.Clipboard;
 using FixFlow.Mobile.Connectivity;
@@ -38,6 +39,7 @@ public static partial class MauiProgram
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
+            .UseMauiCommunityToolkit()
             .ConfigureMauiHandlers(ConfigurePlatformHandlers)
             .ConfigureImageSources(ConfigurePlatformImageSources);
 
@@ -75,6 +77,7 @@ public static partial class MauiProgram
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<WorkOrderListPage>();
         builder.Services.AddTransient<WorkOrderDetailsPage>();
+        builder.Services.AddTransient<CompleteWorkOrderPage>();
         builder.Services.AddTransient<ServiceEntryPage>();
         builder.Services.AddTransient<CorrectionEntryPage>();
         builder.Services.AddTransient<SyncPage>();

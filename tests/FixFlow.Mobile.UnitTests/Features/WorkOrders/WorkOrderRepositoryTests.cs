@@ -61,6 +61,17 @@ public sealed class WorkOrderRepositoryTests : IAsyncLifetime
 
     public async ValueTask DisposeAsync() => await _userDatabase.DisposeAsync();
 
+    [Fact]
+    public async Task Should_Keep_Known_Client_Signature_When_List_Without_Signatures_Replaces_Local_Copy()
+    {
+        var signed = CreateWorkOrder("ZL-2026-0001", Now) with { Status = WorkOrderStatus.Completed, ClientSignaturePhotoId = Guid.NewGuid() };
+        await _repository.ReplaceAllAsync([signed]);
+
+        await _repository.ReplaceAllAsync([signed with { ClientSignaturePhotoId = null }]);
+
+        (await _repository.GetAsync(signed.Id)).ShouldBe(signed);
+    }
+
     private static WorkOrder CreateWorkOrder(string number, DateTimeOffset dueDate) => new(
         Guid.NewGuid(),
         number,

@@ -142,6 +142,20 @@ public sealed class OutboxDispatcherTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Should_Upload_Signature_Before_Completion_And_Send_Its_Id()
+    {
+        var signature = await SavePhotoAsync();
+        await QueueAsync(_writer.CompleteWorkOrderAsync(WorkOrderId, signature.Id));
+
+        var summary = await DispatchAsync();
+
+        summary.Sent.ShouldBe(2);
+        _api.Calls.ShouldBe([$"PUT /api/v1/photos/{signature.Id}", $"POST /api/v1/work-orders/{WorkOrderId}/complete"]);
+        _api.SentCompletions.ShouldHaveSingleItem().RootElement.GetProperty("clientSignaturePhotoId").GetGuid().ShouldBe(signature.Id);
+        (await _photos.ReadAsync(signature.Id)).ShouldBeNull();
+    }
+
+    [Fact]
     public async Task Should_Send_Queue_Time_As_Completion_Time_When_Queued_Completion_Has_No_Time()
     {
         var queuedAt = _timeProvider.GetUtcNow();

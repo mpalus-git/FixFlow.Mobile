@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:FixFlow.Mobile.Controls"
+             xmlns:resources="clr-namespace:FixFlow.Mobile.Core.Resources;assembly=FixFlow.Mobile.Core"
+             xmlns:viewModels="clr-namespace:FixFlow.Mobile.Core.Features.WorkOrders;assembly=FixFlow.Mobile.Core"
+             xmlns:workOrders="clr-namespace:FixFlow.Mobile.Features.WorkOrders"
+             x:Class="FixFlow.Mobile.Features.WorkOrders.CompleteWorkOrderPage"
+             x:DataType="viewModels:CompleteWorkOrderViewModel"
+             Title="{x:Static resources:AppResources.CompleteTitle}">
+    <Grid>
+        <Grid Padding="16"
+              RowSpacing="8"
+              VerticalOptions="{OnIdiom Default=Fill, Desktop=Start}"
+              RowDefinitions="Auto,Auto,Auto,*,Auto,Auto,Auto">
+            <Label Text="{Binding Message}" />
+
+            <Label Grid.Row="1"
+                   Text="{x:Static resources:AppResources.SignatureLabel}"
+                   Style="{StaticResource SectionLabel}" />
+            <Label Grid.Row="2"
+                   Text="{x:Static resources:AppResources.SignatureHint}"
+                   Style="{StaticResource SecondaryLabel}" />
+            <Border Grid.Row="3"
+                    Style="{StaticResource InputBorder}"
+                    BackgroundColor="White"
+                    Padding="0"
+                    MinimumHeightRequest="{OnIdiom Default=120, Desktop=240}"
+                    MaximumHeightRequest="360"
+                    VerticalOptions="Start">
+                <workOrders:SignaturePad x:Name="Signature"
+                                         BackgroundColor="White"
+                                         LineColor="Black"
+                                         LineWidth="4"
+                                         IsMultiLineModeEnabled="True"
+                                         ShouldClearOnFinish="False"
+                                         SemanticProperties.Description="{x:Static resources:AppResources.SignaturePadDescription}" />
+            </Border>
+            <Button Grid.Row="4"
+                    Text="{x:Static resources:AppResources.SignatureClearButton}"
+                    Command="{Binding ClearCommand, Source={x:Reference Signature}, x:DataType=workOrders:SignaturePad}"
+                    Style="{StaticResource OutlineButton}" />
+
+            <Label Grid.Row="5"
+                   Text="{Binding ValidationMessage}"
+                   IsVisible="{Binding HasValidationMessage}"
+                   Style="{StaticResource ErrorLabel}" />
+            <Button Grid.Row="6"
+                    Text="{x:Static resources:AppResources.CompleteWorkOrderButton}"
+                    Command="{Binding CompleteCommand}"
+                    CommandParameter="{x:Reference Signature}" />
+        </Grid>
+
+        <controls:LoadingView Style="{StaticResource ScreenOverlay}"
+                              IsVisible="{Binding Screen.IsLoading}" />
+        <controls:ErrorView Style="{StaticResource ScreenOverlay}"
+                            IsVisible="{Binding Screen.IsError}"
+                            Message="{Binding Screen.ErrorMessage}"
+                            RetryCommand="{Binding ReloadCommand}" />
+    </Grid>
+</ContentPage>

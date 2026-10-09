@@ -25,6 +25,7 @@ public sealed class ConflictResolver(OutboxRepository outbox, PhotoStore photos,
             else if (removed.Kind == OutboxOperationKind.UploadPhoto)
             {
                 DetachPhotoFromWaitingEntries(connection, removed);
+                DetachSignatureFromWaitingCompletion(connection, removed);
             }
         });
         if (conflict is null)
@@ -71,6 +72,21 @@ public sealed class ConflictResolver(OutboxRepository outbox, PhotoStore photos,
                 var payload = OutboxPayload.Serialize(entry with { Photos = [.. entry.Photos.Where(photo => photo.Id != photoId)] });
                 connection.Execute("UPDATE outbox_operations SET payload = ? WHERE id = ?", payload, operation.Id);
             }
+        }
+    }
+
+    private static void DetachSignatureFromWaitingCompletion(SQLiteConnection connection, SyncConflict upload)
+    {
+        var photoId = OutboxPayload.PhotoId(upload.ToOperation());
+        var completions = connection
+            .Query<OutboxOperationRow>(
+                "SELECT * FROM outbox_operations WHERE work_order_id = ? AND kind = ?", upload.WorkOrderId, nameof(OutboxOperationKind.CompleteWorkOrder))
+            .Select(row => row.ToOperation())
+            .Where(operation => OutboxPayload.ClientSignaturePhotoId(operation) == photoId);
+        foreach (var operation in completions)
+        {
+            var payload = OutboxPayload.Serialize(new PendingCompletion(OutboxPayload.CompletedAt(operation)));
+            connection.Execute("UPDATE outbox_operations SET payload = ? WHERE id = ?", payload, operation.Id);
         }
     }
 

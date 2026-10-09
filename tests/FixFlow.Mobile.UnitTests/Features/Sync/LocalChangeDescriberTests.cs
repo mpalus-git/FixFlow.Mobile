@@ -80,6 +80,16 @@ public sealed class LocalChangeDescriberTests : IDisposable
         text.Split(Environment.NewLine).ShouldBe(["ZL-2026-0042 · Zakończenie zlecenia", "Zakończono: 05.10.2026 10:00"]);
     }
 
+    [Fact]
+    public void Should_Mention_Client_Signature_When_Completion_Has_One()
+    {
+        var payload = OutboxPayload.Serialize(new PendingCompletion(Now) { ClientSignaturePhotoId = Guid.NewGuid() });
+
+        var text = _describer.Describe(Create(OutboxOperationKind.CompleteWorkOrder, payload), "ZL-2026-0042");
+
+        text.Split(Environment.NewLine).ShouldBe(["ZL-2026-0042 · Zakończenie zlecenia", "Zakończono: 05.10.2026 10:00", "Podpis klienta: dołączony"]);
+    }
+
     public void Dispose() => _cultureScope.Dispose();
 
     private static OutboxOperation Create(OutboxOperationKind kind, string payload) =>

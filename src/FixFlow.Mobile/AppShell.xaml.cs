@@ -18,6 +18,7 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(NavigationRoute.For<WorkOrderDetailsViewModel>(), typeof(WorkOrderDetailsPage));
         Routing.RegisterRoute(NavigationRoute.For<ServiceEntryViewModel>(), typeof(ServiceEntryPage));
         Routing.RegisterRoute(NavigationRoute.For<CorrectionEntryViewModel>(), typeof(CorrectionEntryPage));
+        Routing.RegisterRoute(NavigationRoute.For<CompleteWorkOrderViewModel>(), typeof(CompleteWorkOrderPage));
         Routing.RegisterRoute(NavigationRoute.For<SyncViewModel>(), typeof(SyncPage));
         Routing.RegisterRoute(NavigationRoute.For<SettingsViewModel>(), typeof(SettingsPage));
     }
