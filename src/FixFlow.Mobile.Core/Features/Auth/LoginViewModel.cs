@@ -45,6 +45,16 @@ public sealed partial class LoginViewModel(
     [NotifyPropertyChangedFor(nameof(HasStatusMessage))]
     public partial string? StatusMessage { get; private set; }
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsPasswordHidden), nameof(PasswordToggleText), nameof(PasswordToggleDescription))]
+    public partial bool IsPasswordVisible { get; private set; }
+
+    public bool IsPasswordHidden => !IsPasswordVisible;
+
+    public string PasswordToggleText => IsPasswordVisible ? AppResources.HidePasswordButton : AppResources.ShowPasswordButton;
+
+    public string PasswordToggleDescription => IsPasswordVisible ? AppResources.HidePasswordDescription : AppResources.ShowPasswordDescription;
+
     public bool HasErrorMessage => ErrorMessage is not null;
 
     public bool HasStatusMessage => StatusMessage is not null;
@@ -56,6 +66,9 @@ public sealed partial class LoginViewModel(
     public bool IsDemoLoginAvailable => demoAccount.IsAvailable;
 
     private bool CanLogin => !string.IsNullOrWhiteSpace(Email) && !string.IsNullOrEmpty(Password);
+
+    [RelayCommand]
+    private void TogglePasswordVisibility() => IsPasswordVisible = !IsPasswordVisible;
 
     [RelayCommand(CanExecute = nameof(CanLogin))]
     private async Task LoginAsync(CancellationToken cancellationToken)

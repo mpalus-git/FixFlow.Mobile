@@ -783,4 +783,16 @@
   <data name="KeepEditingButton" xml:space="preserve">
     <value>Zostań</value>
   </data>
+  <data name="ShowPasswordButton" xml:space="preserve">
+    <value>Pokaż</value>
+  </data>
+  <data name="HidePasswordButton" xml:space="preserve">
+    <value>Ukryj</value>
+  </data>
+  <data name="ShowPasswordDescription" xml:space="preserve">
+    <value>Pokaż hasło</value>
+  </data>
+  <data name="HidePasswordDescription" xml:space="preserve">
+    <value>Ukryj hasło</value>
+  </data>
 </root>

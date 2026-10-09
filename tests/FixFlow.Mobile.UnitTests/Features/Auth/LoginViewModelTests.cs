@@ -56,6 +56,24 @@ public sealed class LoginViewModelTests : IAsyncDisposable
     }
 
     [Fact]
+    public void Should_Toggle_Password_Visibility_With_Matching_Button_Text()
+    {
+        _viewModel.IsPasswordHidden.ShouldBeTrue();
+        _viewModel.PasswordToggleText.ShouldBe(AppResources.ShowPasswordButton);
+
+        _viewModel.TogglePasswordVisibilityCommand.Execute(null);
+
+        _viewModel.IsPasswordHidden.ShouldBeFalse();
+        _viewModel.PasswordToggleText.ShouldBe(AppResources.HidePasswordButton);
+        _viewModel.PasswordToggleDescription.ShouldBe(AppResources.HidePasswordDescription);
+
+        _viewModel.TogglePasswordVisibilityCommand.Execute(null);
+
+        _viewModel.IsPasswordHidden.ShouldBeTrue();
+        _viewModel.PasswordToggleDescription.ShouldBe(AppResources.ShowPasswordDescription);
+    }
+
+    [Fact]
     public async Task Should_Navigate_To_Work_Orders_When_Technician_Logs_In()
     {
         await _viewModel.LoginCommand.ExecuteAsync(null);
