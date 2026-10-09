@@ -14,12 +14,14 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, Sessio
         Device? device,
         IReadOnlyList<ServiceEntry> entries,
         IReadOnlyList<DeviceHistoryItem> history,
+        IReadOnlyList<WorkOrderEvent> events,
         IReadOnlyList<OutboxOperation> pendingOperations,
         Func<Guid, string?>? localPhotoPath = null)
     {
         ArgumentNullException.ThrowIfNull(workOrder);
         ArgumentNullException.ThrowIfNull(entries);
         ArgumentNullException.ThrowIfNull(history);
+        ArgumentNullException.ThrowIfNull(events);
         ArgumentNullException.ThrowIfNull(pendingOperations);
 
         var pendingEntries = pendingOperations
@@ -43,6 +45,7 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, Sessio
             ],
             usedParts.Count == 0 ? null : WorkOrderTexts.Format(AppResources.DetailsPartsTotal, formatter.FormatMoney(usedParts.Sum())),
             [.. history.Where(item => item.WorkOrderId != workOrder.Id).Select(ToHistoryView)],
+            [.. events.Select((item, index) => ToEventView(item, index == 0 ? item.DueDate : events[index - 1].DueDate)), .. PendingEventViews(pendingOperations)],
             workOrder.Status is WorkOrderStatus.Completed or WorkOrderStatus.Invoiced);
     }
 
@@ -124,6 +127,34 @@ public sealed class WorkOrderDetailsPresenter(DisplayFormatter formatter, Sessio
             WorkOrderTexts.Format(AppResources.DetailsQuantity, sign * part.Quantity),
             formatter.FormatMoney(part.UnitPrice),
             formatter.FormatMoney(sign * part.Amount));
+    }
+
+    private WorkOrderEventView ToEventView(WorkOrderEvent item, DateTimeOffset previousDueDate) => new(
+        item.Type switch
+        {
+            WorkOrderEventType.Created => AppResources.EventCreated,
+            WorkOrderEventType.Updated when item.DueDate != previousDueDate =>
+                WorkOrderTexts.Format(AppResources.EventDueDateChanged, formatter.FormatDateTime(item.DueDate)),
+            WorkOrderEventType.Updated => AppResources.EventUpdated,
+            WorkOrderEventType.Assigned => WorkOrderTexts.Format(AppResources.EventAssigned, item.TechnicianName ?? string.Empty),
+            WorkOrderEventType.Reassigned => WorkOrderTexts.Format(AppResources.EventReassigned, item.TechnicianName ?? string.Empty),
+            WorkOrderEventType.Unassigned => AppResources.EventUnassigned,
+            WorkOrderEventType.Started => AppResources.EventStarted,
+            WorkOrderEventType.Completed => AppResources.EventCompleted,
+            _ => AppResources.EventInvoiced,
+        },
+        formatter.FormatDateTime(item.OccurredAt),
+        item.ActorName ?? AppResources.EventSystemActor,
+        IsPending: false);
+
+    private IEnumerable<WorkOrderEventView> PendingEventViews(IReadOnlyList<OutboxOperation> pendingOperations)
+    {
+        var author = session.CurrentUser?.FullName ?? string.Empty;
+        return pendingOperations
+            .Where(operation => operation.Kind is OutboxOperationKind.StartWork or OutboxOperationKind.CompleteWorkOrder)
+            .Select(operation => operation.Kind == OutboxOperationKind.StartWork
+                ? new WorkOrderEventView(AppResources.EventStarted, formatter.FormatDateTime(OutboxPayload.StartedAt(operation)), author, IsPending: true)
+                : new WorkOrderEventView(AppResources.EventCompleted, formatter.FormatDateTime(OutboxPayload.CompletedAt(operation)), author, IsPending: true));
     }
 
     private DeviceHistoryView ToHistoryView(DeviceHistoryItem item) => new(

@@ -14,8 +14,11 @@ public sealed record WorkOrderDetailsView(
     IReadOnlyList<ServiceEntryView> Entries,
     string? PartsTotalText,
     IReadOnlyList<DeviceHistoryView> History,
+    IReadOnlyList<WorkOrderEventView> Events,
     bool CanDownloadProtocol)
 {
+    public bool HasEvents => Events.Count > 0;
+
     public bool HasClient => Client is not null;
 
     public bool HasDevice => Device is not null;

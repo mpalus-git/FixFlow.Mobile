@@ -52,13 +52,14 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
             new ServiceEntryRepository(database),
             new DeviceHistoryRepository(database),
             new OutboxRepository(database),
-            new WorkTimerRepository(database));
+            new WorkTimerRepository(database),
+            new WorkOrderEventRepository(database));
         var api = RestService.ForGenerated<IFixFlowApi>(new HttpClient(_handler, disposeHandler: false) { BaseAddress = new Uri("https://api.test") });
         var formatter = new DisplayFormatter(new LanguageService(Substitute.For<ISettingsStore>()), BusinessClock.CreateForWarsaw(timeProvider));
         _viewModel = new WorkOrderDetailsViewModel(
             new ScreenState(formatter),
             _sources,
-            new WorkOrderDetailsSyncService(api, _sources.WorkOrders, _sources.Devices, _sources.ServiceEntries, _sources.DeviceHistory, new WorkOrderEventRepository(database)),
+            new WorkOrderDetailsSyncService(api, _sources.WorkOrders, _sources.Devices, _sources.ServiceEntries, _sources.DeviceHistory, _sources.WorkOrderEvents),
             new SyncStateRepository(database, timeProvider),
             new WorkOrderDetailsPresenter(formatter, new SessionStore(Substitute.For<ISecureStore>(), timeProvider)),
             new ServiceProtocolService(api, _documents),

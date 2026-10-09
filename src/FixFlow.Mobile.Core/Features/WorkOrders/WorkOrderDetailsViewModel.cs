@@ -396,6 +396,7 @@ public sealed partial class WorkOrderDetailsViewModel(
             await sources.Devices.GetAsync(workOrder.DeviceId),
             storedEntries,
             await sources.DeviceHistory.GetForDeviceAsync(workOrder.DeviceId),
+            await sources.WorkOrderEvents.GetForWorkOrderAsync(workOrder.Id),
             pendingOperations,
             photos.ExistingPathFor);
         var hasRejectedChanges = (await sources.Outbox.GetConflictsAsync()).Any(conflict => conflict.WorkOrderId == _workOrderId);
