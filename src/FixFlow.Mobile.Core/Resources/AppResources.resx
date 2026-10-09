@@ -531,6 +531,9 @@
   <data name="ChangeCompletedAt" xml:space="preserve">
     <value>Zakończono: {0}</value>
   </data>
+  <data name="ChangeClientSignature" xml:space="preserve">
+    <value>Podpis klienta: dołączony</value>
+  </data>
   <data name="ChangeWorkTime" xml:space="preserve">
     <value>Czas pracy: {0} – {1}</value>
   </data>

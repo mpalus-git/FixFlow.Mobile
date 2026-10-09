@@ -104,6 +104,19 @@ public sealed class OutboxWriterTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Should_Queue_Signature_Upload_Before_Completion_When_Client_Signed()
+    {
+        var signatureId = Guid.CreateVersion7();
+
+        var completion = await _writer.CompleteWorkOrderAsync(WorkOrderId, signatureId);
+
+        var queued = await _outbox.GetAllAsync();
+        queued.Select(operation => operation.Kind).ShouldBe([OutboxOperationKind.UploadPhoto, OutboxOperationKind.CompleteWorkOrder]);
+        OutboxPayload.PhotoId(queued[0]).ShouldBe(signatureId);
+        OutboxPayload.ClientSignaturePhotoId(completion).ShouldBe(signatureId);
+    }
+
+    [Fact]
     public async Task Should_Notify_About_Local_Change_When_Operation_Is_Queued()
     {
         LocalChangeQueuedMessage? received = null;

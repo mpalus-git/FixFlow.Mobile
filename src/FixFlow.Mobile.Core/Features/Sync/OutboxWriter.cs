@@ -34,12 +34,20 @@ public sealed class OutboxWriter(OutboxRepository outbox, TimeProvider timeProvi
         return operation;
     }
 
-    public Task<OutboxOperation> CompleteWorkOrderAsync(Guid workOrderId) =>
-        EnqueueAsync(
-            workOrderId,
-            OutboxOperationKind.CompleteWorkOrder,
-            OutboxPayload.Serialize(new PendingCompletion(timeProvider.GetUtcNow())),
+    public async Task<OutboxOperation> CompleteWorkOrderAsync(Guid workOrderId, Guid? clientSignaturePhotoId = null)
+    {
+        var completedAt = timeProvider.GetUtcNow();
+        var payload = OutboxPayload.Serialize(new PendingCompletion(completedAt) { ClientSignaturePhotoId = clientSignaturePhotoId });
+        List<OutboxOperation> operations = clientSignaturePhotoId is { } photoId
+            ? [Create(workOrderId, OutboxOperationKind.UploadPhoto, OutboxPayload.Serialize(new PendingPhotoUpload(photoId)), completedAt)]
+            : [];
+        var operation = Create(workOrderId, OutboxOperationKind.CompleteWorkOrder, payload, completedAt.AddTicks(operations.Count));
+        await outbox.EnqueueAsync(
+            [.. operations, operation],
             connection => connection.Execute("DELETE FROM work_timers WHERE work_order_id = ?", workOrderId));
+        messenger.Send(new LocalChangeQueuedMessage(workOrderId));
+        return operation;
+    }
 
     private static void RestartTimer(SQLiteConnection connection, Guid workOrderId, DateTimeOffset startedAt) =>
         connection.Execute(
