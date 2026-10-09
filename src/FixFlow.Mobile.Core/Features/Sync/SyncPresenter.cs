@@ -6,6 +6,17 @@ namespace FixFlow.Mobile.Core.Features.Sync;
 
 public sealed class SyncPresenter(LocalChangeDescriber describer, DisplayFormatter formatter)
 {
+    public static string DescribeCompletion(int pendingChanges, int rejectedChanges)
+    {
+        string[] parts =
+        [
+            AppResources.SyncCompletedAnnouncement,
+            .. pendingChanges > 0 ? [WorkOrderTexts.Format(AppResources.SyncPendingCount, pendingChanges) + "."] : Array.Empty<string>(),
+            .. rejectedChanges > 0 ? [WorkOrderTexts.Format(AppResources.SyncConflictCount, rejectedChanges) + "."] : Array.Empty<string>(),
+        ];
+        return string.Join(" ", parts);
+    }
+
     public IReadOnlyList<ConflictView> PresentConflicts(
         IReadOnlyList<SyncConflict> conflicts, IReadOnlyList<OutboxOperation> operations, IReadOnlyDictionary<Guid, string> workOrderNumbers)
     {

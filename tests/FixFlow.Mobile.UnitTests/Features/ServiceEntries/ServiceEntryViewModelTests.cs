@@ -49,7 +49,7 @@ public sealed class ServiceEntryViewModelTests : IAsyncLifetime
         _photoService.HasCameraPermissionAsync().Returns(true);
         _photoService.IsCaptureSupported.Returns(true);
         _viewModel = new ServiceEntryViewModel(
-            new ScreenState(_formatter),
+            new ScreenState(_formatter, Substitute.For<IScreenReaderAnnouncer>()),
             new ServiceEntryPartsSelection(new PartRepository(database), _formatter),
             new PhotoAttacher(_photoService, _photos, new ApiAddress(new Uri("https://api.test")), Substitute.For<IDialogService>()),
             new WorkOrderRepository(database),

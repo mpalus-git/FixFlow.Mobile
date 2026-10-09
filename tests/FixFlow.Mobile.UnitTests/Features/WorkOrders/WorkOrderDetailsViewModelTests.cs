@@ -1,5 +1,6 @@
 using System.Net;
 using CommunityToolkit.Mvvm.Messaging;
+using FixFlow.Mobile.Core.Accessibility;
 using FixFlow.Mobile.Core.Api;
 using FixFlow.Mobile.Core.Connectivity;
 using FixFlow.Mobile.Core.Dialogs;
@@ -57,7 +58,7 @@ public sealed class WorkOrderDetailsViewModelTests : IAsyncLifetime
         var api = RestService.ForGenerated<IFixFlowApi>(new HttpClient(_handler, disposeHandler: false) { BaseAddress = new Uri("https://api.test") });
         var formatter = new DisplayFormatter(new LanguageService(Substitute.For<ISettingsStore>()), BusinessClock.CreateForWarsaw(timeProvider));
         _viewModel = new WorkOrderDetailsViewModel(
-            new ScreenState(formatter),
+            new ScreenState(formatter, Substitute.For<IScreenReaderAnnouncer>()),
             _sources,
             new WorkOrderDetailsSyncService(api, _sources.WorkOrders, _sources.Devices, _sources.ServiceEntries, _sources.DeviceHistory, _sources.WorkOrderEvents),
             new SyncStateRepository(database, timeProvider),

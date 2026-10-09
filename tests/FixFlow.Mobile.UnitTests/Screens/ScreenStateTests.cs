@@ -1,3 +1,4 @@
+using FixFlow.Mobile.Core.Accessibility;
 using FixFlow.Mobile.Core.Features.Settings;
 using FixFlow.Mobile.Core.Formatting;
 using FixFlow.Mobile.Core.Screens;
@@ -11,13 +12,14 @@ public sealed class ScreenStateTests : IDisposable
 {
     private readonly GlobalCultureScope _cultureScope = new();
     private readonly LanguageService _languageService = new(Substitute.For<ISettingsStore>());
+    private readonly IScreenReaderAnnouncer _announcer = Substitute.For<IScreenReaderAnnouncer>();
     private readonly ScreenState _state;
 
     public ScreenStateTests()
     {
         _languageService.ApplySavedLanguage();
         var formatter = new DisplayFormatter(_languageService, BusinessClock.CreateForWarsaw(new FakeTimeProvider()));
-        _state = new ScreenState(formatter);
+        _state = new ScreenState(formatter, _announcer);
     }
 
     [Fact]
@@ -157,6 +159,15 @@ public sealed class ScreenStateTests : IDisposable
 
         changed.Count(name => name == nameof(ScreenState.Banner)).ShouldBe(3);
         changed.ShouldContain(nameof(ScreenState.HasBanner));
+    }
+
+    [Fact]
+    public void Should_Announce_Notice_Once_When_Same_Notice_Is_Shown_Again()
+    {
+        _state.ShowNotice(ScreenNotice.Problem("Nie udało się odświeżyć listy."));
+        _state.ShowNotice(ScreenNotice.Problem("Nie udało się odświeżyć listy."));
+
+        _announcer.Received(1).Announce("Nie udało się odświeżyć listy.");
     }
 
     public void Dispose() => _cultureScope.Dispose();

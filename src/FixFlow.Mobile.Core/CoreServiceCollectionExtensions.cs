@@ -28,6 +28,7 @@ public static class CoreServiceCollectionExtensions
         services.AddSingleton<UserDatabase>();
         services.AddSingleton<ServerWarmup>();
         services.AddSingleton<SessionEndNavigator>();
+        services.AddSingleton<ConnectivityAnnouncer>();
         services.AddSingleton<DisplayFormatter>();
         services.AddTransient<ScreenState>();
 

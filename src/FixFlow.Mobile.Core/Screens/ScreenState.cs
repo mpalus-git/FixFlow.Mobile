@@ -1,12 +1,13 @@
 using System.Globalization;
 using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
+using FixFlow.Mobile.Core.Accessibility;
 using FixFlow.Mobile.Core.Formatting;
 using FixFlow.Mobile.Core.Resources;
 
 namespace FixFlow.Mobile.Core.Screens;
 
-public sealed partial class ScreenState(DisplayFormatter formatter) : ObservableObject
+public sealed partial class ScreenState(DisplayFormatter formatter, IScreenReaderAnnouncer announcer) : ObservableObject
 {
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsLoading), nameof(IsContent), nameof(IsEmpty), nameof(IsError))]
@@ -70,7 +71,15 @@ public sealed partial class ScreenState(DisplayFormatter formatter) : Observable
         IsOffline = true;
     }
 
-    public void ShowNotice(ScreenNotice notice) => Notice = notice;
+    public void ShowNotice(ScreenNotice notice)
+    {
+        ArgumentNullException.ThrowIfNull(notice);
+        if (notice != Notice)
+        {
+            Notice = notice;
+            announcer.Announce(notice.Message);
+        }
+    }
 
     public void ClearNotice() => Notice = null;
 

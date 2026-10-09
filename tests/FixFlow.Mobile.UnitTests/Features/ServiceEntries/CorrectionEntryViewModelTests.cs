@@ -39,7 +39,7 @@ public sealed class CorrectionEntryViewModelTests : IAsyncLifetime
         _outbox = new OutboxRepository(database);
         _writer = new OutboxWriter(_outbox, _timeProvider, new WeakReferenceMessenger());
         _viewModel = new CorrectionEntryViewModel(
-            new ScreenState(formatter),
+            new ScreenState(formatter, Substitute.For<IScreenReaderAnnouncer>()),
             new WorkOrderRepository(database),
             new ServiceEntryRepository(database),
             _outbox,
