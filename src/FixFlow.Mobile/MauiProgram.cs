@@ -1,4 +1,3 @@
-using CommunityToolkit.Maui;
 using FixFlow.Mobile.Accessibility;
 using FixFlow.Mobile.Clipboard;
 using FixFlow.Mobile.Connectivity;
@@ -39,7 +38,6 @@ public static partial class MauiProgram
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
-            .UseMauiCommunityToolkit()
             .ConfigureMauiHandlers(ConfigurePlatformHandlers)
             .ConfigureImageSources(ConfigurePlatformImageSources);
 

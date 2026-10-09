@@ -32,10 +32,6 @@
                     VerticalOptions="Start">
                 <workOrders:SignaturePad x:Name="Signature"
                                          BackgroundColor="White"
-                                         LineColor="Black"
-                                         LineWidth="4"
-                                         IsMultiLineModeEnabled="True"
-                                         ShouldClearOnFinish="False"
                                          SemanticProperties.Description="{x:Static resources:AppResources.SignaturePadDescription}" />
             </Border>
             <Button Grid.Row="2"

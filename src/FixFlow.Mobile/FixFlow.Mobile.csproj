@@ -45,7 +45,6 @@
     <PackageReference Include="Plugin.LocalNotification" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Maui" />
     <PackageReference Include="Microsoft.Maui.Controls" />
   </ItemGroup>
   <ItemGroup>
