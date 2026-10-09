@@ -24,7 +24,10 @@ public static class WorkOrderMapper
             item.CreatedAt,
             item.StartedAt,
             item.CompletedAt,
-            item.InvoicedAt);
+            item.InvoicedAt)
+        {
+            ClientContact = ToClientContact(item.ClientAddress, item.ClientContactPerson, item.ClientPhone),
+        };
     }
 
     public static Client ToClient(ClientResponse client)
@@ -89,6 +92,12 @@ public static class WorkOrderMapper
             item.CreatedAt,
             item.StartedAt,
             item.CompletedAt,
-            item.InvoicedAt);
+            item.InvoicedAt)
+        {
+            ClientContact = ToClientContact(item.ClientAddress, item.ClientContactPerson, item.ClientPhone),
+        };
     }
+
+    private static ClientContact ToClientContact(ClientAddress address, string contactPerson, string phone) =>
+        new(address.Street, address.BuildingNumber, address.PostalCode, address.City, contactPerson, phone);
 }

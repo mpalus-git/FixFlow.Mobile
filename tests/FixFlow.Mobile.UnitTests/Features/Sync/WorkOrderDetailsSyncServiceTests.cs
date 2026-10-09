@@ -49,7 +49,9 @@ public sealed class WorkOrderDetailsSyncServiceTests : IAsyncLifetime
         var result = await PullAsync();
 
         result.ShouldBe(PullResult.Succeeded);
-        (await _workOrders.GetAsync(_api.WorkOrderId)).ShouldNotBeNull().Number.ShouldBe("ZL-2026-0042");
+        var workOrder = (await _workOrders.GetAsync(_api.WorkOrderId)).ShouldNotBeNull();
+        workOrder.Number.ShouldBe("ZL-2026-0042");
+        workOrder.ClientContact.City.ShouldBe("Kraków");
         (await _clients.GetAsync(_api.ClientId)).ShouldNotBeNull().City.ShouldBe("Kraków");
         (await _devices.GetAsync(_api.DeviceId)).ShouldNotBeNull().InstallationDate.ShouldBe(new DateOnly(2021, 3, 14));
         var entry = (await _serviceEntries.GetForWorkOrderAsync(_api.WorkOrderId)).ShouldHaveSingleItem();

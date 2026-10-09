@@ -39,7 +39,8 @@ internal sealed class DetailsApiStub
             _ when path == $"/api/v1/work-orders/{WorkOrderId}" => new
             {
                 id = WorkOrderId, number = "ZL-2026-0042", deviceId = DeviceId, deviceSerialNumber = "SN-1", deviceModel = "Altherma 3",
-                clientId = ClientId, clientName = "Piekarnia", description = "Przegląd", priority = "High", status = Status,
+                clientId = ClientId, clientName = "Piekarnia", clientContactPerson = "Anna Kowalska", clientPhone = "+48 600 100 200",
+                clientAddress = new { street = "Długa", buildingNumber = "12A", postalCode = "31-147", city = "Kraków" }, description = "Przegląd", priority = "High", status = Status,
                 dueDate = Now, isOverdue = false, createdAt = Now.AddDays(-2), startedAt = Now.AddHours(-1),
             },
             _ when path == $"/api/v1/clients/{ClientId}" => new

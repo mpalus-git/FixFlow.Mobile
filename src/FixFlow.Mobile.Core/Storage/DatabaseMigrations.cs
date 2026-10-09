@@ -159,5 +159,14 @@ public static class DatabaseMigrations
         [
             "ALTER TABLE service_entries ADD COLUMN photo_urls TEXT NOT NULL DEFAULT '[]'",
         ]),
+        new(10, "add_work_order_client_contact",
+        [
+            "ALTER TABLE work_orders ADD COLUMN client_street TEXT NOT NULL DEFAULT ''",
+            "ALTER TABLE work_orders ADD COLUMN client_building_number TEXT NOT NULL DEFAULT ''",
+            "ALTER TABLE work_orders ADD COLUMN client_postal_code TEXT NOT NULL DEFAULT ''",
+            "ALTER TABLE work_orders ADD COLUMN client_city TEXT NOT NULL DEFAULT ''",
+            "ALTER TABLE work_orders ADD COLUMN client_contact_person TEXT NOT NULL DEFAULT ''",
+            "ALTER TABLE work_orders ADD COLUMN client_phone TEXT NOT NULL DEFAULT ''",
+        ]),
     ];
 }

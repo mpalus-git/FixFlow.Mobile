@@ -26,6 +26,7 @@ public sealed class WorkOrderRepositoryTests : IAsyncLifetime
             Status = WorkOrderStatus.InProgress,
             Priority = WorkOrderPriority.Critical,
             StartedAt = new DateTimeOffset(2026, 10, 5, 7, 15, 30, 123, TimeSpan.Zero),
+            ClientContact = new ClientContact("Długa", "12A", "31-147", "Kraków", "Anna Kowalska", "+48 600 100 200"),
         };
 
         await _repository.ReplaceAllAsync([workOrder]);
