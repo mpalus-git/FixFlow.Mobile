@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using FixFlow.Mobile.Core.Accessibility;
 using FixFlow.Mobile.Core.Api;
+using FixFlow.Mobile.Core.Dialogs;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Settings;
 using FixFlow.Mobile.Core.Features.Sync;
@@ -24,6 +25,7 @@ public sealed class CompleteWorkOrderViewModelTests : IAsyncLifetime
     private readonly FakeTimeProvider _timeProvider = new(Now);
     private readonly TestUserDatabase _userDatabase = new();
     private readonly INavigationService _navigation = Substitute.For<INavigationService>();
+    private readonly IDialogService _dialogs = Substitute.For<IDialogService>();
     private readonly WorkOrder _workOrder = TestWorkOrders.Create("ZL-1", Now.AddHours(4));
     private readonly OutboxRepository _outbox;
     private readonly OutboxWriter _writer;
@@ -45,6 +47,7 @@ public sealed class CompleteWorkOrderViewModelTests : IAsyncLifetime
             _writer,
             _photos,
             _navigation,
+            _dialogs,
             Substitute.For<IScreenReaderAnnouncer>());
     }
 
@@ -96,6 +99,35 @@ public sealed class CompleteWorkOrderViewModelTests : IAsyncLifetime
         _viewModel.ValidationMessage.ShouldBe(AppResources.SignatureInvalid);
         (await _outbox.GetAllAsync()).ShouldNotContain(operation => operation.Kind == OutboxOperationKind.CompleteWorkOrder);
         await _navigation.DidNotReceive().GoBackAsync();
+    }
+
+    [Theory]
+    [InlineData(true, false, true)]
+    [InlineData(false, false, false)]
+    [InlineData(false, true, true)]
+    public async Task Should_Ask_Before_Leaving_Only_When_Client_Signed(bool isEmpty, bool discard, bool expected)
+    {
+        await AddEntryAsync();
+        await _viewModel.OnNavigatedToAsync(_workOrder.Id);
+        _viewModel.Signature = Signature(isEmpty);
+        _dialogs.ConfirmAsync(default!, default!, default!, default!).ReturnsForAnyArgs(discard);
+
+        (await _viewModel.CanLeaveAsync()).ShouldBe(expected);
+
+        await _dialogs.ReceivedWithAnyArgs(isEmpty ? 0 : 1).ConfirmAsync(default!, default!, default!, default!);
+    }
+
+    [Fact]
+    public async Task Should_Leave_Without_Asking_When_Work_Order_Was_Completed_With_Signature()
+    {
+        await AddEntryAsync();
+        await _viewModel.OnNavigatedToAsync(_workOrder.Id);
+        _viewModel.Signature = Signature(isEmpty: false, Jpeg);
+        await _viewModel.CompleteCommand.ExecuteAsync(_viewModel.Signature);
+
+        (await _viewModel.CanLeaveAsync()).ShouldBeTrue();
+
+        await _dialogs.DidNotReceiveWithAnyArgs().ConfirmAsync(default!, default!, default!, default!);
     }
 
     [Fact]

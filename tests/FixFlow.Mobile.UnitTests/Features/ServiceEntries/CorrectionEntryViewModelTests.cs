@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using FixFlow.Mobile.Core.Accessibility;
 using FixFlow.Mobile.Core.Api;
+using FixFlow.Mobile.Core.Dialogs;
 using FixFlow.Mobile.Core.Features.ServiceEntries;
 using FixFlow.Mobile.Core.Features.Settings;
 using FixFlow.Mobile.Core.Features.Sync;
@@ -25,6 +26,7 @@ public sealed class CorrectionEntryViewModelTests : IAsyncLifetime
     private readonly TestUserDatabase _userDatabase = new();
     private readonly INavigationService _navigation = Substitute.For<INavigationService>();
     private readonly IScreenReaderAnnouncer _announcer = Substitute.For<IScreenReaderAnnouncer>();
+    private readonly IDialogService _dialogs = Substitute.For<IDialogService>();
     private readonly WorkOrder _workOrder = TestWorkOrders.Create("ZL-1", Now.AddHours(4));
     private readonly OutboxRepository _outbox;
     private readonly OutboxWriter _writer;
@@ -43,6 +45,7 @@ public sealed class CorrectionEntryViewModelTests : IAsyncLifetime
             _outbox,
             _writer,
             _navigation,
+            _dialogs,
             _announcer);
     }
 
@@ -67,6 +70,29 @@ public sealed class CorrectionEntryViewModelTests : IAsyncLifetime
         part.Usage.ShouldBe(new NetPartUsage(FilterId, "Filtr", "FP-100", 3, 12m));
         part.DetailsText.ShouldBe(WorkOrderTexts.Format(AppResources.CorrectionNetUsed, "FP-100", 3));
         part.Quantity.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task Should_Leave_Without_Asking_When_Nothing_Was_Entered()
+    {
+        await _viewModel.OnNavigatedToAsync(_workOrder.Id);
+
+        (await _viewModel.CanLeaveAsync()).ShouldBeTrue();
+
+        await _dialogs.DidNotReceiveWithAnyArgs().ConfirmAsync(default!, default!, default!, default!);
+    }
+
+    [Fact]
+    public async Task Should_Ask_Before_Leaving_When_Returned_Quantity_Was_Set()
+    {
+        await _viewModel.OnNavigatedToAsync(_workOrder.Id);
+        _viewModel.Parts[0].IncreaseCommand.Execute(null);
+        _dialogs.ConfirmAsync(default!, default!, default!, default!).ReturnsForAnyArgs(false);
+
+        (await _viewModel.CanLeaveAsync()).ShouldBeFalse();
+
+        await _dialogs.Received(1).ConfirmAsync(
+            AppResources.DiscardDraftTitle, AppResources.DiscardDraftMessage, AppResources.DiscardChangeButton, AppResources.KeepEditingButton);
     }
 
     [Fact]

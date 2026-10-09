@@ -29,6 +29,7 @@ public sealed class ServiceEntryViewModelTests : IAsyncLifetime
     private readonly TestUserDatabase _userDatabase = new();
     private readonly INavigationService _navigation = Substitute.For<INavigationService>();
     private readonly IScreenReaderAnnouncer _announcer = Substitute.For<IScreenReaderAnnouncer>();
+    private readonly IDialogService _dialogs = Substitute.For<IDialogService>();
     private readonly WorkOrder _workOrder = TestWorkOrders.Create("ZL-1", StartedAt.AddHours(4));
     private readonly OutboxRepository _outbox;
     private readonly WorkTimerRepository _timers;
@@ -59,6 +60,7 @@ public sealed class ServiceEntryViewModelTests : IAsyncLifetime
             clock,
             _formatter,
             _navigation,
+            _dialogs,
             _announcer);
     }
 
@@ -224,6 +226,66 @@ public sealed class ServiceEntryViewModelTests : IAsyncLifetime
         var queued = await _outbox.GetAllAsync();
         queued.Select(operation => operation.Kind).ShouldBe([OutboxOperationKind.StartWork, OutboxOperationKind.UploadPhoto, OutboxOperationKind.AddServiceEntry]);
         OutboxPayload.ToServiceEntry(queued[2]).Photos.ShouldHaveSingleItem().ShouldBe(draft.Photo);
+    }
+
+    [Fact]
+    public async Task Should_Leave_Without_Asking_When_Form_Was_Not_Changed()
+    {
+        await _viewModel.OnNavigatedToAsync(_workOrder.Id);
+
+        (await _viewModel.CanLeaveAsync()).ShouldBeTrue();
+
+        await _dialogs.DidNotReceiveWithAnyArgs().ConfirmAsync(default!, default!, default!, default!);
+    }
+
+    [Fact]
+    public async Task Should_Stay_On_Form_When_Technician_Keeps_Unsaved_Note()
+    {
+        await _viewModel.OnNavigatedToAsync(_workOrder.Id);
+        _viewModel.Note = "Wymiana filtra";
+        _dialogs.ConfirmAsync(default!, default!, default!, default!).ReturnsForAnyArgs(false);
+
+        (await _viewModel.CanLeaveAsync()).ShouldBeFalse();
+
+        _viewModel.Note.ShouldBe("Wymiana filtra");
+    }
+
+    [Fact]
+    public async Task Should_Ask_When_Only_Work_Time_Was_Changed()
+    {
+        await _viewModel.OnNavigatedToAsync(_workOrder.Id);
+        _viewModel.FinishTime = _viewModel.FinishTime!.Value.Add(TimeSpan.FromMinutes(-5));
+
+        await _viewModel.CanLeaveAsync();
+
+        await _dialogs.ReceivedWithAnyArgs(1).ConfirmAsync(default!, default!, default!, default!);
+    }
+
+    [Fact]
+    public async Task Should_Delete_Draft_Photos_When_Technician_Discards_Entry()
+    {
+        _photoService.CaptureAsync(Arg.Any<CancellationToken>()).Returns(Jpeg);
+        await _viewModel.OnNavigatedToAsync(_workOrder.Id);
+        await _viewModel.TakePhotoCommand.ExecuteAsync(null);
+        var draft = _viewModel.Photos[0];
+        _dialogs.ConfirmAsync(default!, default!, default!, default!).ReturnsForAnyArgs(true);
+
+        (await _viewModel.CanLeaveAsync()).ShouldBeTrue();
+
+        File.Exists(draft.LocalPath).ShouldBeFalse();
+        (await _outbox.GetAllAsync()).ShouldAllBe(operation => operation.Kind == OutboxOperationKind.StartWork);
+    }
+
+    [Fact]
+    public async Task Should_Leave_Without_Asking_When_Entry_Was_Saved()
+    {
+        await _viewModel.OnNavigatedToAsync(_workOrder.Id);
+        _viewModel.Note = "Wymiana filtra";
+        await _viewModel.SaveCommand.ExecuteAsync(null);
+
+        (await _viewModel.CanLeaveAsync()).ShouldBeTrue();
+
+        await _dialogs.DidNotReceiveWithAnyArgs().ConfirmAsync(default!, default!, default!, default!);
     }
 
     [Fact]

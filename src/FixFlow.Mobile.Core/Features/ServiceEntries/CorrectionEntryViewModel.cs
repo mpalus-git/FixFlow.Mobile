@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FixFlow.Mobile.Core.Accessibility;
 using FixFlow.Mobile.Core.Api;
+using FixFlow.Mobile.Core.Dialogs;
 using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Navigation;
@@ -18,9 +19,11 @@ public sealed partial class CorrectionEntryViewModel(
     OutboxRepository outbox,
     OutboxWriter outboxWriter,
     INavigationService navigation,
-    IScreenReaderAnnouncer announcer) : ObservableObject, INavigatedTo<Guid>
+    IDialogService dialogs,
+    IScreenReaderAnnouncer announcer) : ObservableObject, INavigatedTo<Guid>, ILeaveGuard
 {
     private Guid _workOrderId;
+    private bool _saved;
 
     public ScreenState Screen { get; } = screen;
 
@@ -75,6 +78,10 @@ public sealed partial class CorrectionEntryViewModel(
         Screen.ShowContent(hasItems: true);
     }
 
+    public bool HasUnsavedChanges => !string.IsNullOrWhiteSpace(Reason) || Parts.Any(part => part.Quantity > 0);
+
+    public async Task<bool> CanLeaveAsync() => _saved || !HasUnsavedChanges || await ConfirmDiscardAsync();
+
     [RelayCommand]
     private Task ReloadAsync() => OnNavigatedToAsync(_workOrderId);
 
@@ -93,6 +100,13 @@ public sealed partial class CorrectionEntryViewModel(
         await outboxWriter.AddServiceEntryAsync(
             _workOrderId,
             new PendingServiceEntry(Guid.CreateVersion7(), Reason.Trim(), true, null, null, null, null, returned));
+        _saved = true;
         await navigation.GoBackAsync();
     }
+
+    private Task<bool> ConfirmDiscardAsync() => dialogs.ConfirmAsync(
+        AppResources.DiscardDraftTitle,
+        AppResources.DiscardDraftMessage,
+        AppResources.DiscardChangeButton,
+        AppResources.KeepEditingButton);
 }

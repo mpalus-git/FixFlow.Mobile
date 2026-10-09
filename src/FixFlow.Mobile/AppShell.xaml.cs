@@ -22,4 +22,27 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(NavigationRoute.For<SyncViewModel>(), typeof(SyncPage));
         Routing.RegisterRoute(NavigationRoute.For<SettingsViewModel>(), typeof(SettingsPage));
     }
+
+    protected override async void OnNavigating(ShellNavigatingEventArgs args)
+    {
+        ArgumentNullException.ThrowIfNull(args);
+        base.OnNavigating(args);
+        if (args.Source != ShellNavigationSource.Pop || CurrentPage?.BindingContext is not ILeaveGuard guard)
+        {
+            return;
+        }
+
+        var deferral = args.GetDeferral();
+        try
+        {
+            if (!await guard.CanLeaveAsync())
+            {
+                args.Cancel();
+            }
+        }
+        finally
+        {
+            deferral.Complete();
+        }
+    }
 }

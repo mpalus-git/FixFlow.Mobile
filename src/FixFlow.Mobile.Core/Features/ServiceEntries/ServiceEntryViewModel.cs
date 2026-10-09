@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FixFlow.Mobile.Core.Accessibility;
 using FixFlow.Mobile.Core.Api;
+using FixFlow.Mobile.Core.Dialogs;
 using FixFlow.Mobile.Core.Features.Sync;
 using FixFlow.Mobile.Core.Features.WorkOrders;
 using FixFlow.Mobile.Core.Formatting;
@@ -24,7 +25,8 @@ public sealed partial class ServiceEntryViewModel(
     BusinessClock clock,
     DisplayFormatter formatter,
     INavigationService navigation,
-    IScreenReaderAnnouncer announcer) : ObservableObject, INavigatedTo<Guid>
+    IDialogService dialogs,
+    IScreenReaderAnnouncer announcer) : ObservableObject, INavigatedTo<Guid>, ILeaveGuard
 {
     public const int MaxPhotos = 10;
 
@@ -33,6 +35,7 @@ public sealed partial class ServiceEntryViewModel(
     private DateTimeOffset _initialStart;
     private DateTimeOffset _initialFinish;
     private WorkTimer? _timer;
+    private bool _saved;
 
     public ScreenState Screen { get; } = screen;
 
@@ -116,6 +119,36 @@ public sealed partial class ServiceEntryViewModel(
         Screen.ShowContent(hasItems: true);
     }
 
+    public bool HasUnsavedChanges =>
+        !string.IsNullOrWhiteSpace(Note)
+        || Parts.Selected.Count > 0
+        || Photos.Count > 0
+        || Compose(StartDate, StartTime, _initialStart) != _initialStart
+        || Compose(FinishDate, FinishTime, _initialFinish) != _initialFinish;
+
+    public async Task<bool> CanLeaveAsync()
+    {
+        if (_saved || !HasUnsavedChanges)
+        {
+            return true;
+        }
+
+        if (!await ConfirmDiscardAsync())
+        {
+            return false;
+        }
+
+        foreach (var draft in Photos)
+        {
+            photoAttacher.Discard(draft.Photo);
+        }
+
+        Photos.Clear();
+        OnPhotosChanged();
+        _saved = true;
+        return true;
+    }
+
     [RelayCommand]
     private Task ReloadAsync() => OnNavigatedToAsync(_workOrderId);
 
@@ -190,8 +223,15 @@ public sealed partial class ServiceEntryViewModel(
             {
                 Photos = [.. Photos.Select(draft => draft.Photo)],
             });
+        _saved = true;
         await navigation.GoBackAsync();
     }
+
+    private Task<bool> ConfirmDiscardAsync() => dialogs.ConfirmAsync(
+        AppResources.DiscardDraftTitle,
+        AppResources.DiscardDraftMessage,
+        AppResources.DiscardChangeButton,
+        AppResources.KeepEditingButton);
 
     private async Task<DateTimeOffset?> LastFinishAsync(IReadOnlyList<OutboxOperation> workOrderOperations)
     {
