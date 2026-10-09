@@ -105,10 +105,10 @@ public sealed class OutboxIntegrationTests(ApiEnvironment environment)
 
         var summary = await device.Get<OutboxDispatcher>().DispatchAsync(CancellationToken.None);
 
-        summary.ShouldBe(new DispatchSummary(Sent: 0, Rejected: 0, Remaining: 1, SessionRejected: false));
         var waiting = (await device.Get<OutboxRepository>().GetAllAsync()).ShouldHaveSingleItem();
         waiting.AttemptCount.ShouldBe(1);
         waiting.NextAttemptAt.ShouldNotBeNull();
+        summary.ShouldBe(new DispatchSummary(Sent: 0, Rejected: 0, Remaining: 1, SessionRejected: false) { NextAttemptAt = waiting.NextAttemptAt });
         (await device.Get<OutboxRepository>().GetConflictsAsync()).ShouldBeEmpty();
         (await admin.GetAsync($"api/v1/work-orders/{scenario.WorkOrderId}")).GetProperty("status").GetString().ShouldBe("Assigned");
     }

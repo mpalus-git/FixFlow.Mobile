@@ -51,7 +51,8 @@ public static class CoreServiceCollectionExtensions
             provider.GetRequiredService<OutboxDispatcher>,
             provider.GetRequiredService<WorkOrderSyncService>,
             provider.GetRequiredService<PartSyncService>,
-            provider.GetRequiredService<IMessenger>()));
+            provider.GetRequiredService<IMessenger>(),
+            provider.GetRequiredService<TimeProvider>()));
         services.AddTransient<WorkOrderSyncService>();
         services.AddTransient<PartSyncService>();
         services.AddTransient<WorkOrderDetailsSyncService>();

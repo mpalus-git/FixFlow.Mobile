@@ -199,6 +199,21 @@ public sealed class OutboxDispatcherTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Should_Report_Earliest_Retry_Time_When_Operations_Wait_For_Retry()
+    {
+        await QueueAsync(_writer.StartWorkAsync(WorkOrderId));
+        var waiting = await _writer.CompleteWorkOrderAsync(OtherWorkOrderId);
+        await _outbox.RecordFailedAttemptAsync(waiting.Id, Now.AddSeconds(3), "503");
+        _api.Overrides[$"POST /api/v1/work-orders/{WorkOrderId}/start"] = () => new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
+
+        var summary = await DispatchAsync();
+
+        summary.Remaining.ShouldBe(2);
+        summary.NextAttemptAt.ShouldBe(Now.AddSeconds(3));
+        _api.Calls.ShouldHaveSingleItem();
+    }
+
+    [Fact]
     public async Task Should_Wait_For_Retry_After_When_Server_Limits_Requests()
     {
         await QueueAsync(_writer.StartWorkAsync(WorkOrderId));

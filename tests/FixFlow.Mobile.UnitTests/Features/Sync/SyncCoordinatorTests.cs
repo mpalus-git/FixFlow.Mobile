@@ -19,6 +19,7 @@ public sealed class SyncCoordinatorTests : IAsyncLifetime
     private const string ListCall = "GET /api/v1/work-orders";
     private const string ReadyCall = "GET /api/v1/system/ready";
     private static readonly Guid WorkOrderId = Guid.NewGuid();
+    private static readonly string StartCall = $"POST /api/v1/work-orders/{WorkOrderId}/start";
 
     private readonly TestUserDatabase _userDatabase = new();
     private readonly FakeTimeProvider _timeProvider = new(new DateTimeOffset(2026, 10, 5, 8, 0, 0, TimeSpan.Zero));
@@ -46,7 +47,8 @@ public sealed class SyncCoordinatorTests : IAsyncLifetime
             () => new OutboxDispatcher(client, _outbox, new ServiceEntryRepository(_userDatabase.Database), new PhotoUploadClient(httpClient), new PhotoStore(_userDatabase.Options, _userDatabase.Database), new OutboxRetryPolicy(() => 0.5), _timeProvider),
             () => new WorkOrderSyncService(client, new WorkOrderRepository(database), new SyncStateRepository(database, _timeProvider)),
             () => new PartSyncService(client, new PartRepository(database), new SyncStateRepository(database, _timeProvider)),
-            _messenger);
+            _messenger,
+            _timeProvider);
     }
 
     public async ValueTask InitializeAsync() => await _userDatabase.Database.OpenAsync(Guid.NewGuid());
@@ -172,6 +174,74 @@ public sealed class SyncCoordinatorTests : IAsyncLifetime
         startingNotices.ShouldBe(1);
         _api.Calls.ShouldAllBe(call => call == ReadyCall);
         (await _outbox.GetAllAsync()).ShouldHaveSingleItem();
+    }
+
+    [Fact]
+    public async Task Should_Send_Operation_Again_When_Retry_Time_Comes()
+    {
+        await new OutboxWriter(_outbox, _timeProvider, new WeakReferenceMessenger()).StartWorkAsync(WorkOrderId);
+        _api.Overrides[StartCall] = () => new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
+        (await _coordinator.SynchronizeAsync()).Dispatch!.Remaining.ShouldBe(1);
+        _api.Overrides.Remove(StartCall);
+
+        _timeProvider.Advance(TimeSpan.FromSeconds(4));
+        await Task.Delay(50, TestContext.Current.CancellationToken);
+        _api.Calls.Count(call => call == StartCall).ShouldBe(1);
+
+        var completed = WaitForCompletionAsync();
+        _timeProvider.Advance(TimeSpan.FromSeconds(1));
+        await completed;
+
+        _api.Calls.Count(call => call == StartCall).ShouldBe(2);
+        (await _outbox.GetAllAsync()).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Should_Schedule_Retry_When_Operation_Already_Waits_For_Retry()
+    {
+        var operation = await new OutboxWriter(_outbox, _timeProvider, new WeakReferenceMessenger()).StartWorkAsync(WorkOrderId);
+        await _outbox.RecordFailedAttemptAsync(operation.Id, _timeProvider.GetUtcNow().AddMinutes(1), "503");
+        await _coordinator.SynchronizeAsync();
+        _api.Calls.ShouldNotContain(StartCall);
+
+        var completed = WaitForCompletionAsync();
+        _timeProvider.Advance(TimeSpan.FromMinutes(1));
+        await completed;
+
+        _api.Calls.ShouldContain(StartCall);
+    }
+
+    [Fact]
+    public async Task Should_Retry_Only_After_Resume_When_Retries_Are_Suspended()
+    {
+        await new OutboxWriter(_outbox, _timeProvider, new WeakReferenceMessenger()).StartWorkAsync(WorkOrderId);
+        _api.Overrides[StartCall] = () => new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
+        _coordinator.SuspendRetries();
+        await _coordinator.SynchronizeAsync();
+        _api.Overrides.Remove(StartCall);
+
+        _timeProvider.Advance(TimeSpan.FromMinutes(15));
+        await Task.Delay(50, TestContext.Current.CancellationToken);
+        _api.Calls.Count(call => call == StartCall).ShouldBe(1);
+
+        await _coordinator.ResumeAsync();
+
+        _api.Calls.Count(call => call == StartCall).ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task Should_Not_Schedule_Retry_When_Session_Is_Rejected()
+    {
+        await new OutboxWriter(_outbox, _timeProvider, new WeakReferenceMessenger()).StartWorkAsync(WorkOrderId);
+        var operation = (await _outbox.GetAllAsync()).ShouldHaveSingleItem();
+        await _outbox.RecordFailedAttemptAsync(operation.Id, _timeProvider.GetUtcNow(), "503");
+        _api.Overrides[StartCall] = () => new HttpResponseMessage(HttpStatusCode.Unauthorized);
+        await _coordinator.SynchronizeAsync();
+
+        _timeProvider.Advance(TimeSpan.FromMinutes(15));
+        await Task.Delay(50, TestContext.Current.CancellationToken);
+
+        _api.Calls.Count(call => call == StartCall).ShouldBe(1);
     }
 
     public async ValueTask DisposeAsync()

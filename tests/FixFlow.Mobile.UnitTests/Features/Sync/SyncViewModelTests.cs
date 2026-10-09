@@ -46,7 +46,8 @@ public sealed class SyncViewModelTests : IAsyncLifetime
             () => throw new InvalidOperationException(),
             () => throw new InvalidOperationException(),
             () => throw new InvalidOperationException(),
-            _messenger);
+            _messenger,
+            _timeProvider);
         _viewModel = new SyncViewModel(
             new ScreenState(formatter),
             _userDatabase.Database,

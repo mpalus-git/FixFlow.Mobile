@@ -60,7 +60,8 @@ public sealed class WorkOrderListViewModelTests : IAsyncLifetime
             () => new OutboxDispatcher(api, _outbox, new ServiceEntryRepository(_userDatabase.Database), new PhotoUploadClient(httpClient), new PhotoStore(_userDatabase.Options, _userDatabase.Database), new OutboxRetryPolicy(() => 0.5), _timeProvider),
             () => sync,
             () => new PartSyncService(api, new PartRepository(_userDatabase.Database), syncStates),
-            _messenger);
+            _messenger,
+            _timeProvider);
         _viewModel = new WorkOrderListViewModel(
             new ScreenState(formatter),
             _userDatabase.Database,
