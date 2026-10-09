@@ -9,19 +9,26 @@
              x:DataType="viewModels:CompleteWorkOrderViewModel"
              Title="{x:Static resources:AppResources.CompleteTitle}">
     <Grid>
-        <VerticalStackLayout Padding="16"
-                             Spacing="8">
+        <Grid Padding="16"
+              RowSpacing="8"
+              VerticalOptions="{OnIdiom Default=Fill, Desktop=Start}"
+              RowDefinitions="Auto,Auto,Auto,*,Auto,Auto,Auto">
             <Label Text="{Binding Message}" />
 
-            <Label Text="{x:Static resources:AppResources.SignatureLabel}"
+            <Label Grid.Row="1"
+                   Text="{x:Static resources:AppResources.SignatureLabel}"
                    Style="{StaticResource SectionLabel}" />
-            <Label Text="{x:Static resources:AppResources.SignatureHint}"
+            <Label Grid.Row="2"
+                   Text="{x:Static resources:AppResources.SignatureHint}"
                    Style="{StaticResource SecondaryLabel}" />
-            <Border Style="{StaticResource InputBorder}"
+            <Border Grid.Row="3"
+                    Style="{StaticResource InputBorder}"
                     BackgroundColor="White"
-                    Padding="0">
+                    Padding="0"
+                    MinimumHeightRequest="{OnIdiom Default=120, Desktop=240}"
+                    MaximumHeightRequest="360"
+                    VerticalOptions="Start">
                 <workOrders:SignaturePad x:Name="Signature"
-                                         HeightRequest="200"
                                          BackgroundColor="White"
                                          LineColor="Black"
                                          LineWidth="4"
@@ -29,19 +36,20 @@
                                          ShouldClearOnFinish="False"
                                          SemanticProperties.Description="{x:Static resources:AppResources.SignaturePadDescription}" />
             </Border>
-            <Button Text="{x:Static resources:AppResources.SignatureClearButton}"
+            <Button Grid.Row="4"
+                    Text="{x:Static resources:AppResources.SignatureClearButton}"
                     Command="{Binding ClearCommand, Source={x:Reference Signature}, x:DataType=workOrders:SignaturePad}"
                     Style="{StaticResource OutlineButton}" />
 
-            <Label Text="{Binding ValidationMessage}"
+            <Label Grid.Row="5"
+                   Text="{Binding ValidationMessage}"
                    IsVisible="{Binding HasValidationMessage}"
-                   Style="{StaticResource ErrorLabel}"
-                   Margin="0,8,0,0" />
-            <Button Text="{x:Static resources:AppResources.CompleteWorkOrderButton}"
+                   Style="{StaticResource ErrorLabel}" />
+            <Button Grid.Row="6"
+                    Text="{x:Static resources:AppResources.CompleteWorkOrderButton}"
                     Command="{Binding CompleteCommand}"
-                    CommandParameter="{x:Reference Signature}"
-                    Margin="0,8,0,16" />
-        </VerticalStackLayout>
+                    CommandParameter="{x:Reference Signature}" />
+        </Grid>
 
         <controls:LoadingView Style="{StaticResource ScreenOverlay}"
                               IsVisible="{Binding Screen.IsLoading}" />
