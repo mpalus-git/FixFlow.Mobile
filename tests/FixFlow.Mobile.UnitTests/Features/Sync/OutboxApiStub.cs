@@ -12,6 +12,8 @@ internal sealed class OutboxApiStub
 
     public List<JsonDocument> SentStarts { get; } = [];
 
+    public List<JsonDocument> SentCompletions { get; } = [];
+
     public Dictionary<string, Func<HttpResponseMessage>> Overrides { get; } = [];
 
     public Dictionary<string, Func<Task<HttpResponseMessage>>> AsyncOverrides { get; } = [];
@@ -35,6 +37,11 @@ internal sealed class OutboxApiStub
         if (request.Content is not null && call.EndsWith("/start", StringComparison.Ordinal))
         {
             SentStarts.Add(JsonDocument.Parse(await request.Content.ReadAsStringAsync(cancellationToken)));
+        }
+
+        if (request.Content is not null && call.EndsWith("/complete", StringComparison.Ordinal))
+        {
+            SentCompletions.Add(JsonDocument.Parse(await request.Content.ReadAsStringAsync(cancellationToken)));
         }
 
         if (Overrides.TryGetValue(call, out var respond))

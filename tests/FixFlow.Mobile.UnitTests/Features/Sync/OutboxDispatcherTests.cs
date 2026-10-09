@@ -130,6 +130,31 @@ public sealed class OutboxDispatcherTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Should_Send_Completion_Time_From_Device_When_Completion_Is_Sent_Later()
+    {
+        var completedOffline = _timeProvider.GetUtcNow();
+        await QueueAsync(_writer.CompleteWorkOrderAsync(WorkOrderId));
+        _timeProvider.Advance(TimeSpan.FromHours(2));
+
+        await DispatchAsync();
+
+        _api.SentCompletions.ShouldHaveSingleItem().RootElement.GetProperty("completedAt").GetDateTimeOffset().ShouldBe(completedOffline);
+    }
+
+    [Fact]
+    public async Task Should_Send_Queue_Time_As_Completion_Time_When_Queued_Completion_Has_No_Time()
+    {
+        var queuedAt = _timeProvider.GetUtcNow();
+        await _outbox.EnqueueAsync(
+            new OutboxOperation(Guid.CreateVersion7(), WorkOrderId, OutboxOperationKind.CompleteWorkOrder, OutboxPayload.Empty, queuedAt, 0, null, null));
+        _timeProvider.Advance(TimeSpan.FromHours(2));
+
+        await DispatchAsync();
+
+        _api.SentCompletions.ShouldHaveSingleItem().RootElement.GetProperty("completedAt").GetDateTimeOffset().ShouldBe(queuedAt);
+    }
+
+    [Fact]
     public async Task Should_Keep_Operation_And_Hold_Later_Ones_When_Server_Is_Unavailable()
     {
         await QueueAsync(_writer.StartWorkAsync(WorkOrderId));

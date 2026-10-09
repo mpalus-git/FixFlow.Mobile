@@ -525,6 +525,9 @@
   <data name="ChangeStartedAt" xml:space="preserve">
     <value>Rozpoczęto: {0}</value>
   </data>
+  <data name="ChangeCompletedAt" xml:space="preserve">
+    <value>Zakończono: {0}</value>
+  </data>
   <data name="ChangeWorkTime" xml:space="preserve">
     <value>Czas pracy: {0} – {1}</value>
   </data>

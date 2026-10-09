@@ -120,7 +120,8 @@ public sealed class OutboxDispatcher(
     {
         OutboxOperationKind.StartWork => await api.StartWorkAsync(
             operation.WorkOrderId, new StartWorkRequest(OutboxPayload.StartedAt(operation)), cancellationToken),
-        OutboxOperationKind.CompleteWorkOrder => await api.CompleteWorkOrderAsync(operation.WorkOrderId, null, cancellationToken),
+        OutboxOperationKind.CompleteWorkOrder => await api.CompleteWorkOrderAsync(
+            operation.WorkOrderId, new CompleteWorkOrderRequest(null, OutboxPayload.CompletedAt(operation)), cancellationToken),
         _ => await api.AddServiceEntryAsync(operation.WorkOrderId, ToRequest(OutboxPayload.ToServiceEntry(operation)), cancellationToken),
     };
 

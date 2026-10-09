@@ -14,8 +14,8 @@ public sealed class OutboxIntegrationTests(ApiEnvironment environment)
         var scenario = await TechnicianScenario.CreateAsync(admin);
         await using var device = await TechnicianDevice.LogInAsync(environment.BaseAddress, scenario.Email, scenario.Password);
         var writer = device.Get<OutboxWriter>();
-        await writer.StartWorkAsync(scenario.WorkOrderId);
-        await writer.AddServiceEntryAsync(scenario.WorkOrderId, CreateEntry(scenario.PartId, quantity: 2));
+        var start = await writer.StartWorkAsync(scenario.WorkOrderId);
+        await writer.AddServiceEntryAsync(scenario.WorkOrderId, CreateEntry(scenario.PartId, quantity: 2, start));
         await writer.CompleteWorkOrderAsync(scenario.WorkOrderId);
 
         var summary = await device.Get<OutboxDispatcher>().DispatchAsync(CancellationToken.None);
@@ -33,8 +33,8 @@ public sealed class OutboxIntegrationTests(ApiEnvironment environment)
         await using var device = await TechnicianDevice.LogInAsync(environment.BaseAddress, scenario.Email, scenario.Password);
         var writer = device.Get<OutboxWriter>();
         var dispatcher = device.Get<OutboxDispatcher>();
-        await writer.StartWorkAsync(scenario.WorkOrderId);
-        var entry = CreateEntry(scenario.PartId, quantity: 3);
+        var start = await writer.StartWorkAsync(scenario.WorkOrderId);
+        var entry = CreateEntry(scenario.PartId, quantity: 3, start);
         await writer.AddServiceEntryAsync(scenario.WorkOrderId, entry);
         await dispatcher.DispatchAsync(CancellationToken.None);
 
@@ -87,17 +87,14 @@ public sealed class OutboxIntegrationTests(ApiEnvironment environment)
         (await admin.GetAsync($"api/v1/work-orders/{scenario.WorkOrderId}")).GetProperty("status").GetString().ShouldBe("Assigned");
     }
 
-    private static PendingServiceEntry CreateEntry(Guid partId, int quantity)
-    {
-        var workStartedAt = DateTimeOffset.UtcNow;
-        return new PendingServiceEntry(
+    private static PendingServiceEntry CreateEntry(Guid partId, int quantity, OutboxOperation start) =>
+        new(
             Guid.CreateVersion7(),
             "Wymiana filtra w teście integracyjnym",
             false,
-            workStartedAt,
-            workStartedAt.AddMinutes(1),
+            OutboxPayload.StartedAt(start),
+            DateTimeOffset.UtcNow,
             50.0614,
             19.9366,
             [new PendingServiceEntryPart(partId, "Filtr testowy", "FT", quantity, 12.34m)]);
-    }
 }

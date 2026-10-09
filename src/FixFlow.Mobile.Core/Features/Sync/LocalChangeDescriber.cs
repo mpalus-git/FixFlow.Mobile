@@ -19,6 +19,10 @@ public sealed class LocalChangeDescriber(DisplayFormatter formatter)
         {
             lines.Add(WorkOrderTexts.Format(AppResources.ChangeStartedAt, formatter.FormatDateTime(OutboxPayload.StartedAt(operation))));
         }
+        else if (operation.Kind == OutboxOperationKind.CompleteWorkOrder)
+        {
+            lines.Add(WorkOrderTexts.Format(AppResources.ChangeCompletedAt, formatter.FormatDateTime(OutboxPayload.CompletedAt(operation))));
+        }
         else if (operation.Kind == OutboxOperationKind.AddServiceEntry)
         {
             AddServiceEntryLines(lines, operation);

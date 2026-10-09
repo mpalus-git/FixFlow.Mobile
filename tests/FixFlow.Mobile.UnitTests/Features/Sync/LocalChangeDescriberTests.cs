@@ -72,6 +72,14 @@ public sealed class LocalChangeDescriberTests : IDisposable
         text.Split(Environment.NewLine).ShouldBe(["Rozpoczęcie pracy", "Rozpoczęto: 05.10.2026 10:00"]);
     }
 
+    [Fact]
+    public void Should_Describe_Completion_Time_When_Change_Is_Completion()
+    {
+        var text = _describer.Describe(Create(OutboxOperationKind.CompleteWorkOrder, OutboxPayload.Serialize(new PendingCompletion(Now))), "ZL-2026-0042");
+
+        text.Split(Environment.NewLine).ShouldBe(["ZL-2026-0042 · Zakończenie zlecenia", "Zakończono: 05.10.2026 10:00"]);
+    }
+
     public void Dispose() => _cultureScope.Dispose();
 
     private static OutboxOperation Create(OutboxOperationKind kind, string payload) =>
