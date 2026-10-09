@@ -2,7 +2,12 @@
 
 [![CI](https://github.com/mpalus-git/FixFlow.Mobile/actions/workflows/ci.yml/badge.svg)](https://github.com/mpalus-git/FixFlow.Mobile/actions/workflows/ci.yml)
 
-Aplikacja mobilna technika systemu FixFlow (.NET MAUI 10, Android i Windows). Technik widzi przypisane mu zlecenia, rozpoczyna pracę, dodaje wpisy serwisowe z czasem pracy, zużytymi częściami, zdjęciami i pozycją GPS, a na końcu zamyka zlecenie. Wszystko działa także bez zasięgu: zmiany zapisują się lokalnie i trafiają do API po odzyskaniu sieci.
+Aplikacja mobilna technika systemu FixFlow (.NET MAUI 10, Android i Windows). Technik widzi przypisane mu zlecenia, rozpoczyna pracę, dodaje wpisy serwisowe z czasem pracy, zużytymi częściami, zdjęciami i pozycją GPS, a na końcu zamyka zlecenie z podpisem klienta. Wszystko działa także bez zasięgu: zmiany zapisują się lokalnie i trafiają do API po odzyskaniu sieci.
+
+Pozostałe części systemu FixFlow:
+
+- [FixFlow.Api](https://github.com/mpalus-git/FixFlow.Api) - backend .NET 10 z PostgreSQL, źródło reguł biznesowych i kontraktu OpenAPI ([dokumentacja API na żywo](https://fixflow-api-us2p.onrender.com/scalar)).
+- [FixFlow.Web](https://github.com/mpalus-git/FixFlow.Web) - panel dyspozytora i administratora (React 19, TypeScript, TanStack Query), działający pod adresem [fix-flow-web.vercel.app](https://fix-flow-web.vercel.app).
 
 ## Wypróbowanie
 
@@ -23,21 +28,21 @@ Aplikacja łączy się z instancją demo API na Render. Konto technika (Jan Kowa
 
 ## Zrzuty ekranu
 
-| Moje zlecenia | Szczegóły zlecenia | Wpis serwisowy |
-|---|---|---|
-| ![Lista zleceń z podziałem na zaległe, dziś, nadchodzące i zakończone](docs/screenshots/work-orders.png) | ![Szczegóły zlecenia z klientem i urządzeniem](docs/screenshots/work-order-details.png) | ![Formularz wpisu serwisowego z czasem pracy i zużytą częścią](docs/screenshots/service-entry.png) |
+| Moje zlecenia | Szczegóły (tryb ciemny) | Wpisy i historia | Wpis serwisowy |
+|---|---|---|---|
+| ![Lista zleceń z podziałem na zaległe, nadchodzące i zakończone, z plakietkami statusu i priorytetu](docs/screenshots/work-orders.png) | ![Szczegóły zlecenia w toku z klientem, osobą kontaktową i urządzeniem w trybie ciemnym](docs/screenshots/work-order-details-dark.png) | ![Wpis serwisowy ze zdjęciem i pozycją GPS oraz historia zlecenia](docs/screenshots/work-order-history.png) | ![Formularz wpisu serwisowego z czasem pracy i zużytą częścią](docs/screenshots/service-entry.png) |
 
-| Praca offline z kolejką | Zmiana odrzucona przez serwer | Tryb ciemny |
-|---|---|---|
-| ![Lista bez połączenia z liczbą zmian do wysłania](docs/screenshots/offline-queue.png) | ![Ekran synchronizacji z rozpoczęciem odrzuconym po przekazaniu zlecenia innemu technikowi](docs/screenshots/conflict.png) | ![Szczegóły zlecenia w toku w trybie ciemnym](docs/screenshots/work-order-details-dark.png) |
+| Zakończenie z podpisem | Praca offline z kolejką | Zmiana odrzucona przez serwer | |
+|---|---|---|---|
+| ![Ekran zakończenia zlecenia z podpisem klienta](docs/screenshots/complete-signature.png) | ![Lista bez połączenia z paskiem stanu i liczbą zmian do wysłania](docs/screenshots/offline-queue.png) | ![Ekran synchronizacji z rozpoczęciem odrzuconym po przekazaniu zlecenia innemu technikowi i wstrzymanym wpisem](docs/screenshots/conflict.png) | |
 
 Praca bez sieci: rozpoczęcie zlecenia i wpis serwisowy czekają w kolejce, a po odzyskaniu połączenia trafiają do API w kolejności, w jakiej powstały.
 
 ![Rozpoczęcie zlecenia i wpis serwisowy bez sieci, potem synchronizacja po odzyskaniu połączenia](docs/screenshots/offline-sync.gif)
 
-Wersja Windows:
+Wersja Windows (treść ma ograniczoną szerokość, motyw ciemny):
 
-![Lista zleceń w wersji Windows](docs/screenshots/windows.png)
+![Lista zleceń w wersji Windows w trybie ciemnym](docs/screenshots/windows.png)
 
 ## Opis systemu
 
@@ -50,11 +55,11 @@ FixFlow to system obsługi zleceń serwisowych w terenie dla firmy naprawiające
 Technik może:
 
 - przeglądać swoje zlecenia w sekcjach zaległe, dziś, nadchodzące i zakończone ostatnio;
-- otworzyć szczegóły z klientem, urządzeniem, wpisami serwisowymi i swoimi wcześniejszymi zleceniami na tym urządzeniu, zadzwonić do klienta, otworzyć adres w aplikacji map i pobrać protokół PDF zakończonego zlecenia;
+- otworzyć szczegóły z klientem i osobą kontaktową, urządzeniem, wpisami serwisowymi, historią zlecenia (utworzenie, przypisanie, zmiana terminu, rozpoczęcie, zakończenie) i swoimi wcześniejszymi zleceniami na tym urządzeniu, zadzwonić do klienta, otworzyć adres w aplikacji map i pobrać protokół PDF zakończonego zlecenia;
 - rozpocząć zlecenie przypisane (Przypisane -> W toku), przy czym w toku może mieć najwyżej jedno; aplikacja zapisuje pozycję GPS z chwili rozpoczęcia, jeśli technik się na to zgodzi;
 - dodawać wpisy serwisowe z notatką, czasem pracy, częściami z katalogu (wyszukiwanie działa offline) i zdjęciami z aparatu lub z plików;
 - poprawić pomyłkę wpisem korygującym, który zwraca części najwyżej do ilości netto zużytej na zleceniu (wpisów nie da się edytować ani usuwać);
-- zakończyć zlecenie (W toku -> Zakończone), jeśli ma co najmniej jeden wpis;
+- zakończyć zlecenie (W toku -> Zakończone), jeśli ma co najmniej jeden wpis, z opcjonalnym podpisem klienta złożonym palcem lub myszą, który trafia do protokołu PDF;
 - dostać przypomnienie godzinę przed terminem zlecenia (Android);
 - przełączyć język (polski, angielski) i motyw (systemowy, jasny, ciemny).
 
@@ -65,7 +70,7 @@ Reguły biznesowe egzekwuje API. Aplikacja je odzwierciedla, czyli ukrywa niedoz
 | Obszar | Technologie |
 |---|---|
 | Podstawa | .NET 10, .NET MAUI 10 (Android API 29+, Windows unpackaged i self-contained), C# z Nullable i TreatWarningsAsErrors |
-| UI | XAML z kompilowanymi wiązaniami, Shell, CommunityToolkit.Mvvm (source generatory, WeakReferenceMessenger) |
+| UI | XAML z kompilowanymi wiązaniami, Shell, CommunityToolkit.Mvvm (source generatory, WeakReferenceMessenger), GraphicsView (pole podpisu) |
 | Komunikacja z API | Refit 16 z klientem i kontraktami generowanymi przez Refitter z OpenAPI, Microsoft.Extensions.Http.Resilience (Polly) |
 | Dane lokalne | SQLite (sqlite-net-pcl), osobny plik bazy dla każdego technika, własne migracje schematu |
 | Funkcje urządzenia | MAUI Essentials (Connectivity, SecureStorage, MediaPicker, Geolocation, Map, Launcher, Clipboard), Plugin.LocalNotification |
@@ -144,7 +149,7 @@ Kod jest podzielony na dwa projekty:
 - `src/FixFlow.Mobile.Core` (zwykłe `net10.0`, bez zależności od MAUI): ViewModele, synchronizacja, kolejka operacji, dostęp do SQLite, wygenerowany klient API, zasoby językowe i abstrakcje platformy (`INavigationService`, `IConnectivityService`, `ISecureStore`, `ILocationService` i inne). Dzięki temu cała logika jest testowana zwykłymi testami jednostkowymi, bez emulatora.
 - `src/FixFlow.Mobile`: widoki XAML, implementacje abstrakcji na MAUI Essentials, `MauiProgram` z rejestracją w DI i kod platformowy w `Platforms/`.
 
-W obu projektach kod jest podzielony według funkcji: `Features/Auth`, `WorkOrders`, `ServiceEntries`, `Parts`, `Sync`, `Settings`. Para widok i ViewModel to np. `WorkOrderListPage.xaml` w aplikacji i `WorkOrderListViewModel` w Core. Nawigacja idzie wyłącznie przez `INavigationService` z parametrem odbieranym przez interfejs `INavigatedTo<T>`, więc ViewModele nie znają Shell.
+W obu projektach kod jest podzielony według funkcji: `Features/Auth`, `WorkOrders`, `ServiceEntries`, `Parts`, `Sync`, `Settings`. Większe obszary mają podfoldery: `Sync/Outbox` (zapis i wysyłka kolejki), `Sync/Pull` (pobieranie z API), `Sync/Conflicts` (zmiany do wyjaśnienia) oraz `WorkOrders/List`, `WorkOrders/Details` i `WorkOrders/WorkTime` (licznik czasu pracy). Przypomnienia są w `Notifications`, a wspólne elementy ekranów (stany, pasek stanu) w `Screens`. Para widok i ViewModel to np. `WorkOrderListPage.xaml` w aplikacji i `WorkOrderListViewModel` w Core. Nawigacja idzie wyłącznie przez `INavigationService` z parametrem odbieranym przez interfejs `INavigatedTo<T>`, więc ViewModele nie znają Shell.
 
 ## Decyzje techniczne
 
@@ -154,11 +159,13 @@ Ekrany czytają najpierw dane z lokalnej bazy, a odświeżenie z API idzie w tle
 
 Dane pobrane z serwera nie są modyfikowane przez lokalne zmiany. Operacje czekające w kolejce są nakładane na wynik przy odczycie (status, wpis ze znacznikiem „Oczekuje na wysłanie”, dostępna ilość części), więc pobranie z API może zawsze nadpisać lokalną kopię (serwer wygrywa), a zmiany technika nie znikają z ekranu.
 
-`OutboxDispatcher` wysyła operacje ściśle w kolejności powstania w obrębie zlecenia; zlecenia są od siebie niezależne. Synchronizacja (`SyncCoordinator`, jedna naraz i najwyżej jeden przebieg w kolejce) rusza przy starcie i powrocie aplikacji na pierwszy plan, po odzyskaniu sieci, po każdej lokalnej zmianie i przy pull-to-refresh.
+`OutboxDispatcher` wysyła operacje ściśle w kolejności powstania w obrębie zlecenia; zlecenia są od siebie niezależne. Synchronizacja (`SyncCoordinator`, jedna naraz i najwyżej jeden przebieg w kolejce) rusza przy starcie i powrocie aplikacji na pierwszy plan, po odzyskaniu sieci, po każdej lokalnej zmianie i przy pull-to-refresh. Po każdym przebiegu koordynator ustawia jeden timer na najbliższy termin ponowienia operacji odrzuconej przejściowo, więc kolejka wychodzi sama także bez nowego wyzwalacza; timer jest wstrzymywany, gdy aplikacja schodzi w tło.
+
+Ruch sieciowy jest ograniczony: powrót na listę pobiera zlecenia ponownie dopiero wtedy, gdy ostatnie pobranie ma co najmniej 5 minut, a katalog części jest pobierany przy pull-to-refresh, po wysłaniu wpisu, który zmienił stan części, albo gdy jego kopia ma co najmniej 15 minut.
 
 ### Idempotencja
 
-Wpis serwisowy zużywa części, więc dwukrotne wysłanie tego samego wpisu byłoby błędem danych. Identyfikator wpisu i zdjęcia nadaje aplikacja (`Guid.CreateVersion7()`) w chwili zapisu offline, a API przy ponownym wysłaniu tego samego id zwraca 200 bez ponownego zdjęcia części ze stanu. Dla rozpoczęcia i zakończenia odpowiedź 409 jest sprawdzana pobraniem zlecenia: jeśli ma już docelowy status, operacja była wykonana wcześniej i jej odpowiedź się zgubiła. Obie zmiany w API powstały na potrzeby tej aplikacji, a scenariusz „odpowiedź zgubiona, wpis wysłany ponownie” jest pokryty testem integracyjnym.
+Wpis serwisowy zużywa części, więc dwukrotne wysłanie tego samego wpisu byłoby błędem danych. Identyfikator wpisu i zdjęcia nadaje aplikacja (`Guid.CreateVersion7()`) w chwili zapisu offline, a API przy ponownym wysłaniu tego samego id zwraca 200 bez ponownego zdjęcia części ze stanu. Ponowione rozpoczęcie i zakończenie zlecenia, które ma już docelowy status, API również przyjmuje odpowiedzią 200 z bieżącym stanem, więc 409 zawsze oznacza prawdziwy konflikt. Rozpoczęcie i zakończenie niosą czas z urządzenia z chwili zapisu offline, dzięki czemu historia zlecenia pokazuje, kiedy technik faktycznie zaczął i skończył pracę, a nie kiedy wróciła sieć. Te zmiany w API powstały na potrzeby tej aplikacji, a scenariusze „odpowiedź zgubiona, operacja wysłana ponownie” są pokryte testami integracyjnymi.
 
 ### Błędy: ponowienie czy konflikt
 
@@ -190,13 +197,21 @@ Kopia kontraktu jest w `openapi/fixflow-api.v1.json`. Refitter generuje z niej i
 
 API przyjmuje zdjęcia jako surowy JPEG pod identyfikatorem nadanym przez klienta (`PUT /api/v1/photos/{id}`, do 1 MiB), a wpis zawiera ich adresy. Dzięki temu adres zdjęcia jest znany offline, a wysłanie zdjęcia jest osobną operacją w kolejce, która musi się udać przed wysłaniem wpisu. Zdjęcia są skalowane do 1600 px na dłuższym boku z jakością JPEG 75, trzymane w katalogu danych aplikacji i usuwane po wysłaniu.
 
+### Podpis klienta
+
+Podpis jest zdjęciem wysyłanym w kolejce przed zakończeniem zlecenia, więc działa offline tak samo jak zdjęcia wpisów, a API wstawia go do protokołu PDF. Pole podpisu to `GraphicsView` z własnym `IDrawable`, bez zewnętrznej biblioteki: wspólny kod rysuje kreski na białym tle, a eksport do JPEG jest osobny dla platform (na Androidzie `PlatformBitmapExportService`, na Windows Win2D), bo eksport MAUI na Windows nie jest zaimplementowany. Wyjście z ekranu zakończenia z narysowanym podpisem, a także z niezapisanego wpisu lub korekty, wymaga potwierdzenia, niezależnie od tego, czy technik użyje systemowego przycisku Wstecz, strzałki paska czy przycisku wstecz na Windows.
+
+### Wygląd
+
+Paleta, znak aplikacji oraz plakietki statusu i priorytetu odpowiadają panelowi dyspozytora (kolory przeliczone z tokenów panelu), w trybie jasnym i ciemnym. Stan połączenia, komunikaty oraz liczby zmian do wysłania i do wyjaśnienia są zebrane w jednym pasku nad treścią, którego kolor zależy od najpoważniejszego stanu, a z listy prowadzi on do ekranu synchronizacji. W wersji Windows treść ma ograniczoną szerokość, żeby na dużym oknie nie rozciągała się na cały ekran.
+
 ### Strefa czasowa i formaty
 
 Daty są pokazywane w strefie Europe/Warsaw niezależnie od strefy urządzenia, a sekcje listy (dziś, zaległe) liczone są według dnia w Warszawie. Czas pochodzi z wstrzykiwanego `TimeProvider`, więc testy sprawdzają granicę dnia oraz czas letni i zimowy przy urządzeniu ustawionym na inną strefę. Formaty dat są zapisane jawnie dla każdego języka, bo wzorce domyślne zależą od wersji ICU na urządzeniu.
 
 ### Dostępność
 
-Elementy interaktywne mają opisy dla TalkBack i Narratora, a błędy logowania i walidacji formularzy są ogłaszane czytnikowi ekranu. Dwie poprawki wynikają z zachowania MAUI: na Androidzie opis (`SemanticProperties.Description`) pola tekstowego trafia do drzewa dostępności razem z surową treścią pola, więc pole hasła dostaje etykietę przez `Hint`, żeby hasło nie wyciekło do usług dostępności. Na Windows elementy `CollectionView` miały w UI Automation nazwę typu MAUI zamiast treści, więc karty listy i nagłówki sekcji dostają nazwy z widocznych tekstów.
+Elementy interaktywne mają opisy dla TalkBack i Narratora. Czytnik ekranu ogłasza błędy logowania i walidacji formularzy, nowe komunikaty na pasku stanu, utratę i powrót sieci oraz wynik ręcznej synchronizacji. Układ jest sprawdzony przy czcionce systemowej 130% i 200% na ekranie 360 dp: plakietka statusu przechodzi pod numer zlecenia, przyciski się zawijają, a pole podpisu zachowuje minimalną wysokość. Dwie poprawki wynikają z zachowania MAUI: na Androidzie opis (`SemanticProperties.Description`) pola tekstowego trafia do drzewa dostępności razem z surową treścią pola, więc pole hasła dostaje etykietę przez `Hint`, żeby hasło nie wyciekło do usług dostępności. Na Windows elementy `CollectionView` miały w UI Automation nazwę typu MAUI zamiast treści, więc karty listy i nagłówki sekcji dostają nazwy z widocznych tekstów.
 
 ### Pozostałe
 
@@ -210,17 +225,17 @@ Elementy interaktywne mają opisy dla TalkBack i Narratora, a błędy logowania 
 
 | Projekt | Liczba | Zakres |
 |---|---|---|
-| `FixFlow.Mobile.UnitTests` | 400 | ViewModele (komendy, stany, walidacja, widoczność akcji, ogłaszanie błędów), kolejka operacji (kolejność, ponawianie, klasyfikacja błędów, konflikty), nakładanie zmian oczekujących, sesja i równoległe odświeżanie tokena, mapowanie ProblemDetails, migracje i repozytoria SQLite, sprzątanie zdjęć, daty w Europe/Warsaw, planowanie przypomnień |
-| `FixFlow.Mobile.IntegrationTests` | 12 | synchronizacja na prawdziwym API |
+| `FixFlow.Mobile.UnitTests` | 481 | ViewModele (komendy, stany, walidacja, widoczność akcji, ochrona niezapisanych formularzy, ogłaszanie komunikatów), pasek stanu, kolejka operacji (kolejność, ponawianie, timer ponowień, klasyfikacja błędów, konflikty), nakładanie zmian oczekujących, historia zlecenia, sesja i równoległe odświeżanie tokena, mapowanie ProblemDetails, migracje i repozytoria SQLite, sprzątanie zdjęć, daty w Europe/Warsaw, planowanie przypomnień |
+| `FixFlow.Mobile.IntegrationTests` | 14 | synchronizacja na prawdziwym API |
 | `FixFlow.Tools.Tests` | 40 | usuwanie i wykrywanie komentarzy |
 
 Testy jednostkowe używają SQLite na prawdziwym pliku w katalogu tymczasowym (bez mockowania bazy), własnego `HttpMessageHandler` zamiast HttpClient i NSubstitute tylko dla abstrakcji platformy.
 
-Testy integracyjne uruchamiają przez Testcontainers PostgreSQL 18 i obraz `ghcr.io/mpalus-git/fixflow.api` przypięty do konkretnego commita, a dane każdego testu zakłada konto administratora. Sprawdzają m.in. pełny przebieg technika (logowanie, rozpoczęcie, wpis z częścią, zakończenie), wysłanie zdjęcia przed wpisem, odrzucenie rozpoczęcia po przekazaniu zlecenia innemu technikowi, brak duplikatu wpisu wysłanego ponownie po zgubionej odpowiedzi oraz zachowanie kolejki przy zatrzymanym kontenerze API.
+Testy integracyjne uruchamiają przez Testcontainers PostgreSQL 18 i obraz `ghcr.io/mpalus-git/fixflow.api` przypięty do konkretnego commita, a dane każdego testu zakłada konto administratora. Sprawdzają m.in. pełny przebieg technika (logowanie, rozpoczęcie, wpis z częścią, zakończenie), wysłanie zdjęcia przed wpisem, zakończenie z podpisem klienta, wpis korygujący zwracający części, odrzucenie rozpoczęcia po przekazaniu zlecenia innemu technikowi, ponowienie wpisu odrzuconego z braku części po dostawie, brak duplikatu wpisu, rozpoczęcia i zakończenia wysłanych ponownie po zgubionej odpowiedzi oraz zachowanie kolejki przy zatrzymanym kontenerze API.
 
 CI uruchamia osobno: build i testy jednostkowe, testy integracyjne, kontrolę komentarzy, kontrolę wygenerowanego klienta, porównanie kontraktu z API (ostrzeżenie), build Androida i build Windows. Pokrycie linii `FixFlow.Mobile.Core` z testów jednostkowych i integracyjnych razem trafia do podsumowania przebiegu, z podziałem na obszary, bez progów. Wydanie na tag `v*` buduje podpisany APK i archiwum zip wersji Windows.
 
-Wydajność zmierzona na APK wydania 1.0.0 na emulatorze Pixel 9 (Android 16): zimny start do pierwszej klatki (`am start -W`, mediana z 11 prób) 1,1 s zarówno do ekranu logowania, jak i do listy z zapisaną sesją. Przy przewijaniu (`dumpsys gfxinfo`) 3,4% klatek listy i 1,8% klatek szczegółów przekracza budżet klatki, mediana czasu klatki to 17 ms. Wyniki nie wymagały optymalizacji.
+Wydajność zmierzona na podpisanym APK wydania na emulatorze Pixel 9 (Android 16): zimny start do pierwszej klatki (`am start -W`, mediana z 11 prób) 1,1 s zarówno do ekranu logowania, jak i do listy z zapisaną sesją. Przy przewijaniu (`dumpsys gfxinfo`) 3,4% klatek listy i 1,8% klatek szczegółów przekracza budżet klatki, mediana czasu klatki to 17 ms. Wyniki nie wymagały optymalizacji.
 
 ## Ograniczenia
 
