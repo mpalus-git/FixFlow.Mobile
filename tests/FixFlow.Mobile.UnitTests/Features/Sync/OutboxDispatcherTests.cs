@@ -53,7 +53,7 @@ public sealed class OutboxDispatcherTests : IAsyncLifetime
 
         var summary = await DispatchAsync();
 
-        summary.ShouldBe(new DispatchSummary(Sent: 3, Rejected: 0, Remaining: 0, SessionRejected: false));
+        summary.ShouldBe(new DispatchSummary(Sent: 3, Rejected: 0, Remaining: 0, SessionRejected: false) { ChangedPartStock = true });
         _api.Calls.ShouldBe([$"POST /api/v1/work-orders/{WorkOrderId}/start", $"POST /api/v1/work-orders/{WorkOrderId}/service-entries", $"POST /api/v1/work-orders/{WorkOrderId}/complete"]);
         var sent = _api.SentEntries.ShouldHaveSingleItem().RootElement;
         sent.GetProperty("id").GetGuid().ShouldBe(entry.Id);
@@ -196,6 +196,18 @@ public sealed class OutboxDispatcherTests : IAsyncLifetime
 
         summary.Sent.ShouldBe(1);
         _api.Calls.ShouldContain($"POST /api/v1/work-orders/{OtherWorkOrderId}/complete");
+    }
+
+    [Fact]
+    public async Task Should_Not_Report_Part_Stock_Change_When_Sent_Entry_Has_No_Parts()
+    {
+        await QueueAsync(_writer.AddServiceEntryAsync(
+            WorkOrderId, new PendingServiceEntry(Guid.CreateVersion7(), "Przegląd", false, Now.AddHours(-1), Now, null, null, [])));
+
+        var summary = await DispatchAsync();
+
+        summary.Sent.ShouldBe(1);
+        summary.ChangedPartStock.ShouldBeFalse();
     }
 
     [Fact]

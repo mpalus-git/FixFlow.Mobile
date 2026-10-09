@@ -26,6 +26,7 @@ public sealed class OutboxDispatcher(
         var operations = await outbox.GetAllAsync();
         int sent = 0, rejected = 0;
         DateTimeOffset? nextAttemptAt = null;
+        var changedPartStock = false;
 
         foreach (var workOrderQueue in operations.GroupBy(operation => operation.WorkOrderId))
         {
@@ -51,13 +52,14 @@ public sealed class OutboxDispatcher(
                         photos.Delete(OutboxPayload.PhotoId(operation));
                     }
 
+                    changedPartStock |= operation.Kind == OutboxOperationKind.AddServiceEntry && OutboxPayload.ToServiceEntry(operation).Parts.Count > 0;
                     sent++;
                     continue;
                 }
 
                 if (error.Kind == ApiErrorKind.Unauthorized)
                 {
-                    return new DispatchSummary(sent, rejected, operations.Count - sent - rejected, SessionRejected: true);
+                    return new DispatchSummary(sent, rejected, operations.Count - sent - rejected, SessionRejected: true) { ChangedPartStock = changedPartStock };
                 }
 
                 if (error.ShouldRetry)
@@ -85,7 +87,11 @@ public sealed class OutboxDispatcher(
             }
         }
 
-        return new DispatchSummary(sent, rejected, operations.Count - sent - rejected, SessionRejected: false) { NextAttemptAt = nextAttemptAt };
+        return new DispatchSummary(sent, rejected, operations.Count - sent - rejected, SessionRejected: false)
+        {
+            NextAttemptAt = nextAttemptAt,
+            ChangedPartStock = changedPartStock,
+        };
     }
 
     private static DateTimeOffset Earliest(DateTimeOffset? current, DateTimeOffset candidate) =>

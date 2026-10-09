@@ -46,6 +46,7 @@ public sealed class PartSyncServiceTests : IAsyncLifetime
         (await _parts.SearchAsync("czesc-", 500)).Count.ShouldBe(130);
         (await _parts.SearchAsync("Stara")).ShouldBeEmpty();
         _handler.Requests.Select(request => HttpUtility.ParseQueryString(request.RequestUri!.Query)["page"]).ShouldBe(["1", "2"]);
+        (await _service.GetLastPulledAtAsync()).ShouldNotBeNull();
     }
 
     [Fact]
@@ -58,6 +59,7 @@ public sealed class PartSyncServiceTests : IAsyncLifetime
 
         result.Outcome.ShouldBe(PullOutcome.Failed);
         (await _parts.SearchAsync("filtr")).ShouldHaveSingleItem().StockQuantity.ShouldBe(4);
+        (await _service.GetLastPulledAtAsync()).ShouldBeNull();
     }
 
     public async ValueTask DisposeAsync()

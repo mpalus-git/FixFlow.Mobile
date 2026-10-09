@@ -21,7 +21,7 @@ public sealed class OutboxIntegrationTests(ApiEnvironment environment)
 
         var summary = await device.Get<OutboxDispatcher>().DispatchAsync(CancellationToken.None);
 
-        summary.ShouldBe(new DispatchSummary(Sent: 3, Rejected: 0, Remaining: 0, SessionRejected: false));
+        summary.ShouldBe(new DispatchSummary(Sent: 3, Rejected: 0, Remaining: 0, SessionRejected: false) { ChangedPartStock = true });
         (await admin.GetAsync($"api/v1/work-orders/{scenario.WorkOrderId}")).GetProperty("status").GetString().ShouldBe("Completed");
         (await admin.GetAsync($"api/v1/parts/{scenario.PartId}")).GetProperty("stockQuantity").GetInt32().ShouldBe(TechnicianScenario.InitialStock - 2);
         await device.Get<WorkOrderDetailsSyncService>().PullAsync(scenario.WorkOrderId, CancellationToken.None);

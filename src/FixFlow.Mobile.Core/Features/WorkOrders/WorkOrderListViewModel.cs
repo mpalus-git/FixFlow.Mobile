@@ -107,7 +107,7 @@ public sealed partial class WorkOrderListViewModel
             }
 
             Screen.SetOnline();
-            var result = await _coordinator.SynchronizeAsync();
+            var result = await _coordinator.SynchronizeAsync(refreshPartCatalog: true);
             Notice = null;
             if (result.Pull?.Outcome == PullOutcome.Succeeded)
             {

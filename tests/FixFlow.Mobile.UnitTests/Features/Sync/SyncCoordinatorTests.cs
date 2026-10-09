@@ -18,6 +18,7 @@ public sealed class SyncCoordinatorTests : IAsyncLifetime
 {
     private const string ListCall = "GET /api/v1/work-orders";
     private const string ReadyCall = "GET /api/v1/system/ready";
+    private const string PartsCall = "GET /api/v1/parts";
     private static readonly Guid WorkOrderId = Guid.NewGuid();
     private static readonly string StartCall = $"POST /api/v1/work-orders/{WorkOrderId}/start";
 
@@ -242,6 +243,53 @@ public sealed class SyncCoordinatorTests : IAsyncLifetime
         await Task.Delay(50, TestContext.Current.CancellationToken);
 
         _api.Calls.Count(call => call == StartCall).ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Should_Skip_Part_Catalog_When_It_Was_Pulled_Recently()
+    {
+        await _coordinator.SynchronizeAsync();
+        _timeProvider.Advance(SyncCoordinator.PartCatalogMaxAge - TimeSpan.FromSeconds(1));
+
+        await _coordinator.SynchronizeAsync();
+
+        _api.Calls.Count(call => call == ListCall).ShouldBe(2);
+        _api.Calls.Count(call => call == PartsCall).ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Should_Pull_Part_Catalog_When_It_Is_Older_Than_Limit()
+    {
+        await _coordinator.SynchronizeAsync();
+        _timeProvider.Advance(SyncCoordinator.PartCatalogMaxAge);
+
+        await _coordinator.SynchronizeAsync();
+
+        _api.Calls.Count(call => call == PartsCall).ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task Should_Pull_Part_Catalog_When_Sent_Entry_Changed_Part_Stock()
+    {
+        await _coordinator.SynchronizeAsync();
+        var now = _timeProvider.GetUtcNow();
+        await new OutboxWriter(_outbox, _timeProvider, new WeakReferenceMessenger()).AddServiceEntryAsync(
+            WorkOrderId,
+            new PendingServiceEntry(Guid.CreateVersion7(), "Wymiana filtra", false, now.AddHours(-1), now, null, null, [new PendingServiceEntryPart(Guid.NewGuid(), "Filtr", "FP-100", 1, 12.34m)]));
+
+        await _coordinator.SynchronizeAsync();
+
+        _api.Calls.Count(call => call == PartsCall).ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task Should_Pull_Part_Catalog_When_User_Requests_Refresh()
+    {
+        await _coordinator.SynchronizeAsync();
+
+        await _coordinator.SynchronizeAsync(refreshPartCatalog: true);
+
+        _api.Calls.Count(call => call == PartsCall).ShouldBe(2);
     }
 
     public async ValueTask DisposeAsync()

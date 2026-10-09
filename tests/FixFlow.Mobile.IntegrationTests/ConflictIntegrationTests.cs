@@ -47,7 +47,7 @@ public sealed class ConflictIntegrationTests(ApiEnvironment environment)
         await device.Get<ConflictResolver>().RetryAsync(entry.Id);
         var summary = await dispatcher.DispatchAsync(CancellationToken.None);
 
-        summary.ShouldBe(new DispatchSummary(Sent: 1, Rejected: 0, Remaining: 0, SessionRejected: false));
+        summary.ShouldBe(new DispatchSummary(Sent: 1, Rejected: 0, Remaining: 0, SessionRejected: false) { ChangedPartStock = true });
         using var entries = await device.Get<IFixFlowApi>().ListServiceEntriesAsync(scenario.WorkOrderId, CancellationToken.None);
         entries.Content.ShouldNotBeNull().ShouldHaveSingleItem().Id.ShouldBe(OutboxPayload.ToServiceEntry(entry).Id);
         (await admin.GetAsync($"api/v1/parts/{scarcePartId}")).GetProperty("stockQuantity").GetInt32().ShouldBe(4);
