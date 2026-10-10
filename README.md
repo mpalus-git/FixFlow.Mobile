@@ -1,6 +1,8 @@
 # FixFlow.Mobile
 
 [![CI](https://github.com/mpalus-git/FixFlow.Mobile/actions/workflows/ci.yml/badge.svg)](https://github.com/mpalus-git/FixFlow.Mobile/actions/workflows/ci.yml)
+![Platformy](https://img.shields.io/badge/platformy-Android%20%7C%20Windows-0D736A)
+![.NET MAUI 10](https://img.shields.io/badge/.NET%20MAUI-10-512BD4)
 
 Aplikacja mobilna technika systemu FixFlow (.NET MAUI 10, Android i Windows). Technik widzi przypisane mu zlecenia, rozpoczyna pracę, dodaje wpisy serwisowe z czasem pracy, zużytymi częściami, zdjęciami i pozycją GPS, a na końcu zamyka zlecenie z podpisem klienta. Wszystko działa także bez zasięgu: zmiany zapisują się lokalnie i trafiają do API po odzyskaniu sieci.
 
@@ -20,11 +22,10 @@ Najnowsze wydanie: [github.com/mpalus-git/FixFlow.Mobile/releases/latest](https:
 
 Plik exe nie jest podpisany certyfikatem, więc przy pierwszym uruchomieniu Windows SmartScreen pokaże ostrzeżenie: trzeba wybrać „Więcej informacji”, a potem „Uruchom mimo to”.
 
-Aplikacja łączy się z instancją demo API na Render. Konto technika (Jan Kowalski) ma dane podane w [README FixFlow.Api](https://github.com/mpalus-git/FixFlow.Api#opis-systemu), a w wydaniu można też użyć przycisku „Zaloguj się kontem demo”. Inne role po zalogowaniu dostają link do [panelu dyspozytora](https://fix-flow-web.vercel.app). Warto wiedzieć, że:
+Aplikacja łączy się z instancją demo API na Render. Konto technika (Jan Kowalski) ma dane podane w [README FixFlow.Api](https://github.com/mpalus-git/FixFlow.Api#opis-systemu), a w wydaniu można też użyć przycisku „Zaloguj się kontem demo”. Inne role po zalogowaniu dostają link do [panelu dyspozytora](https://fix-flow-web.vercel.app). Instancja demo:
 
 - dane demo są wspólne dla wszystkich odwiedzających i wracają do stanu początkowego codziennie o 2:00 UTC;
-- serwer działa na darmowym planie, więc po okresie bezczynności startuje do minuty; aplikacja pokazuje wtedy pasek „Serwer się uruchamia” i do tego czasu pracuje na danych lokalnych;
-- pracę offline najłatwiej zobaczyć, wyłączając sieć w trakcie pracy i włączając ją z powrotem.
+- serwer działa na darmowym planie, więc po okresie bezczynności startuje do minuty; aplikacja pokazuje wtedy pasek „Serwer się uruchamia” i do tego czasu pracuje na danych lokalnych.
 
 ## Zrzuty ekranu
 
@@ -63,7 +64,7 @@ Technik może:
 - dostać przypomnienie godzinę przed terminem zlecenia (Android);
 - przełączyć język (polski, angielski) i motyw (systemowy, jasny, ciemny).
 
-Reguły biznesowe egzekwuje API. Aplikacja je odzwierciedla, czyli ukrywa niedozwolone akcje i blokuje lokalnie oczywiste błędy, ale zawsze obsługuje odpowiedź błędu z serwera, także z opóźnieniem, gdy zmiana zrobiona offline zostanie odrzucona przy synchronizacji.
+Reguły biznesowe egzekwuje API. Aplikacja ukrywa niedozwolone akcje i obsługuje odpowiedź błędu z serwera, także opóźnioną, gdy zmiana offline zostanie odrzucona przy synchronizacji.
 
 ## Stack
 
@@ -163,11 +164,11 @@ Dane pobrane z serwera nie są modyfikowane przez lokalne zmiany. Operacje czeka
 
 Ruch sieciowy jest ograniczony: powrót na listę pobiera zlecenia ponownie dopiero wtedy, gdy ostatnie pobranie ma co najmniej 5 minut, a katalog części jest pobierany przy pull-to-refresh, po wysłaniu wpisu, który zmienił stan części, albo gdy jego kopia ma co najmniej 15 minut.
 
-### Idempotencja
+### Ponowne wysłanie bez duplikatów
 
-Wpis serwisowy zużywa części, więc dwukrotne wysłanie tego samego wpisu byłoby błędem danych. Identyfikator wpisu i zdjęcia nadaje aplikacja (`Guid.CreateVersion7()`) w chwili zapisu offline, a API przy ponownym wysłaniu tego samego id zwraca 200 bez ponownego zdjęcia części ze stanu. Ponowione rozpoczęcie i zakończenie zlecenia, które ma już docelowy status, API również przyjmuje odpowiedzią 200 z bieżącym stanem, więc 409 zawsze oznacza prawdziwy konflikt. Rozpoczęcie i zakończenie niosą czas z urządzenia z chwili zapisu offline, dzięki czemu historia zlecenia pokazuje, kiedy technik faktycznie zaczął i skończył pracę, a nie kiedy wróciła sieć. Te zmiany w API powstały na potrzeby tej aplikacji, a scenariusze „odpowiedź zgubiona, operacja wysłana ponownie” są pokryte testami integracyjnymi.
+Identyfikatory wpisów i zdjęć nadaje aplikacja (`Guid.CreateVersion7()`) przy zapisie offline. Gdy odpowiedź się zgubi i kolejka wyśle wpis jeszcze raz, API rozpoznaje to samo id, zwraca 200 i nie zdejmuje części ze stanu drugi raz. Ponowione rozpoczęcie lub zakończenie zlecenia, które ma już docelowy status, też dostaje 200, więc 409 zawsze oznacza konflikt. Rozpoczęcie i zakończenie niosą czas z urządzenia, więc historia pokazuje, kiedy technik faktycznie pracował, a nie kiedy wróciła sieć.
 
-### Błędy: ponowienie czy konflikt
+### Klasyfikacja błędów
 
 Odpowiedzi błędów są mapowane z ProblemDetails (`errorCode`, błędy pól, `Retry-After`) i klasyfikowane:
 
@@ -177,13 +178,13 @@ Odpowiedzi błędów są mapowane z ProblemDetails (`errorCode`, błędy pól, `
 | 401 | wysyłka się zatrzymuje, kolejka zostaje bez zmian do ponownego zalogowania |
 | inne 4xx, w tym 404 po odebraniu zlecenia, 409 i brak części na stanie | operacja trafia do „Do wyjaśnienia”, a dalsze zmiany tego zlecenia czekają na decyzję technika |
 
-Nic nie znika po cichu i nic nie jest ślepo nadpisywane. Ekran synchronizacji pokazuje przyczynę przetłumaczoną po `errorCode` (gdy tłumaczenia brak, `detail` z ProblemDetails) i treść lokalnej zmiany do skopiowania. Technik może ponowić zmianę, gdy przyczyna zniknie (np. po dostawie części), odrzucić ją albo odrzucić wszystkie zmiany zlecenia. Odrzucenie sprząta też dane zależne: licznik czasu, pliki zdjęć.
+Ekran synchronizacji pokazuje przyczynę przetłumaczoną po `errorCode` (gdy tłumaczenia brak, `detail` z ProblemDetails) i treść lokalnej zmiany do skopiowania. Technik może ponowić zmianę, gdy przyczyna zniknie (np. po dostawie części), odrzucić ją albo odrzucić wszystkie zmiany zlecenia. Odrzucenie sprząta też dane zależne: licznik czasu, pliki zdjęć.
 
 ### Sesja i odświeżanie tokenów single-flight
 
 Access token jest tylko w pamięci, refresh token w SecureStorage. API rotuje refresh token przy każdym odświeżeniu, a ponowne użycie starego unieważnia całą rodzinę tokenów. Dlatego `TokenRefresher` odświeża pod `SemaphoreSlim`: równoległe żądania, które dostały 401, czekają na jedno odświeżenie, a wewnątrz blokady sprawdzane jest, czy inne żądanie już nie wymieniło tokena. `AuthenticationHandler` powtarza żądanie najwyżej raz. Po 429 (limit 10 logowań i odświeżeń na minutę) nowa próba czeka do czasu z `Retry-After`.
 
-Wygaśnięcie sesji przenosi do logowania, ale lokalne dane i kolejka zostają: po ponownym zalogowaniu tego samego technika synchronizacja rusza dalej. Każdy technik ma osobny plik bazy, więc zmiany jednej osoby nigdy nie zostaną wysłane na konto innej. Start bez sieci z zapisaną sesją otwiera dane lokalne bez wymuszania logowania. Świadome wylogowanie wymaga potwierdzenia z liczbą niewysłanych zmian i usuwa dane technika z urządzenia.
+Wygaśnięcie sesji przenosi do logowania, ale lokalne dane i kolejka zostają: po ponownym zalogowaniu tego samego technika synchronizacja rusza dalej. Każdy technik ma osobny plik bazy i osobną kolejkę. Start bez sieci z zapisaną sesją otwiera dane lokalne bez wymuszania logowania. Świadome wylogowanie wymaga potwierdzenia z liczbą niewysłanych zmian i usuwa dane technika z urządzenia.
 
 ### Uśpiony serwer
 
@@ -203,7 +204,7 @@ Podpis jest zdjęciem wysyłanym w kolejce przed zakończeniem zlecenia, więc d
 
 ### Wygląd
 
-Paleta, znak aplikacji oraz plakietki statusu i priorytetu odpowiadają panelowi dyspozytora (kolory przeliczone z tokenów panelu), w trybie jasnym i ciemnym. Stan połączenia, komunikaty oraz liczby zmian do wysłania i do wyjaśnienia są zebrane w jednym pasku nad treścią, którego kolor zależy od najpoważniejszego stanu, a z listy prowadzi on do ekranu synchronizacji. W wersji Windows treść ma ograniczoną szerokość, żeby na dużym oknie nie rozciągała się na cały ekran.
+Paleta, znak aplikacji oraz plakietki statusu i priorytetu odpowiadają panelowi dyspozytora (kolory przeliczone z tokenów panelu), w trybie jasnym i ciemnym. Stan połączenia, komunikaty oraz liczby zmian do wysłania i do wyjaśnienia są zebrane w jednym pasku nad treścią, którego kolor zależy od najpoważniejszego stanu, a z listy prowadzi on do ekranu synchronizacji.
 
 ### Strefa czasowa i formaty
 
@@ -235,14 +236,14 @@ Testy integracyjne uruchamiają przez Testcontainers PostgreSQL 18 i obraz `ghcr
 
 CI uruchamia osobno: build i testy jednostkowe, testy integracyjne, kontrolę komentarzy, kontrolę wygenerowanego klienta, porównanie kontraktu z API (ostrzeżenie), build Androida i build Windows. Pokrycie linii `FixFlow.Mobile.Core` z testów jednostkowych i integracyjnych razem trafia do podsumowania przebiegu, z podziałem na obszary, bez progów. Wydanie na tag `v*` buduje podpisany APK i archiwum zip wersji Windows.
 
-Wydajność zmierzona na podpisanym APK wydania na emulatorze Pixel 9 (Android 16): zimny start do pierwszej klatki (`am start -W`, mediana z 11 prób) 1,1 s zarówno do ekranu logowania, jak i do listy z zapisaną sesją. Przy przewijaniu (`dumpsys gfxinfo`) 3,4% klatek listy i 1,8% klatek szczegółów przekracza budżet klatki, mediana czasu klatki to 17 ms. Wyniki nie wymagały optymalizacji.
+Wydajność zmierzona na podpisanym APK wydania na emulatorze Pixel 9 (Android 16): zimny start do pierwszej klatki (`am start -W`, mediana z 11 prób) 1,1 s zarówno do ekranu logowania, jak i do listy z zapisaną sesją. Przy przewijaniu (`dumpsys gfxinfo`) 3,4% klatek listy i 1,8% klatek szczegółów przekracza budżet klatki, mediana czasu klatki to 17 ms.
 
 ## Ograniczenia
 
 - Brak synchronizacji w tle: kolejka jest wysyłana tylko wtedy, gdy aplikacja działa. Zmiany zrobione offline czekają do jej otwarcia po odzyskaniu sieci, a przypomnienia o zmianie terminu w panelu docierają po najbliższej synchronizacji.
 - Brak wersji iOS i Mac Catalyst.
 - Brak automatycznych testów UI. Ekrany są sprawdzane ręcznie na emulatorze Androida i w wersji Windows, w obu motywach i na małym ekranie. Dostępność jest sprawdzana na drzewie dostępności Androida i drzewie UI Automation, bez ręcznego testu z włączonym TalkBack i Narratorem.
-- Przypomnienia działają tylko na Androidzie: wersja Plugin.LocalNotification dla Windows wymaga nowszego Windows App SDK niż MAUI 10.
+- Przypomnienia działają tylko na Androidzie: aktualny Plugin.LocalNotification (14.1.2) dla Windows wymaga Windows App SDK 2.4, a MAUI 10 używa 1.8.
 - Pozycja GPS trafia tylko do pierwszego wpisu po rozpoczęciu zlecenia, bo w API jest polem wpisu, a nie rozpoczęcia.
 - Protokół PDF można pobrać tylko online.
 - Konto demo technika jest wspólne: zlecenia rozpoczęte lub zakończone przez innych odwiedzających są widoczne do nocnego resetu, a limit 10 logowań i odświeżeń sesji na minutę liczy się dla adresu IP.
@@ -252,7 +253,6 @@ Wydajność zmierzona na podpisanym APK wydania na emulatorze Pixel 9 (Android 1
 - Synchronizacja w tle (WorkManager na Androidzie), żeby kolejka wychodziła bez otwierania aplikacji.
 - Powiadomienia push z serwera o nowym przypisaniu i odebraniu zlecenia zamiast polegania na synchronizacji przy otwarciu.
 - Rozwiązywanie konfliktu przez edycję zmiany (np. zmniejszenie ilości części i ponowienie) zamiast tylko kopiowania, ponowienia albo odrzucenia.
-- Testy UI kluczowej ścieżki offline (Appium) na emulatorze w CI.
 
 ## Licencja
 
